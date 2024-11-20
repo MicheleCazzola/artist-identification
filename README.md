@@ -23,12 +23,16 @@ In priority order:
 ### Dataset
 Dataset from Kaggle: https://www.kaggle.com/competitions/artist-identification/data
 
-Dimension: ~25.2k images (~8.5 GB)
+Dimension: ~25k images (~8.5 GB), but only those in train split are labeled. Thus, only ~21k images from training split are available to be used for our purpose.
 
-Train-Test split already performed by Kaggle: ~21k/4k 
+Train-Validation-Test split: necessary to manually split original training set into train-validation-test set; first idea is to perform a 60-20-20 split, with:
+- ~13k samples for training
+- ~4k samples for validation
+- ~4k samples for test
 
-Train-Validation split performed 80-20, even if other options are yet to be considered after a further data analysis.  
-Due to huge dimension of dataset and low computational resources available, it may be necessary to sample it, taking only a portion. In this case, the split would be more unbalanced to the validation split (70-30 or 60-40), to have enough data for validation and testing.
+Due to huge dimension of dataset and low computational resources available, it may be necessary to sample it, taking only a portion. In this case, the split would be more unbalanced to the validation/test splits (such as 50-25-25), to have enough data for validation and testing.
+
+On the other hand, if dataset is sufficiently large for our purpose it would be possible to increase the portion of samples used for training.
 
 ### Data preprocessing
 Perform some data augmentation on training set only.
@@ -54,10 +58,10 @@ Possible evaluation metrics:
 - global accuracy (top-1)
 - mean class accuracy (MCA): average of accuracies for each artist
 - (`optional`) top-k accuracy (k = 3, 5), per class, averaged (not weighted) on classes
-- (`optional`) Kaggle scoring: $\frac{1}{k}$ point for top-k accuracy, with k <= 5. An average score will be calculated for each artist across their paintings.
-- (`optional`) Kaggle submission: it uses Kaggle scoring on both public and private test instances. The former are those in the provided test set, the latter are not disclosed: it is necessary to submit a properly formatted .csv file on Kaggle competition portal to get this evaluation. It could be interesting to compare this work wrt what done by other teams during the challenge period. 
+- (`optional`) Kaggle custom score for this challenge: $\frac{1}{k}$ point for top-k accuracy, with k <= 5. An average score will be calculated for each artist across their paintings.
+- (`optional`) Kaggle submission: it uses Kaggle custom scoring on both public and private test instances. The former are those in the provided test set, the latter are not disclosed: it is necessary to submit a properly formatted .csv file on Kaggle competition portal to get this evaluation. It could be interesting to compare this work wrt what done by other teams during the challenge period. In this case, it would be necessary to test the model on the original test set, whose labels are kept secret by Kaggle.
 
-Validation workflow: single-fold validation. Cross validation would be too resource and time consuming; moreover, it seems dataset is large enough.
+Validation workflow: single-fold validation. K-fold cross validation would be too resource and time consuming; moreover, it seems dataset is large enough.
 
 ### Results presentation
 Methods:
@@ -69,6 +73,6 @@ Methods:
 These results are intended to be presented only wrt most relevant (that is, best performing for each backbone type) models. 
 
 ## Final notes
-What marked with `optional` is mentioned to be developed only if the other tasks would not be enough to obtain the maximum grade in the project, considering a well-done work.
+What marked with `optional` is mentioned to be developed only if the other tasks would not be enough to obtain the maximum grade in the project, considering a well-done work, with an exhaustive realized report.
 
 We are glad if you provide us any suggestion related to the development of this project, in particular related to the number of different backbones to try.
