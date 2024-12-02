@@ -2,11 +2,11 @@
 data/
 
 # Multimedia
-.jpg
-.png
-.mp3
-.mp4
-.mov
+*.jpg
+*.png
+*.mp3
+*.mp4
+*.mov
 
 
 # Byte-compiled / optimized / DLL files
