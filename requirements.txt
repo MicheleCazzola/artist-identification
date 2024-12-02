@@ -1,0 +1,16 @@
+numpy     
+torch       
+torchvision    
+Pillow     
+matplotlib  
+seaborn 
+albumentations
+imgaug
+tqdm
+pyyaml        
+jupyter           
+notebook         
+ipywidgets        
+torchsummary
+torchmetrics
+pandas
