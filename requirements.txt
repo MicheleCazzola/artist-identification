@@ -14,3 +14,4 @@ ipywidgets
 torchsummary
 torchmetrics
 pandas
+scikit-learn
