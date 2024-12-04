@@ -7,7 +7,7 @@ train_transforms = transforms.Compose([
 ])
 
 eval_transforms = transforms.Compose([
-    transforms.Resize(224),
+    transforms.Resize(256),
     transforms.CenterCrop(224),
     transforms.ToTensor()
 ])
