@@ -1,12 +1,16 @@
+from sys import argv
 from torch.utils.data import DataLoader
 import torch
 from src.dataset import ArtistDataset, create_datasets
 from src.transformations import get_transforms
 from src.dataloader import create_dataloaders
 
-ROOT = "./scripts/stats/images/artist_dataset"
+DEFAULT_ROOT = "./scripts/stats/images/artist_dataset"
+root = argv[1] if len(argv) else DEFAULT_ROOT
+
+
 transformations = get_transforms()
-dataset = create_datasets(ROOT, merge_datasets=True, transforms=transformations)
+dataset = create_datasets(root, merge_datasets=True, transforms=transformations)
 dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_workers=0)
 
 def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
