@@ -4,11 +4,13 @@ import torch
 from src.dataset import ArtistDataset, create_datasets
 from src.transformations import get_transforms
 from src.dataloader import create_dataloaders
+from statistics import mean
+import json
 
 DEFAULT_ROOT = "./scripts/stats/images/artist_dataset"
-root = argv[1] if len(argv) else DEFAULT_ROOT
+OUTFILE = "stats.json"
 
-
+root = argv[1] if len(argv) > 1 else DEFAULT_ROOT
 transformations = get_transforms()
 dataset = create_datasets(root, merge_datasets=True, transforms=transformations)
 dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_workers=0)
@@ -16,6 +18,8 @@ dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_w
 def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     assert isinstance(dataset, ArtistDataset), "Dataset must be of type ArtistDataset"
+    
+    keys = ["total", "categories-length", "categories-size", "avg-categories-size", "mean", "devstd"]
     
     print(list(dataset.categories))
     num_authors = len(dataset.categories)
@@ -28,7 +32,11 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     assert len(dataloader) > 0, "Dataloader must contain some data"
     
-    for inputs, labels in dataloader:
+    tot_batches = len(dataloader)
+    
+    for (step, (inputs, labels)) in enumerate(dataloader):
+        
+        print(f"Processing {step}/{tot_batches}")
         
         # Count number of elements for each class
         for label in labels:
@@ -44,7 +52,9 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     avg /= tot_pixels
     std = torch.sqrt(std / tot_pixels - avg * avg)
     
-    return num_authors, labels_dict, avg, std, dim
+    return dict(zip(keys, [dim, num_authors, mean(labels_dict.values()), labels_dict, avg.tolist(), std.tolist()]))
 
-num_authors, labels, avg, std, dim = compute_stats(dataset, dataloader)
-print(num_authors, labels, avg, std, dim)
+
+stats = compute_stats(dataset, dataloader)
+with open(OUTFILE, "w") as fout:
+    json.dump(stats, fout, indent=4)
