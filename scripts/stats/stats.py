@@ -7,24 +7,40 @@ from src.dataloader import create_dataloaders
 from statistics import mean
 import json
 
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+NUM_WORKERS = 4 if DEVICE == "cuda" else 0
 DEFAULT_ROOT = "./scripts/stats/images/artist_dataset"
 OUTFILE = "stats.json"
 
-root = argv[1] if len(argv) > 1 else DEFAULT_ROOT
-transformations = get_transforms()
-dataset = create_datasets(root, merge_datasets=True, transforms=transformations)
-dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_workers=0)
+def load_data():
+    
+    if len(argv) > 1:
+        root = argv[1]
+        
+        if not (DEVICE == "cuda" and NUM_WORKERS == 4):
+            print("Warning: running on complete dataset - Please use GPU acceleration\nCPU may take a long time...")
+    else:
+        root = DEFAULT_ROOT
+        print("Warning: not official run - Running on sample dataset")
+        
+    transformations = get_transforms()
+    dataset = create_datasets(root, merge_datasets=True, transforms=transformations)
+    dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_workers=0)
+    
+    return dataset, dataloader
 
 def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     assert isinstance(dataset, ArtistDataset), "Dataset must be of type ArtistDataset"
     
-    keys = ["total", "categories-length", "categories-size", "avg-categories-size", "mean", "devstd"]
+    keys = ["data_length", "categories_length", "avg_categories_size", "categories_size", "mean", "devstd"]
     
     print(list(dataset.categories))
     num_authors = len(dataset.categories)
+    
+    category = lambda l: dataset.categories[l]
         
-    labels_dict = {}
+    labels_counts = {}
     avg = torch.zeros((1,3))
     std = torch.zeros((1,3))
     dim = 0
@@ -36,11 +52,11 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     for (step, (inputs, labels)) in enumerate(dataloader):
         
-        print(f"Processing {step}/{tot_batches}")
+        print(f"Processing batch {step}/{tot_batches}")
         
         # Count number of elements for each class
         for label in labels:
-            labels_dict[label.item()] = labels_dict.get(label.item(), 0) + 1
+            labels_counts[category(label.item())] = labels_counts.get(category(label.item()), 0) + 1
         
         b, _, h, w = inputs.shape
         
@@ -52,9 +68,10 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     avg /= tot_pixels
     std = torch.sqrt(std / tot_pixels - avg * avg)
     
-    return dict(zip(keys, [dim, num_authors, mean(labels_dict.values()), labels_dict, avg.tolist(), std.tolist()]))
+    return dict(zip(keys, [dim, num_authors, mean(labels_counts.values()), labels_counts, avg.tolist(), std.tolist()]))
 
 
+dataset, dataloader = load_data()
 stats = compute_stats(dataset, dataloader)
 with open(OUTFILE, "w") as fout:
     json.dump(stats, fout, indent=4)

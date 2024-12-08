@@ -1,11 +1,11 @@
 {
-    "total": 13,
-    "categories-length": 3,
-    "categories-size": 4.333333333333333,
-    "avg-categories-size": {
-        "0": 4,
-        "1": 4,
-        "2": 5
+    "data_length": 13,
+    "categories_length": 3,
+    "avg_categories_size": 4.333333333333333,
+    "categories_size": {
+        "adriaen_van_ostade": 4,
+        "agnolo_bronzino": 4,
+        "albrecht_altdorfer": 5
     },
     "mean": [
         [

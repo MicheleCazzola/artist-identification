@@ -12,13 +12,13 @@ class ArtistDataset(VisionDataset):
     def __init__(
         self,
         root: str,
-        split: str = "all",
+        split: str = None,
         transform: transforms = None,
         target_transform: transforms = None
     ):
         super(ArtistDataset, self).__init__(root, transform=transform, target_transform=target_transform)
         
-        assert split in ["all", "train", "test"], "Split must be either training or test, or include all the dataset"
+        assert split is None or split in ["train", "test"], "Split must be either training or test, or include all the dataset"
                 
         self.split = split
         self.categories = os.listdir(self.root)
@@ -26,7 +26,7 @@ class ArtistDataset(VisionDataset):
         images_paths, labels = [], []
         split_file = lambda s: f"{root}/../{s}.txt"
         
-        if split == "all":
+        if split is None:
             images_paths_train, labels_train = self.__get_data_split(split_file("train"))
             images_paths_test, labels_test = self.__get_data_split(split_file("test"))
             images_paths, labels = images_paths_train + images_paths_test, labels_train + labels_test
