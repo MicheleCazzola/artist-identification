@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import torch
-import math
 from torchvision.datasets import VisionDataset
 from torchvision.transforms import transforms
 from torch.utils.data import Subset
@@ -67,9 +66,9 @@ class ArtistDataset(VisionDataset):
 
 def create_datasets(
     root: str,
+    train_split_size: float,
     merge_datasets: bool = False,
     transforms: dict = None,
-    train_split_size: float = 0.75,
     validation: bool = True
 ) -> tuple[Subset, Subset, ArtistDataset] | tuple[ArtistDataset, ArtistDataset] | ArtistDataset:
     
@@ -99,7 +98,13 @@ def create_datasets(
     return dataset
 
 
-def split_dataset(dataset: ArtistDataset, train_size: float, random_state: int = 42, shuffle: bool = True) -> tuple[Subset, Subset]:
+def split_dataset(
+    dataset: ArtistDataset, 
+    train_size: float, 
+    random_state: int = 42, 
+    shuffle: bool = True
+) -> tuple[Subset, Subset]:
+    
     indexes = range(0, len(dataset))
     train_indexes, val_indexes = train_test_split(indexes, train_size=train_size, random_state=random_state, shuffle=shuffle)
 

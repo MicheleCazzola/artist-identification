@@ -1,10 +1,10 @@
+from src.constants import Constants
 from src.dataset import create_datasets
 from src.dataloader import create_dataloaders
 from src.transformations import get_transforms
 import matplotlib.pyplot as plt
 from torchvision.transforms import transforms
 import sys
-
 
 
 def check(*dataloaders):
@@ -18,17 +18,14 @@ def check(*dataloaders):
                 
     plt.show()
 
+
 def main():
     
-    ROOT = "./scripts/create_labels/images"
-    TRAIN_SPLIT = 0.75
-    
-    if len(sys.argv) > 1:
-        ROOT = sys.argv[1]
-    
+    root = sys.argv[1] if len(sys.argv) > 1 else Constants.Paths.DEFAULT_ROOT
+        
     transformations = get_transforms()
-    trainset, validset, testset = create_datasets(ROOT, TRAIN_SPLIT, transformations)
-    trainloader, validloader, testloader = create_dataloaders(trainset, validset, testset)
+    trainset, validset, testset = create_datasets(root, Constants.Train.TRAIN_SPLIT_SIZE, transforms=transformations)
+    trainloader, validloader, testloader = create_dataloaders([trainset, validset, testset], drop_last=False)
 
     check(trainloader, validloader, testloader)
 
