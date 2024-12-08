@@ -9,14 +9,26 @@ import sys
 
 def check(*dataloaders):
     for dataloader in dataloaders:
-        for inputs, labels in dataloader:
-            images = [transforms.ToPILImage()(input) for input in inputs]
-            for img, label in zip(images, labels):
-                plt.figure()
-                plt.imshow(img)
-                plt.title(f"Label {label}")
-                
-    plt.show()
+        
+        print(dataloader)
+        tot_len = len(dataloader)
+        for (step, (inputs, labels)) in enumerate(dataloader):
+            
+            inputs = inputs.to(Constants.Env.DEVICE)
+            labels = labels.to(Constants.Env.DEVICE)
+            
+            print(f"Batch {step+1}/{tot_len}")
+            
+            print(type(inputs), inputs.shape, labels.shape)
+            
+            
+            # images = [transforms.ToPILImage()(input) for input in inputs]
+            # for img, label in zip(images, labels):
+            #     plt.figure()
+            #     plt.imshow(img)
+            #     plt.title(f"Label {label}")
+        print()
+    #plt.show()
 
 
 def main():
