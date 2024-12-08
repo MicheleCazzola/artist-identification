@@ -35,15 +35,14 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     keys = ["data_length", "categories_length", "avg_categories_size", "categories_size", "mean", "devstd"]
     
-    print(list(dataset.categories))
     num_authors = len(dataset.categories)
     
     category = lambda l: dataset.categories[l]
         
     labels_counts = {}
-    avg = torch.zeros((1,3))
-    std = torch.zeros((1,3))
-    dim = 0
+    avg = torch.zeros((1,3)).to(DEVICE)
+    std = torch.zeros((1,3)).to(DEVICE)
+    data_len = 0
     tot_pixels = 0
     
     assert len(dataloader) > 0, "Dataloader must contain some data"
@@ -52,7 +51,10 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     for (step, (inputs, labels)) in enumerate(dataloader):
         
-        print(f"Processing batch {step}/{tot_batches}")
+        inputs = inputs.to(DEVICE)
+        labels = labels.to(DEVICE)
+        
+        print(f"Processing batch {step+1}/{tot_batches}")
         
         # Count number of elements for each class
         for label in labels:
@@ -60,7 +62,7 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
         
         b, _, h, w = inputs.shape
         
-        dim += b
+        data_len += b
         tot_pixels += b * h * w
         avg += torch.sum(inputs, dim=(0,2,3))
         std += torch.sum(inputs * inputs, dim=(0,2,3))
@@ -68,8 +70,9 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     avg /= tot_pixels
     std = torch.sqrt(std / tot_pixels - avg * avg)
     
-    return dict(zip(keys, [dim, num_authors, mean(labels_counts.values()), labels_counts, avg.tolist(), std.tolist()]))
+    return dict(zip(keys, [data_len, num_authors, mean(labels_counts.values()), labels_counts, avg.tolist(), std.tolist()]))
 
+print(f"Device: {DEVICE}\nWorkers: {NUM_WORKERS}")
 
 dataset, dataloader = load_data()
 stats = compute_stats(dataset, dataloader)
