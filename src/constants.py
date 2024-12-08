@@ -11,7 +11,7 @@ class Constants:
     @dataclass
     class Env:
         DEVICE: str = "cuda"
-        NUM_WORKERS: int = 4
+        NUM_WORKERS: int = 2
         
     @dataclass
     class Img:
