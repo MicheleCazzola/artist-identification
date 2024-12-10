@@ -30,6 +30,7 @@ eval_transforms = transforms.Compose([
 aug_pipeline = transforms.Compose([
     to_image,
     random_apply([aug_transform], p=Constants.Img.AUG_PROB),
+    to_tensor,
     normalizer
 ])
 

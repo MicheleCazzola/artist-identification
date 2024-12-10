@@ -66,13 +66,19 @@ class ArtistDataset(VisionDataset):
 
 def create_datasets(
     root: str,
-    train_split_size: float,
+    train_split_size: float = None,
     merge_datasets: bool = False,
     transforms: dict = None,
     validation: bool = True
 ) -> tuple[Subset, Subset, ArtistDataset] | tuple[ArtistDataset, ArtistDataset] | ArtistDataset:
     
-    assert 0 <= train_split_size <= 1, "Train split size must be a fraction"
+    assert not merge_datasets and not validation and (train_split_size is None) or \
+        not merge_datasets and validation and not (train_split_size is None) or \
+        merge_datasets and validation and (train_split_size is None), \
+        f"Something went wrong in parameter definition 
+        (merge_datasets:{merge_datasets}, validation_enabled:{validation}), train_split_size: {train_split_size:.2f}"
+        
+    assert train_split_size is None or 0 <= train_split_size <= 1, "Train split size must be a fraction"
     
     if transforms:
         train_transforms, eval_transforms = map(transforms.get, ["train", "test"])

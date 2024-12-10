@@ -8,7 +8,7 @@ from statistics import mean
 import json
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-NUM_WORKERS = 4 if DEVICE == "cuda" else 0
+NUM_WORKERS = 2 if DEVICE == "cuda" else 0
 DEFAULT_ROOT = "./scripts/stats/images/artist_dataset"
 OUTFILE = "stats.json"
 
@@ -17,7 +17,7 @@ def load_data():
     if len(argv) > 1:
         root = argv[1]
         
-        if not (DEVICE == "cuda" and NUM_WORKERS == 4):
+        if DEVICE != "cuda":
             print("Warning: running on complete dataset - Please use GPU acceleration\nCPU may take a long time...")
     else:
         root = DEFAULT_ROOT
@@ -25,7 +25,7 @@ def load_data():
         
     transformations = get_transforms()
     dataset = create_datasets(root, merge_datasets=True, transforms=transformations)
-    dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_workers=0)
+    dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_workers=NUM_WORKERS)
     
     return dataset, dataloader
 
