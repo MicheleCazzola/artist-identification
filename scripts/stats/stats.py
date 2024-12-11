@@ -35,7 +35,9 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     assert isinstance(dataset, ArtistDataset), "Dataset must be of type ArtistDataset"
     
-    keys = ["data_length", "categories_length", "avg_categories_size", "categories_size", "mean", "devstd", "dimensions"]
+    keys = ["data_length", "categories_length", "avg_categories_size",
+             "categories_size", "mean", "devstd", "dimensions",
+             "min_height", "max_height", "min_width", "max_width"]
     
     num_authors = len(dataset.categories)
     
@@ -47,6 +49,8 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     std = torch.zeros((1,3)).to(DEVICE)
     data_len = 0
     tot_pixels = 0
+    h_min, h_max = 10_000, 0
+    w_min, w_max = 10_000, 0
     
     assert len(dataloader) > 0, "Dataloader must contain some data"
     
@@ -60,7 +64,9 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
         labels = labels.to(DEVICE)
         
         _, _, h, w = inputs.shape
-        dimensions[f"{int(h*w / 10_000)}0k"] = dimensions.get(f"{int(h*w / 10_000)}0k", 0) + 1
+        h_min, h_max = min(h_min, h), max(h_max, h)
+        w_min, w_max = min(w_min, w), max(w_max, w)
+        dimensions[f"{int(h*w / 100_000)}00k"] = dimensions.get(f"{int(h*w / 100_000)}00k", 0) + 1
         
         print(f"Processing batch {step+1}/{tot_batches}")
         
@@ -78,7 +84,12 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     avg /= tot_pixels
     std = torch.sqrt(std / tot_pixels - avg * avg)
     
-    return dict(zip(keys, [data_len, num_authors, mean(labels_counts.values()), labels_counts, avg.tolist(), std.tolist(), dimensions]))
+    return dict(zip(
+        keys, 
+        [data_len, num_authors, mean(labels_counts.values()),
+        labels_counts, avg.tolist(), std.tolist(), dimensions,
+        h_min, h_max, w_min, w_max]
+    ))
 
 print(f"Device: {DEVICE}\nWorkers: {NUM_WORKERS}")
 
