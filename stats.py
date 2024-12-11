@@ -1,8 +1,9 @@
 from sys import argv
 from torch.utils.data import DataLoader
+from torchvision import transforms
 import torch
 from src.dataset import ArtistDataset, create_datasets
-from src.transformations import get_transforms
+from src.transformations import Transforms
 from src.dataloader import create_dataloaders
 from statistics import mean
 import json
@@ -23,9 +24,10 @@ def load_data():
         root = DEFAULT_ROOT
         print("Warning: not official run - Running on sample dataset")
         
-    transformations = get_transforms()
+        
+    transformations = Transforms(type = "stats").get("tensor")
     dataset = create_datasets(root, merge_datasets=True, transforms=transformations)
-    dataloader = create_dataloaders([dataset], shuffle=False, drop_last=False, num_workers=NUM_WORKERS)
+    dataloader = create_dataloaders([dataset], batch_size=1, shuffle=False, drop_last=False, num_workers=NUM_WORKERS)
     
     return dataset, dataloader
 
@@ -33,13 +35,14 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     assert isinstance(dataset, ArtistDataset), "Dataset must be of type ArtistDataset"
     
-    keys = ["data_length", "categories_length", "avg_categories_size", "categories_size", "mean", "devstd"]
+    keys = ["data_length", "categories_length", "avg_categories_size", "categories_size", "mean", "devstd", "dimensions"]
     
     num_authors = len(dataset.categories)
     
     category = lambda l: dataset.categories[l]
         
     labels_counts = {}
+    dimensions = {}
     avg = torch.zeros((1,3)).to(DEVICE)
     std = torch.zeros((1,3)).to(DEVICE)
     data_len = 0
@@ -48,11 +51,16 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     assert len(dataloader) > 0, "Dataloader must contain some data"
     
     tot_batches = len(dataloader)
+    img_adjust = Transforms("stats").get("adjust")
     
     for (step, (inputs, labels)) in enumerate(dataloader):
         
-        inputs = inputs.to(DEVICE)
+        img_inputs = torch.stack([img_adjust(input) for input in inputs])
+        img_inputs = img_inputs.to(DEVICE)
         labels = labels.to(DEVICE)
+        
+        _, _, h, w = inputs.shape
+        dimensions[f"{int(h*w / 10_000)}0k"] = dimensions.get(f"{int(h*w / 10_000)}0k", 0) + 1
         
         print(f"Processing batch {step+1}/{tot_batches}")
         
@@ -60,17 +68,17 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
         for label in labels:
             labels_counts[category(label.item())] = labels_counts.get(category(label.item()), 0) + 1
         
-        b, _, h, w = inputs.shape
+        b, _, h, w = img_inputs.shape
         
         data_len += b
         tot_pixels += b * h * w
-        avg += torch.sum(inputs, dim=(0,2,3))
-        std += torch.sum(inputs * inputs, dim=(0,2,3))
+        avg += torch.sum(img_inputs, dim=(0,2,3))
+        std += torch.sum(img_inputs * img_inputs, dim=(0,2,3))
             
     avg /= tot_pixels
     std = torch.sqrt(std / tot_pixels - avg * avg)
     
-    return dict(zip(keys, [data_len, num_authors, mean(labels_counts.values()), labels_counts, avg.tolist(), std.tolist()]))
+    return dict(zip(keys, [data_len, num_authors, mean(labels_counts.values()), labels_counts, avg.tolist(), std.tolist(), dimensions]))
 
 print(f"Device: {DEVICE}\nWorkers: {NUM_WORKERS}")
 

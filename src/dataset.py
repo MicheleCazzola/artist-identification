@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import torch
 from torchvision.datasets import VisionDataset
-from torchvision.transforms import transforms
+from torchvision.transforms import transforms, Compose
 from torch.utils.data import Subset
 from sklearn.model_selection import train_test_split
 from PIL import Image
@@ -68,25 +68,26 @@ def create_datasets(
     root: str,
     train_split_size: float = None,
     merge_datasets: bool = False,
-    transforms: dict = None,
+    transforms: dict | Compose = None,
     validation: bool = True
 ) -> tuple[Subset, Subset, ArtistDataset] | tuple[ArtistDataset, ArtistDataset] | ArtistDataset:
     
     assert not merge_datasets and not validation and (train_split_size is None) or \
         not merge_datasets and validation and not (train_split_size is None) or \
         merge_datasets and validation and (train_split_size is None), \
-        f"Something went wrong in parameter definition 
-        (merge_datasets:{merge_datasets}, validation_enabled:{validation}), train_split_size: {train_split_size:.2f}"
+        f"Something went wrong in parameter definition" + \
+        f"(merge_datasets:{merge_datasets}, validation_enabled:{validation}), train_split_size: {train_split_size:.2f}"
         
     assert train_split_size is None or 0 <= train_split_size <= 1, "Train split size must be a fraction"
     
-    if transforms:
-        train_transforms, eval_transforms = map(transforms.get, ["train", "test"])
-    else:
-        train_transforms, eval_transforms = None, None
-    
     # Dataset is loaded into training and test set
     if not merge_datasets:
+        
+        if transforms:
+            train_transforms, eval_transforms = map(transforms.get, ["train", "test"])
+        else:
+            train_transforms, eval_transforms = None, None
+        
         trainset = ArtistDataset(root, "train", transform=train_transforms)
         testset = ArtistDataset(root, "test", transform=eval_transforms)
         
@@ -99,7 +100,7 @@ def create_datasets(
     
     # Load all the dataset in one single object: useful for statistics
     # Applied only basic evaluation transformations
-    dataset = ArtistDataset(root, transform=eval_transforms)
+    dataset = ArtistDataset(root, transform=transforms)
     
     return dataset
 
