@@ -1,4 +1,4 @@
-from src.constants import Constants
+from src.constants import Constants, Env
 from torchvision.transforms import transforms
 import json
 
@@ -20,27 +20,27 @@ class Transforms:
     random_apply = transforms.RandomApply
     aug_transform = sample_aug
     
-    def __init__(self, type: str = "model"):
+    def __init__(self, type: str = "model", constants: Constants = Env().constants):
         
         assert type in ["model", "stats"], f"Type must be either 'model' or 'stats', found {type} instead"
         self.type = type
         
         if type == "model":
             self.keys = ["train", "eval", "aug"]
-            mean, devstd = load_stats(Constants.Paths.STATS_FILE)
+            mean, devstd = load_stats(constants.stats_file)
             train_transforms = transforms.Compose([
-                Transforms.resizer(Constants.Img.RESIZE_DIM),
-                Transforms.cropper(Constants.Img.CROP_DIM),
+                Transforms.resizer(constants.resize_dim),
+                Transforms.cropper(constants.crop_dim),
                 Transforms.to_tensor()
             ])
             eval_transforms = transforms.Compose([
-                Transforms.resizer(Constants.Img.RESIZE_DIM),
-                Transforms.cropper(Constants.Img.CROP_DIM),
+                Transforms.resizer(constants.resize_dim),
+                Transforms.cropper(constants.crop_dim),
                 Transforms.to_tensor()
             ])
             aug_pipeline = transforms.Compose([
                 Transforms.to_image(),
-                Transforms.random_apply([Transforms.aug_transform], p = Constants.Img.AUG_PROB),
+                Transforms.random_apply([Transforms.aug_transform], p = constants.aug_prob),
                 Transforms.to_tensor(),
                 Transforms.normalizer(mean, devstd)
             ])
@@ -53,8 +53,8 @@ class Transforms:
             ])
             to_adjusted = transforms.Compose([
                 Transforms.to_image(),
-                Transforms.resizer(Constants.Img.RESIZE_DIM),
-                Transforms.cropper(Constants.Img.CROP_DIM),
+                Transforms.resizer(constants.resize_dim),
+                Transforms.cropper(constants.crop_dim),
                 Transforms.to_tensor()
             ])
             

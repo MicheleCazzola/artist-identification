@@ -1,13 +1,13 @@
 from torch.utils.data import DataLoader, Subset
-from src.constants import Constants
+from src.constants import Env
 from src.dataset import ArtistDataset
 
 def create_dataloaders(
     datasets: list[ArtistDataset | Subset],
-    batch_size: int = Constants.Train.BATCH_SIZE,
+    batch_size: int = Env().constants.batch_size,
     shuffle: bool = True,
     drop_last: bool = True,
-    num_workers: int = Constants.Env.NUM_WORKERS
+    num_workers: int = Env().constants.num_workers
 ) -> tuple[DataLoader, DataLoader, DataLoader] | tuple[DataLoader, DataLoader] | DataLoader:
     
     assert batch_size > 0, f"Batch size must be strictly positive, found {batch_size}"

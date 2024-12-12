@@ -84,7 +84,7 @@ def create_datasets(
     if not merge_datasets:
         
         if transforms:
-            train_transforms, eval_transforms = map(transforms.get, ["train", "test"])
+            train_transforms, eval_transforms = map(transforms.get, ["train", "eval"])
         else:
             train_transforms, eval_transforms = None, None
         
