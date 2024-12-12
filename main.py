@@ -36,8 +36,12 @@ def check(*dataloaders):
 
 def main():
     
-    constants = Env("local").constants
-    root = sys.argv[1] if len(sys.argv) > 1 else constants.default_root
+    if len(sys.argv) > 1:
+        constants = Env("colab").constants
+        root = sys.argv[1]
+    else:
+        constants = Env("local").constants
+        root = constants.default_root
     
     print(constants)
         
