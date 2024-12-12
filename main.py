@@ -2,7 +2,7 @@ from src.constants import Constants, Env
 from src.dataset import create_datasets
 from src.dataloader import create_dataloaders
 from src.transformations import Transforms
-from src.train import train, train_setup
+from src.train import Trainer, train, train_setup
 from src.evaluate import evaluate
 from src.network import MultibranchNetwork
 from src.display import plot_metric
@@ -60,6 +60,13 @@ def main():
 
     model = MultibranchNetwork(out_classes=constants.num_classes)
     criterion, optimizer, scheduler = train_setup(model)
+    
+    # trainer = Trainer(model, trainloader, validloader, testloader, constants.num_epochs, constants.device, constants.log_frequency)
+    # trainer.set_params(
+    #     constants.num_epochs,
+    # )
+    # trainer.train()
+    # trainer.evaluate()
     
     train_losses, train_acc, val_losses, val_acc = train(model, trainloader, validloader, criterion, optimizer, scheduler,
           constants.num_epochs, constants.device, constants.log_frequency)
