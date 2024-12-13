@@ -5,6 +5,8 @@ class Constants:
     
     default_root: str = "./data/artist_dataset"
     stats_file: str = "./scripts/stats/stats.json"
+    results_plot_path: str = "."
+    results_file_path: str = "."
         
     device: str = "cuda"
     num_workers: int = 2
@@ -19,6 +21,14 @@ class Constants:
     log_frequency: int = 100
         
     num_classes: int = 161
+    lr: float = 1e-3
+    momentum: float = 0.9
+    weight_decay: float = 1e-4
+    scheduler_step_size: int = 7
+    scheduler_gamma: float = 0.1
+    criterion: str = "cross_entropy"
+    optimizer: str = "sgd"
+    scheduler: str = "step_lr"
         
         
 class Env:
@@ -36,5 +46,8 @@ class Env:
                 num_workers=0,
                 batch_size=2,
                 num_epochs=3,
-                train_split_size=0.66
+                train_split_size=0.66,
+                log_frequency=1,
+                results_plot_path="./out/plots",
+                results_file_path="./out/files"
             ) 
