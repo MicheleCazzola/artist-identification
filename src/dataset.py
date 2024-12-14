@@ -76,7 +76,8 @@ def create_datasets(
     train_split_size: float = None,
     merge_datasets: bool = False,
     transforms: dict | Compose = None,
-    validation: bool = True
+    validation: bool = True,
+    reduce_factor: float = None
 ) -> tuple[Subset, Subset, ArtistDataset] | tuple[ArtistDataset, ArtistDataset] | ArtistDataset:
     
     assert not merge_datasets and not validation and (train_split_size is None) or \
@@ -86,6 +87,7 @@ def create_datasets(
         f"(merge_datasets:{merge_datasets}, validation_enabled:{validation}), train_split_size: {train_split_size:.2f}"
         
     assert train_split_size is None or 0 <= train_split_size <= 1, "Train split size must be a fraction"
+    assert reduce_factor is None or 0 <= reduce_factor <= 1, "Reduce factor must be a fraction"
     
     # Dataset is loaded into training and test set
     if not merge_datasets:
@@ -98,6 +100,10 @@ def create_datasets(
         trainset = ArtistDataset(root, "train", transform=train_transforms)
         testset = ArtistDataset(root, "test", transform=eval_transforms)
         
+        if reduce_factor is not None:
+            trainset = reduce_dataset(trainset)
+            testset = reduce_dataset(testset)
+        
         # A validation split is generated out of the train set
         if validation:
             trainset, validset = split_dataset(trainset, train_split_size)
@@ -108,6 +114,9 @@ def create_datasets(
     # Load all the dataset in one single object: useful for statistics
     # Applied only basic evaluation transformations
     dataset = ArtistDataset(root, transform=transforms)
+    
+    if reduce_dataset:
+        dataset = reduce_dataset(dataset)
     
     return dataset
 
@@ -132,3 +141,20 @@ def split_dataset(
     validset = Subset(dataset, val_indexes)
     
     return trainset, validset
+
+
+def reduce_dataset(
+    dataset: ArtistDataset,
+    reduction_factor: float
+) -> Subset:
+        
+    indexes = range(0, len(dataset))
+    reduced_indexes, _ = train_test_split(
+        indexes,
+        train_size=reduction_factor,
+        random_state=42,
+        shuffle=True,
+        stratify=dataset.get_labels()
+    )
+    
+    return Subset(dataset, reduced_indexes)
