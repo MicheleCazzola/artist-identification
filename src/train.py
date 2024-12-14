@@ -20,6 +20,7 @@ class TrainingMetrics:
         if top_k > num_classes:
             logging.error(f"Top-k value {top_k} cannot be greater than number of classes {num_classes}")
         
+        self.num_classes = num_classes
         self.top_k = top_k
         self.top_1_accuracy: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.top_k_accuracy: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, top_k=top_k)
@@ -46,8 +47,22 @@ class TrainingMetrics:
         }
         
     def to(self, device: torch.device):
-        return self.top_1_accuracy.to(device), self.top_k_accuracy.to(device), self.mca.to(device)
+        return TrainingMetrics.from_metrics(
+            self.num_classes,
+            self.top_k,
+            self.top_1_accuracy.to(device),
+            self.top_k_accuracy.to(device),
+            self.mca.to(device)
+        )
 
+    @staticmethod
+    def from_metrics(nc, top_k, *metrics) -> "TrainingMetrics":
+        tm = TrainingMetrics(nc, top_k)
+        tm.top_1_accuracy = metrics[0]
+        tm.top_k_accuracy = metrics[1]
+        tm.mca = metrics[2]
+
+        return tm
 
 @dataclass
 class TrainingResult:
@@ -153,7 +168,6 @@ class Trainer:
             raise ValueError(f"Scheduler {scheduler} not supported")
 
     def train(self) -> TrainingResult:
-        self.model.train()
         
         if self.device == "cuda":
             cudnn.benchmark
@@ -162,12 +176,17 @@ class Trainer:
         train_losses, train_accuracies = [], []
         best_accuracy = -1
         best_num_epochs = None
-        current_step = 0
+
+        torch.autograd.set_detect_anomaly(True)
         
         if len(self.aug_train.transforms) == 1:
             logging.warning("No augmentation transforms found, only image normalization will be applied")
         
         for epoch in range(self.num_epochs):
+            
+            current_step = 0
+            
+            self.model.train()
             for (inputs, labels) in self.trainloader:
                 
                 aug_inputs = torch.stack([self.aug_train(input_img) for input_img in inputs])

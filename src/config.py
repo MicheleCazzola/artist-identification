@@ -16,8 +16,9 @@ class Config:
     aug_prob: float = 0.5
     
     train_split_size: float = 0.75
+    reduce_factor: float = 0.1
     batch_size: int = 10
-    num_epochs: int = 10
+    num_epochs: int = 3
     log_frequency: int = 100
         
     num_classes: int = 161
@@ -50,7 +51,8 @@ class Config:
             "log_frequency": 1,
             "results_plot_path": "./out/plots",
             "results_file_path": "./out/files",
-            "num_classes": 3
+            "num_classes": 3,
+            "reduce_factor": None
         } if target == "local" else {}
         
         return Config(**params)

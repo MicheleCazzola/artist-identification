@@ -49,7 +49,8 @@ def main():
     trainset, validset, testset = create_datasets(
         root, 
         train_split_size=cfg.train_split_size, 
-        transforms=transformations
+        transforms=transformations,
+        reduction_factor=cfg.reduce_factor,
     )
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
