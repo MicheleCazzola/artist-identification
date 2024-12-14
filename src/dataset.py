@@ -118,6 +118,9 @@ def create_datasets(
     if reduce_dataset:
         dataset = reduce_dataset(dataset)
     
+    if reduce_dataset:
+        dataset = reduce_dataset(dataset)
+    
     return dataset
 
 
