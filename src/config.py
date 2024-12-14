@@ -16,7 +16,7 @@ class Config:
     aug_prob: float = 0.5
     
     train_split_size: float = 0.75
-    batch_size: int = 30
+    batch_size: int = 10
     num_epochs: int = 10
     log_frequency: int = 100
         

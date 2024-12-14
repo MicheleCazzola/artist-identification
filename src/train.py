@@ -25,7 +25,7 @@ class TrainingMetrics:
         self.top_k_accuracy: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, top_k=top_k)
         self.mca: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, average=None)
         
-    def update(self, outputs, labels):
+    def update(self, outputs: torch.Tensor, labels: torch.Tensor):
         self.top_1_accuracy(outputs, labels)
         self.top_k_accuracy(outputs, labels)
         self.mca(outputs, labels)
@@ -44,6 +44,9 @@ class TrainingMetrics:
             f"top-{self.top_k}_accuracy": top_k_accuracy,
             "mca": mca_result
         }
+        
+    def to(self, device: torch.device):
+        return self.top_1_accuracy.to(device), self.top_k_accuracy.to(device), self.mca.to(device)
 
 
 @dataclass
@@ -121,7 +124,7 @@ class Trainer:
         self.step_size = step_size
         self.gamma = gamma
         self.weight_decay = weight_decay
-        self.metrics = TrainingMetrics(num_classes=self.model.out_classes, top_k=top_k)
+        self.metrics = TrainingMetrics(num_classes=self.model.out_classes, top_k=top_k).to(self.device)
         
     def build_trainer(
         self,
@@ -168,8 +171,6 @@ class Trainer:
             for (inputs, labels) in self.trainloader:
                 
                 aug_inputs = torch.stack([self.aug_train(input_img) for input_img in inputs])
-                
-                
                 
                 aug_inputs = aug_inputs.to(self.device)
                 labels = labels.to(self.device)
