@@ -26,9 +26,9 @@ class TrainingMetrics:
         self.mca: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, average=None)
         
     def update(self, outputs: torch.Tensor, labels: torch.Tensor):
-        self.top_1_accuracy(outputs, labels)
-        self.top_k_accuracy(outputs, labels)
-        self.mca(outputs, labels)
+        self.top_1_accuracy.update(outputs, labels)
+        self.top_k_accuracy.update(outputs, labels)
+        self.mca.update(outputs, labels)
         
     def reset(self):
         self.top_1_accuracy.reset()
