@@ -87,7 +87,7 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     return dict(zip(
         keys, 
         [data_len, num_authors, mean(labels_counts.values()),
-        labels_counts, avg.tolist(), std.tolist(), dimensions,
+        labels_counts, avg.flatten().tolist(), std.flatten().tolist(), dimensions,
         h_min, h_max, w_min, w_max]
     ))
 

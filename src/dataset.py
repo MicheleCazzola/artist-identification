@@ -32,7 +32,11 @@ class ArtistDataset(VisionDataset):
         else:
             images_paths, labels = self.__get_data_split(split_file(split))
 
+        labels = torch.tensor(labels, dtype=torch.uint8)
         self.data = pd.DataFrame(zip(images_paths, labels), columns = ["image_path", "label"])
+        
+        # For stratification, avoiding to load all the dataset in memory
+        self.labels = labels
     
     def __len__(self) -> int:
         return len(self.data)
@@ -57,6 +61,9 @@ class ArtistDataset(VisionDataset):
         
         return images_paths, labels
     
+    def get_labels(self) -> torch.Tensor:
+        return self.labels
+    
     @staticmethod
     def __pil_loader(path: str) -> Image:
         with open(path, 'rb') as f:
@@ -75,7 +82,7 @@ def create_datasets(
     assert not merge_datasets and not validation and (train_split_size is None) or \
         not merge_datasets and validation and not (train_split_size is None) or \
         merge_datasets and validation and (train_split_size is None), \
-        f"Something went wrong in parameter definition" + \
+        f"Something went wrong in parameter definition " + \
         f"(merge_datasets:{merge_datasets}, validation_enabled:{validation}), train_split_size: {train_split_size:.2f}"
         
     assert train_split_size is None or 0 <= train_split_size <= 1, "Train split size must be a fraction"
@@ -113,7 +120,13 @@ def split_dataset(
 ) -> tuple[Subset, Subset]:
     
     indexes = range(0, len(dataset))
-    train_indexes, val_indexes = train_test_split(indexes, train_size=train_size, random_state=random_state, shuffle=shuffle)
+    train_indexes, val_indexes = train_test_split(
+        indexes,
+        train_size=train_size,
+        random_state=random_state, 
+        shuffle=shuffle,
+        stratify=dataset.get_labels()
+    )
 
     trainset = Subset(dataset, train_indexes)
     validset = Subset(dataset, val_indexes)

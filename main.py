@@ -1,87 +1,94 @@
-from src.constants import Constants, Env
+import logging
+from src.config import Config
 from src.dataset import create_datasets
 from src.dataloader import create_dataloaders
 from src.transformations import Transforms
 from src.train import Trainer
 from src.network import MultibranchNetwork
-from src.display import plot_metric
-import matplotlib.pyplot as plt
 import sys
 
 
-def check(*dataloaders):
-    for dataloader in dataloaders:
+# def check(*dataloaders):
+#     for dataloader in dataloaders:
         
-        print(dataloader)
-        tot_len = len(dataloader)
-        for (step, (inputs, labels)) in enumerate(dataloader):
+#         print(dataloader)
+#         tot_len = len(dataloader)
+#         for (step, (inputs, labels)) in enumerate(dataloader):
             
-            inputs = inputs.to(Constants.Env.DEVICE)
-            labels = labels.to(Constants.Env.DEVICE)
+#             inputs = inputs.to(Constants.Env.DEVICE)
+#             labels = labels.to(Constants.Env.DEVICE)
             
-            print(f"Batch {step+1}/{tot_len}")
+#             print(f"Batch {step+1}/{tot_len}")
             
-            print(type(inputs), inputs.shape, labels.shape)
+#             print(type(inputs), inputs.shape, labels.shape)
             
             
-            # images = [transforms.ToPILImage()(input) for input in inputs]
-            # for img, label in zip(images, labels):
-            #     plt.figure()
-            #     plt.imshow(img)
-            #     plt.title(f"Label {label}")
-        print()
-    #plt.show()
+#             # images = [transforms.ToPILImage()(input) for input in inputs]
+#             # for img, label in zip(images, labels):
+#             #     plt.figure()
+#             #     plt.imshow(img)
+#             #     plt.title(f"Label {label}")
+#         print()
+#     #plt.show()
 
 
 def main():
     
+    logging.basicConfig(level=logging.INFO)
+    
     if len(sys.argv) > 1:
-        constants = Env("colab").constants
+        cfg = Config.create("colab")
         root = sys.argv[1]
     else:
-        constants = Env("local").constants
-        root = constants.default_root
+        cfg = Config.create("local")
+        root = cfg.default_root
     
-    print(constants)
+    logging.info(cfg.__dict__)
         
-    transformations = Transforms(constants=constants).get()
+    transformations = Transforms(config=cfg).get()
     trainset, validset, testset = create_datasets(
         root, 
-        train_split_size=constants.train_split_size, 
+        train_split_size=cfg.train_split_size, 
         transforms=transformations
     )
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
-        batch_size=constants.batch_size,
+        cfg.batch_size,
         drop_last=True,
-        num_workers=constants.num_workers
+        num_workers=cfg.num_workers
     )
 
-    model = MultibranchNetwork(out_classes=constants.num_classes)
+    model = MultibranchNetwork(out_classes=cfg.num_classes)
     
-    trainer = Trainer(model, trainloader, validloader, testloader, constants.device, constants.log_frequency)
+    logging.info(f"Training setup...")
+    trainer = Trainer(model, trainloader, validloader, testloader, transformations["aug"], cfg.device, cfg.log_frequency)
     trainer.set_params(
-        constants.num_epochs,
-        constants.lr,
-        constants.momentum,
-        constants.scheduler_step_size,
-        constants.scheduler_gamma,
-        constants.weight_decay
+        cfg.num_epochs,
+        cfg.lr,
+        cfg.momentum,
+        cfg.scheduler_step_size,
+        cfg.scheduler_gamma,
+        cfg.weight_decay,
+        cfg.top_k
     )
     trainer.build_trainer(
-        constants.criterion,
-        constants.optimizer,
-        constants.scheduler
+        cfg.criterion,
+        cfg.optimizer,
+        cfg.scheduler
     )
-    train_losses, train_acc, val_losses, val_acc = trainer.train()
-    test_loss, test_acc = trainer.test()
     
-    loss_fig = plot_metric([train_losses, val_losses], ["training loss", "validation loss"], name="Loss")
-    acc_fig = plot_metric([train_acc, val_acc], ["training accuracy", "validation accuracy"], name="Accuracy")
+    logging.info(f"Training...")
+    trainer.train()
     
-    loss_fig.savefig(f"{constants.results_plot_path}/loss.png")
-    acc_fig.savefig(f"{constants.results_plot_path}/accuracy.png")
+    logging.info(f"Inference...")
+    trainer.test()
     
-    print(f"Test: accuracy {100 * test_acc:.2f}%, loss: {test_loss}")
+    logging.info(f"Saving results...")
+    trainer.plot_results("Loss", cfg.results_plot_path)
+    trainer.plot_results("Accuracy", cfg.results_plot_path)
+    
+    trainer.save_results(cfg, cfg.results_file_path)
+    
+    logging.info(f"Done!")
 
 main()

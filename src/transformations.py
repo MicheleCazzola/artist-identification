@@ -1,4 +1,5 @@
-from src.constants import Constants, Env
+import logging
+from src.config import Config
 from torchvision.transforms import transforms
 import json
 
@@ -16,32 +17,37 @@ class Transforms:
     to_image = transforms.ToPILImage
     normalizer = transforms.Normalize
 
-    sample_aug = transforms.RandomHorizontalFlip(p = 1)
+    rh_flip = transforms.RandomHorizontalFlip(p = 1)
     random_apply = transforms.RandomApply
-    aug_transform = sample_aug
+    aug_transforms = [rh_flip]
     
-    def __init__(self, type: str = "model", constants: Constants = Env().constants):
+    def __init__(self, type: str = "model", config: Config = None):
         
         assert type in ["model", "stats"], f"Type must be either 'model' or 'stats', found {type} instead"
+        assert config is not None, "No config found"
+        
         self.type = type
         
         if type == "model":
             self.keys = ["train", "eval", "aug"]
-            mean, devstd = load_stats(constants.stats_file)
+            mean, devstd = load_stats(config.stats_file)
+            
             train_transforms = transforms.Compose([
-                Transforms.resizer(constants.resize_dim),
-                Transforms.cropper(constants.crop_dim),
+                Transforms.resizer(config.resize_dim),
+                Transforms.cropper(config.crop_dim),
                 Transforms.to_tensor()
             ])
             eval_transforms = transforms.Compose([
-                Transforms.resizer(constants.resize_dim),
-                Transforms.cropper(constants.crop_dim),
+                Transforms.resizer(config.resize_dim),
+                Transforms.cropper(config.crop_dim),
                 Transforms.to_tensor()
             ])
             aug_pipeline = transforms.Compose([
                 Transforms.to_image(),
-                Transforms.random_apply([Transforms.aug_transform], p = constants.aug_prob),
+                Transforms.random_apply(Transforms.aug_transforms, p = config.aug_prob),
                 Transforms.to_tensor(),
+                Transforms.normalizer(mean, devstd)
+            ]) if Transforms.aug_transforms else transforms.Compose([
                 Transforms.normalizer(mean, devstd)
             ])
             
@@ -53,8 +59,8 @@ class Transforms:
             ])
             to_adjusted = transforms.Compose([
                 Transforms.to_image(),
-                Transforms.resizer(constants.resize_dim),
-                Transforms.cropper(constants.crop_dim),
+                Transforms.resizer(config.resize_dim),
+                Transforms.cropper(config.crop_dim),
                 Transforms.to_tensor()
             ])
             

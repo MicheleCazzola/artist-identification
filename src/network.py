@@ -93,6 +93,8 @@ class HandCraftedFeatures(nn.Module):
 class MultibranchNetwork(nn.Module):
     def __init__(self, out_classes, use_stn=True):
         super(MultibranchNetwork, self).__init__()
+        
+        self.out_classes = out_classes
 
         # ROI proposal module
         self.roi_proposal = ROIsProposal(use_stn=use_stn)

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass
-class Constants:
+class Config:
     
     default_root: str = "./data/artist_dataset"
     stats_file: str = "./scripts/stats/stats.json"
@@ -29,25 +29,28 @@ class Constants:
     criterion: str = "cross_entropy"
     optimizer: str = "sgd"
     scheduler: str = "step_lr"
+    top_k: int = 5
         
-        
-class Env:
-    def __init__(self, target: str = "colab"):
-        
+    def __post_init__(self):
+        self.top_k = min(5, self.num_classes)
+
+    @staticmethod
+    def create(target: str = "colab") -> "Config":
+            
         assert target in ["local", "colab"], f"Target must be either 'local' or 'colab', found {target}"
         
-        if target == "colab":
-            self.constants = Constants()
-        else:
-            self.constants = Constants(
-                default_root="./scripts/stats/images/artist_dataset",
-                stats_file="./scripts/stats/stats.json",
-                device="cpu",
-                num_workers=0,
-                batch_size=2,
-                num_epochs=3,
-                train_split_size=0.66,
-                log_frequency=1,
-                results_plot_path="./out/plots",
-                results_file_path="./out/files"
-            ) 
+        params = {
+            "default_root": "./scripts/stats/images/artist_dataset",
+            "stats_file": "./scripts/stats/stats.json",
+            "device": "cpu",
+            "num_workers": 0,
+            "batch_size": 2,
+            "num_epochs": 3,
+            "train_split_size": 0.66,
+            "log_frequency": 1,
+            "results_plot_path": "./out/plots",
+            "results_file_path": "./out/files",
+            "num_classes": 3
+        } if target == "local" else {}
+        
+        return Config(**params)

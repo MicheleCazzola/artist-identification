@@ -1,14 +1,50 @@
 from dataclasses import dataclass
+import json
+import logging
 import os
 from statistics import mean
+from matplotlib import pyplot as plt
 import torch
 import torch.optim as optim
 import torch.nn as nn
 from torch.backends import cudnn
-from src.evaluate import evaluate
+from src.config import Config
 from src.network import MultibranchNetwork
-from src.constants import Env
 from torch.utils.data import DataLoader
+from torchvision.transforms import Compose
+from torchmetrics.classification import Accuracy, MulticlassAccuracy
+
+class TrainingMetrics:
+    def __init__(self, num_classes: int, top_k: int):
+        
+        if top_k > num_classes:
+            logging.error(f"Top-k value {top_k} cannot be greater than number of classes {num_classes}")
+        
+        self.top_k = top_k
+        self.top_1_accuracy: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.top_k_accuracy: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, top_k=top_k)
+        self.mca: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, average=None)
+        
+    def update(self, outputs, labels):
+        self.top_1_accuracy(outputs, labels)
+        self.top_k_accuracy(outputs, labels)
+        self.mca(outputs, labels)
+        
+    def reset(self):
+        self.top_1_accuracy.reset()
+        self.top_k_accuracy.reset()
+        self.mca.reset()
+        
+    def compute(self):
+        top_1_accuracy = self.top_1_accuracy.compute().item()
+        top_k_accuracy = self.top_k_accuracy.compute().item()
+        mca_result = self.mca.compute().mean().item()
+        return {
+            "top-1_accuracy": top_1_accuracy,
+            f"top-{self.top_k}_accuracy": top_k_accuracy,
+            "mca": mca_result
+        }
+
 
 @dataclass
 class TrainingResult:
@@ -16,6 +52,7 @@ class TrainingResult:
     train_accuracies: list
     val_losses: list
     val_accuracies: list
+    best_num_epochs: int = None
     
     def __iter__(self):
         return iter((self.train_losses, self.train_accuracies, self.val_losses, self.val_accuracies))
@@ -23,11 +60,12 @@ class TrainingResult:
     
 @dataclass
 class EvaluationResult:
-    eval_loss: float
-    eval_accuracy: float
+    loss: float
+    metrics: dict
 
     def __iter__(self):
-        return iter((self.eval_loss, self.eval_accuracy))
+        return iter((self.loss, *self.metrics.values()))
+    
 
 class Trainer: 
     def __init__(
@@ -36,6 +74,7 @@ class Trainer:
         trainloader: DataLoader,
         validloader: DataLoader,
         testloader: DataLoader,
+        aug_train: Compose,
         device: torch.device,
         log_frequency: int
     ):
@@ -43,6 +82,7 @@ class Trainer:
         self.trainloader = trainloader
         self.validloader = validloader
         self.testloader = testloader
+        self.aug_train = aug_train
         self.device = device
         self.log_frequency = log_frequency
         
@@ -56,10 +96,14 @@ class Trainer:
         self.criterion = None
         self.optimizer = None
         self.scheduler = None
+        self.metrics = None
         
-        self.best_num_epochs = self.num_epochs
+        self.best_num_epochs = None
         
         self.model_path = "best_model.pth"
+        
+        self.training_results = None
+        self.test_results = None
         
     def set_params(
         self,
@@ -68,7 +112,8 @@ class Trainer:
         momentum: float,
         step_size: int,
         gamma: float,
-        weight_decay: float
+        weight_decay: float,
+        top_k: int
     ):
         self.num_epochs = num_epochs
         self.lr = lr
@@ -76,6 +121,7 @@ class Trainer:
         self.step_size = step_size
         self.gamma = gamma
         self.weight_decay = weight_decay
+        self.metrics = TrainingMetrics(num_classes=self.model.out_classes, top_k=top_k)
         
     def build_trainer(
         self,
@@ -115,15 +161,23 @@ class Trainer:
         best_num_epochs = None
         current_step = 0
         
+        if len(self.aug_train.transforms) == 1:
+            logging.warning("No augmentation transforms found, only image normalization will be applied")
+        
         for epoch in range(self.num_epochs):
             for (inputs, labels) in self.trainloader:
-                inputs = inputs.to(self.device)
+                
+                aug_inputs = torch.stack([self.aug_train(input_img) for input_img in inputs])
+                
+                
+                
+                aug_inputs = aug_inputs.to(self.device)
                 labels = labels.to(self.device)
 
                 # Forward pass
                 self.optimizer.zero_grad()
                 
-                outputs = self.model(inputs)
+                outputs = self.model(aug_inputs)
                 loss = self.criterion(outputs, labels)
 
                 # Backward pass
@@ -131,7 +185,7 @@ class Trainer:
                 self.optimizer.step()
 
                 if current_step % self.log_frequency == 0:
-                    print(f"Epoch {epoch+1}, Iteration {current_step}, Loss: {loss.item()}")
+                    logging.info(f"Epoch {epoch+1}, Iteration {current_step}, Loss: {loss.item()}")
 
                 current_step += 1
 
@@ -143,9 +197,9 @@ class Trainer:
                 best_num_epochs = epoch + 1
                 torch.save(self.model.state_dict(), self.model_path)
 
-            print(f"End of Epoch {epoch+1}")
-            print(f"Training accuracy: {train_accuracy:.3f}, Training loss: {train_loss:.5f}")
-            print(f"Validation accuracy: {val_accuracy:.3f}, Validation loss: {val_loss:.5f}")
+            logging.info(f"End of Epoch {epoch+1}")
+            logging.info(f"Training accuracy: {train_accuracy:.3f}, Training loss: {train_loss:.5f}")
+            logging.info(f"Validation accuracy: {val_accuracy:.3f}, Validation loss: {val_loss:.5f}")
 
             val_losses.append(val_loss)
             val_accuracies.append(val_accuracy)
@@ -157,17 +211,17 @@ class Trainer:
                 self.scheduler.step()
 
         self.best_num_epochs = best_num_epochs
-        print(f"Best validation accuracy: {best_accuracy:.3f} at epoch {best_num_epochs}")
+        logging.info(f"Best validation accuracy: {best_accuracy:.3f} at epoch {best_num_epochs}")
 
-        return TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies)
+        self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        train_result = self.evaluate(self.trainloader)
-        return train_result
+        losses, top_1_accuracies, _, _ = self.evaluate(self.trainloader)
+        return losses, top_1_accuracies
     
     def validate(self) -> EvaluationResult:
-        valid_result = self.evaluate(self.validloader)
-        return valid_result
+        losses, top_1_accuracies, _, _ = self.evaluate(self.validloader)
+        return losses, top_1_accuracies
     
     def test(self) -> EvaluationResult:
         
@@ -177,7 +231,7 @@ class Trainer:
         os.remove(self.model_path)
         test_result = self.evaluate(self.testloader)
         
-        return test_result
+        self.test_results = test_result
 
     @torch.no_grad()
     def evaluate(self, dataloader: DataLoader) -> EvaluationResult:
@@ -204,11 +258,47 @@ class Trainer:
             losses.append(loss.item())
 
             # Calculate accuracy
+            self.metrics.update(outputs, labels)
             predictions = torch.argmax(outputs, dim=1)
             corrects += torch.sum(predictions == labels).item()
 
-        accuracy = corrects / data_len
+        metrics = self.metrics.compute()
+        self.metrics.reset()
         
-        assert sum(losses) / len(losses) == mean(losses)
+        return EvaluationResult(mean(losses), metrics)
+    
+    def plot_results(self, name: str, save_path: str):
         
-        return EvaluationResult(sum(losses) / len(losses), accuracy)
+        assert name in ["Loss", "Accuracy"], f"Plot name must be either 'Loss' or 'Accuracy', found {name}"
+        
+        if name == "Loss":
+            values = [self.training_results.train_losses, self.training_results.val_losses]
+            labels = ["training loss", "validation loss"]
+        else:
+            values = [self.training_results.train_accuracies, self.training_results.val_accuracies]
+            labels = ["training accuracy", "validation accuracy"]
+        
+        f = plt.figure(name)
+        for val, label in zip(values, labels):
+            plt.plot(val, label=label)
+            plt.title(f"{name} vs. epochs")
+        
+        plt.xticks(ticks=range(len(values)+1), labels=range(1, len(values)+2))
+        plt.xlabel("Epochs")
+        plt.ylabel(name)
+        plt.grid()
+        plt.legend()
+        plt.xlim(0, len(values)+0.2)
+        
+        if name == "Accuracy":
+            plt.ylim(-0.1,1.1)
+            
+        f.savefig(f"{save_path}/{name.lower()}.png")
+    
+    def save_results(self, cfg: Config, save_path: str):
+        result = cfg.__dict__.copy()
+        result.update(self.training_results.__dict__)
+        result.update(self.test_results.__dict__)
+        
+        with open(f"{save_path}/config.json", "w") as f:
+            json.dump(result, f, indent=4)
