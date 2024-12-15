@@ -14,6 +14,7 @@ from src.network import MultibranchNetwork
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
 from torchmetrics.classification import Accuracy, MulticlassAccuracy
+from torchvision import transforms
 
 class TrainingMetrics:
     def __init__(self, num_classes: int, top_k: int):
@@ -93,7 +94,6 @@ class Trainer:
         trainloader: DataLoader,
         validloader: DataLoader,
         testloader: DataLoader,
-        aug_train: Compose,
         device: torch.device,
         log_frequency: int
     ):
@@ -101,7 +101,6 @@ class Trainer:
         self.trainloader: DataLoader = trainloader
         self.validloader: DataLoader = validloader
         self.testloader: DataLoader = testloader
-        self.aug_train: Compose = aug_train
         self.device: torch.device = device
         self.log_frequency: int = log_frequency
         
@@ -111,6 +110,8 @@ class Trainer:
         self.step_size: int = None
         self.gamma: float = None
         self.weight_decay: float = None
+        self.aug_train: Compose = None
+        self.norm_eval: transforms.Normalize = None
         
         self.criterion: str = None
         self.optimizer: str = None
@@ -132,7 +133,9 @@ class Trainer:
         step_size: int,
         gamma: float,
         weight_decay: float,
-        top_k: int
+        top_k: int,
+        aug_train: Compose,
+        norm_eval: transforms.Normalize
     ):
         self.num_epochs = num_epochs
         self.lr = lr
@@ -141,6 +144,8 @@ class Trainer:
         self.gamma = gamma
         self.weight_decay = weight_decay
         self.metrics = TrainingMetrics(num_classes=self.model.out_classes, top_k=top_k).to(self.device)
+        self.aug_train = aug_train
+        self.norm_eval = norm_eval
         
     def build_trainer(
         self,
@@ -188,15 +193,16 @@ class Trainer:
             self.model.train()
             for (inputs, labels) in self.trainloader:
                 
-                aug_inputs = torch.stack([self.aug_train(input_img) for input_img in inputs])
+                if self.aug_train is not None:
+                    inputs = torch.stack([self.aug_train(input_img) for input_img in inputs])
                 
-                aug_inputs = aug_inputs.to(self.device)
+                inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
 
                 # Forward pass
                 self.optimizer.zero_grad()
                 
-                outputs = self.model(aug_inputs)
+                outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
 
                 # Backward pass
@@ -235,11 +241,11 @@ class Trainer:
         self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _ = self.evaluate(self.trainloader)
+        losses, top_1_accuracies, _, _ = self.evaluate(self.trainloader, normalize=True)
         return losses, top_1_accuracies
     
     def validate(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _ = self.evaluate(self.validloader)
+        losses, top_1_accuracies, _, _ = self.evaluate(self.validloader, normalize=True)
         return losses, top_1_accuracies
     
     def test(self) -> EvaluationResult:
@@ -253,7 +259,7 @@ class Trainer:
         self.test_results = test_result
 
     @torch.no_grad()
-    def evaluate(self, dataloader: DataLoader) -> EvaluationResult:
+    def evaluate(self, dataloader: DataLoader, normalize: bool = False) -> EvaluationResult:
         
         self.model.eval()
 
@@ -266,6 +272,9 @@ class Trainer:
         for inputs, labels in dataloader:
 
             data_len += inputs.size(0)
+            
+            if self.norm_eval is not None and normalize:
+                inputs = torch.stack([self.norm_eval(input_img) for input_img in inputs])
 
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)

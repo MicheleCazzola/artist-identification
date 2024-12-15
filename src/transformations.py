@@ -93,14 +93,18 @@ class Transforms:
             eval_transforms = transforms.Compose([
                 Transforms.resizer(config.resize_dim),
                 Transforms.cropper(config.crop_dim),
-                Transforms.to_tensor()
-            ])
-            aug_pipeline = transforms.Compose([
-                Transforms.to_image(),
-                Augmentations(config.aug_probs),
-                Transforms.to_tensor(), 
+                Transforms.to_tensor(),
                 Transforms.normalizer(mean, devstd)
             ])
+            aug_pipeline = {
+                "train": transforms.Compose([
+                    Transforms.to_image(),
+                    Augmentations(config.aug_probs),
+                    Transforms.to_tensor(), 
+                    Transforms.normalizer(mean, devstd)
+                ]),
+                "valid": Transforms.normalizer(mean, devstd)
+            } 
             
             self.transforms = dict(zip(self.keys, [train_transforms, eval_transforms, aug_pipeline]))
         else:

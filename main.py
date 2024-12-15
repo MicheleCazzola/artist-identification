@@ -62,7 +62,7 @@ def main():
     model = MultibranchNetwork(out_classes=cfg.num_classes)
     
     logging.info(f"Training setup...")
-    trainer = Trainer(model, trainloader, validloader, testloader, transformations["aug"], cfg.device, cfg.log_frequency)
+    trainer = Trainer(model, trainloader, validloader, testloader, cfg.device, cfg.log_frequency)
     trainer.set_params(
         cfg.num_epochs,
         cfg.lr,
@@ -70,7 +70,9 @@ def main():
         cfg.scheduler_step_size,
         cfg.scheduler_gamma,
         cfg.weight_decay,
-        cfg.top_k
+        cfg.top_k,
+        transformations["aug"]["train"],
+        transformations["aug"]["valid"]
     )
     trainer.build_trainer(
         cfg.criterion,
