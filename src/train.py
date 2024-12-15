@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from statistics import mean
+import time
 from matplotlib import pyplot as plt
 import torch
 import torch.optim as optim
@@ -56,13 +57,13 @@ class TrainingMetrics:
         )
 
     @staticmethod
-    def from_metrics(nc, top_k, *metrics) -> "TrainingMetrics":
-        tm = TrainingMetrics(nc, top_k)
-        tm.top_1_accuracy = metrics[0]
-        tm.top_k_accuracy = metrics[1]
-        tm.mca = metrics[2]
+    def from_metrics(num_classes, top_k, *metrics) -> "TrainingMetrics":
+        new_metrics = TrainingMetrics(num_classes, top_k)
+        new_metrics.top_1_accuracy = metrics[0]
+        new_metrics.top_k_accuracy = metrics[1]
+        new_metrics.mca = metrics[2]
 
-        return tm
+        return new_metrics
 
 @dataclass
 class TrainingResult:
@@ -96,32 +97,32 @@ class Trainer:
         device: torch.device,
         log_frequency: int
     ):
-        self.model = model.to(device)
-        self.trainloader = trainloader
-        self.validloader = validloader
-        self.testloader = testloader
-        self.aug_train = aug_train
-        self.device = device
-        self.log_frequency = log_frequency
+        self.model: MultibranchNetwork = model.to(device)
+        self.trainloader: DataLoader = trainloader
+        self.validloader: DataLoader = validloader
+        self.testloader: DataLoader = testloader
+        self.aug_train: Compose = aug_train
+        self.device: torch.device = device
+        self.log_frequency: int = log_frequency
         
-        self.num_epochs = None
-        self.lr = None
-        self.momentum = None
-        self.step_size = None
-        self.gamma = None
-        self.weight_decay = None
+        self.num_epochs: int = None
+        self.lr: float = None
+        self.momentum: float = None
+        self.step_size: int = None
+        self.gamma: float = None
+        self.weight_decay: float = None
         
-        self.criterion = None
-        self.optimizer = None
-        self.scheduler = None
-        self.metrics = None
+        self.criterion: str = None
+        self.optimizer: str = None
+        self.scheduler: str = None
+        self.metrics: TrainingMetrics = None
         
-        self.best_num_epochs = None
+        self.best_num_epochs: int = None
         
-        self.model_path = "best_model.pth"
+        self.model_path: str = "best_model.pth"
         
-        self.training_results = None
-        self.test_results = None
+        self.training_results: TrainingResult = None
+        self.test_results: EvaluationResult = None
         
     def set_params(
         self,
@@ -166,7 +167,7 @@ class Trainer:
             self.scheduler = None
         else:
             raise ValueError(f"Scheduler {scheduler} not supported")
-
+    
     def train(self) -> TrainingResult:
         
         if self.device == "cuda":
@@ -176,8 +177,6 @@ class Trainer:
         train_losses, train_accuracies = [], []
         best_accuracy = -1
         best_num_epochs = None
-
-        torch.autograd.set_detect_anomaly(True)
         
         if len(self.aug_train.transforms) == 1:
             logging.warning("No augmentation transforms found, only image normalization will be applied")
@@ -306,7 +305,7 @@ class Trainer:
         plt.xticks(ticks=range(len(values)+1), labels=range(1, len(values)+2))
         plt.xlabel("Epochs")
         plt.ylabel(name)
-        plt.grid()
+        plt.grid(which="both")
         plt.legend()
         plt.xlim(0, len(values)+0.2)
         
@@ -320,5 +319,7 @@ class Trainer:
         result.update(self.training_results.__dict__)
         result.update(self.test_results.__dict__)
         
-        with open(f"{save_path}/config.json", "w") as f:
+        id = time.strftime("%Y%m%d-%H%M%S")
+        
+        with open(f"{save_path}/config_{id}.json", "w") as f:
             json.dump(result, f, indent=4)

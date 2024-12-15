@@ -11,14 +11,14 @@ class Config:
     device: str = "cuda"
     num_workers: int = 2
         
-    resize_dim: int = 256
-    crop_dim: int = 224
-    aug_prob: float = 0.5
+    resize_dim: int = 512
+    crop_dim: int = 512
+    aug_probs: tuple[float] = (0.3, 0.5, 0.3, 1.0)
     
     train_split_size: float = 0.75
-    reduce_factor: float = 0.1
+    reduce_factor: float = None
     batch_size: int = 10
-    num_epochs: int = 3
+    num_epochs: int = 5
     log_frequency: int = 100
         
     num_classes: int = 161
