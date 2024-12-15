@@ -85,10 +85,8 @@ def main():
     trainer.test()
     
     logging.info(f"Saving results...")
-    trainer.plot_results("Loss", cfg.results_plot_path)
-    trainer.plot_results("Accuracy", cfg.results_plot_path)
     
-    trainer.save_results(cfg, cfg.results_file_path)
+    trainer.save_results(cfg, cfg.results_root)
     
     logging.info(f"Done!")
 

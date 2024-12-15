@@ -119,7 +119,7 @@ class Trainer:
         
         self.best_num_epochs: int = None
         
-        self.model_path: str = "best_model.pth"
+        self.model_path: str = "./temp/best_model.pth"
         
         self.training_results: TrainingResult = None
         self.test_results: EvaluationResult = None
@@ -286,7 +286,14 @@ class Trainer:
         
         return EvaluationResult(mean(losses), metrics)
     
-    def plot_results(self, name: str, save_path: str):
+    def save_results(self, cfg: Config, save_path: str):
+        id = time.strftime("%Y%m%d-%H%M%S")
+        
+        self._save_files(cfg, f"{save_path}/{cfg.files_dir}", id)
+        self._save_plots("Loss", f"{save_path}/{cfg.plots_dir}", id)
+        self._save_plots("Accuracy", f"{save_path}/{cfg.plots_dir}", id)
+    
+    def _save_plots(self, name: str, save_path: str, file_id: str):
         
         assert name in ["Loss", "Accuracy"], f"Plot name must be either 'Loss' or 'Accuracy', found {name}"
         
@@ -312,14 +319,12 @@ class Trainer:
         if name == "Accuracy":
             plt.ylim(-0.1,1.1)
             
-        f.savefig(f"{save_path}/{name.lower()}.png")
+        f.savefig(f"{save_path}/{name.lower()}_{file_id}.png")
     
-    def save_results(self, cfg: Config, save_path: str):
+    def _save_files(self, cfg: Config, save_path: str, file_id: str):
         result = cfg.__dict__.copy()
         result.update(self.training_results.__dict__)
         result.update(self.test_results.__dict__)
         
-        id = time.strftime("%Y%m%d-%H%M%S")
-        
-        with open(f"{save_path}/config_{id}.json", "w") as f:
+        with open(f"{save_path}/config_{file_id}.json", "w") as f:
             json.dump(result, f, indent=4)

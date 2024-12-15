@@ -5,20 +5,21 @@ class Config:
     
     default_root: str = "./data/artist_dataset"
     stats_file: str = "./scripts/stats/stats.json"
-    results_plot_path: str = "."
-    results_file_path: str = "."
+    results_root: str = "."
+    plots_dir: str = "."
+    files_dir: str = "."
         
     device: str = "cuda"
     num_workers: int = 2
         
     resize_dim: int = 512
     crop_dim: int = 512
-    aug_probs: tuple[float] = (0.3, 0.5, 0.3, 1.0)
+    aug_probs: tuple[float] = (0.3, 0.3, 0.3, 1.0)
     
     train_split_size: float = 0.75
     reduce_factor: float = None
-    batch_size: int = 10
-    num_epochs: int = 5
+    batch_size: int = 24
+    num_epochs: int = 10
     log_frequency: int = 100
         
     num_classes: int = 161
@@ -49,8 +50,9 @@ class Config:
             "num_epochs": 3,
             "train_split_size": 0.66,
             "log_frequency": 1,
-            "results_plot_path": "./out/plots",
-            "results_file_path": "./out/files",
+            "results_root": "./out",
+            "plots_dir": "plots",
+            "files_dir": "files",
             "num_classes": 3,
             "reduce_factor": None
         } if target == "local" else {}

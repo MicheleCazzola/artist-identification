@@ -1,0 +1,58 @@
+{
+    "default_root": "./scripts/stats/images/artist_dataset",
+    "stats_file": "./scripts/stats/stats.json",
+    "results_plot_path": "./out/plots",
+    "results_file_path": "./out/files",
+    "device": "cpu",
+    "num_workers": 0,
+    "resize_dim": 512,
+    "crop_dim": 512,
+    "aug_probs": [
+        0.3,
+        0.5,
+        0.3,
+        1.0
+    ],
+    "train_split_size": 0.66,
+    "reduce_factor": null,
+    "batch_size": 2,
+    "num_epochs": 3,
+    "log_frequency": 1,
+    "num_classes": 3,
+    "lr": 0.001,
+    "momentum": 0.9,
+    "weight_decay": 0.0001,
+    "scheduler_step_size": 7,
+    "scheduler_gamma": 0.1,
+    "criterion": "cross_entropy",
+    "optimizer": "sgd",
+    "scheduler": "step_lr",
+    "top_k": 3,
+    "train_losses": [
+        1.0665106773376465,
+        1.0945939719676971,
+        1.1320828199386597
+    ],
+    "train_accuracies": [
+        0.5,
+        0.25,
+        0.25
+    ],
+    "val_losses": [
+        1.102082073688507,
+        1.133638322353363,
+        1.1771749556064606
+    ],
+    "val_accuracies": [
+        0.3333333432674408,
+        0.3333333432674408,
+        0.3333333432674408
+    ],
+    "best_num_epochs": 1,
+    "loss": 1.1097374359766643,
+    "metrics": {
+        "top-1_accuracy": 0.3333333432674408,
+        "top-3_accuracy": 1.0,
+        "mca": 0.3333333432674408
+    }
+}

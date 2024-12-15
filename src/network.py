@@ -63,14 +63,13 @@ class ROIsProposal(nn.Module):
         else:
             # Random cropping logic
             for _ in range(2):
-                i, j, h, w = T.RandomCrop.get_params(x, output_size=(224, 224))
-                crop = T.functional.crop(x, i, j, h, w)
+                crop = T.RandomCrop(size=(224, 224))(x)
                 crops.append(crop)
 
         # Low-resolution crop
-        low_res = F.interpolate(x, size=(256, 256), mode='bilinear', align_corners=False)
-        i, j, h, w = T.RandomCrop.get_params(low_res, output_size=(224, 224))
-        crops.append(T.functional.crop(low_res, i, j, h, w))
+        resized_x = T.Resize(size=(256, 256))(x)
+        low_res = T.RandomCrop(size=(224, 224))(resized_x)
+        crops.append(low_res)
 
         return crops
 
@@ -117,11 +116,6 @@ class MultibranchNetwork(nn.Module):
 
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
 
-        # Task-specific fully connected layers
-        #self.fc_artist = nn.Linear(2048 + 4056, 1508)  # HOG feature size is 3780
-        # self.fc_style = nn.Linear(2048 + 4056, 125)
-        # self.fc_genre = nn.Linear(2048 + 4056, 41)
-        #self.fc_artist = nn.Linear(2048 + 4056, 1508)  # HOG feature size is 3780
         self.fc_artist = nn.Linear(2048 + 4056, out_classes)
 
     def _make_branch(self):
@@ -168,9 +162,7 @@ class MultibranchNetwork(nn.Module):
         x_cropped = T.CenterCrop(crop_size)(x)
         hand_crafted = self.hand_crafted_features(x_cropped)
 
-        #print(x.shape, out.shape, hand_crafted.shape)
         out = torch.cat([out, hand_crafted], dim=1)
-
 
         # Task-specific outputs
         artist = self.fc_artist(out)
