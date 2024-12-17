@@ -5,8 +5,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from torchvision.models import resnet18
+from torchvision.models import resnet18, mobilenet_v3_small
 from skimage.feature import hog
+from enum import Enum
+
+class BackboneType(Enum):
+    RESNET18 = "resnet18"
+    MOBILENET_V3_SMALL = "mobilenet_v3_small"
 
 class BottleneckBlock(nn.Module):
     """
@@ -19,7 +24,7 @@ class BottleneckBlock(nn.Module):
         # Convolutions and batch normalization
         # No bias since batch norm is used
         
-        # Reduce dimensionality and downsample, according to original implementation
+        # Reduce dimensionality and downsampling, according to original implementation
         self.conv1 = nn.Conv2d(in_channels, bottleneck_channels, kernel_size=1, stride=stride, bias=False)
         self.bn1 = nn.BatchNorm2d(bottleneck_channels)
         
@@ -48,42 +53,69 @@ class BottleneckBlock(nn.Module):
         
         return F.relu(out)
     
+class CroppingModule(nn.Module):
+    def __init__(self, crop_size: int, downsample_size: int = None):
+        super(CroppingModule, self).__init__()
+        self.crop_size = crop_size
+        self.downsample_size = downsample_size
+        
+    def forward(self, x):
+        if self.downsample_size is not None:
+            x = transforms.Resize((self.downsample_size, self.downsample_size))(x)
+        return transforms.RandomCrop((self.crop_size, self.crop_size), pad_if_needed=True)(x)
+    
+class SpatialTransformerNetwork(nn.Module):
+    def __init__(self, crop_size: int, backbone_type: BackboneType):
+        super(SpatialTransformerNetwork, self).__init__()
+        self.crop_size = crop_size
+        self.backbone_type = backbone_type
+        self.loc_net = self._make_loc_net()
+        self.sampling_grid = lambda t: F.affine_grid(t.view(-1, 2, 3), size=(t.size(0), 3, self.crop_size, self.crop_size), align_corners=False)
+        self.sampler = lambda x,g: F.grid_sample(x, g, align_corners=False)
+        
+    def _make_loc_net(self):
+        # Using ResNet-18 as the localization network
+        if self.backbone_type == self.backbone_type.RESNET18:
+            model = resnet18(weights="IMAGENET1K_V1")
+            last_in_features = model.fc.in_features     # 1024
+            model.fc = nn.Linear(last_in_features, 6)
+            
+        # Using MobileNetV3-Small as the localization network
+        elif self.backbone_type == self.backbone_type.MOBILENET_V3_SMALL:
+            model = mobilenet_v3_small(weights="IMAGENET1K_V1")
+            last_in_features = model.classifier[3].in_features      # 512
+            model.classifier[3] = nn.Linear(last_in_features, 6)
+        else:
+            raise ValueError(f"Unknown backbone type: {self.backbone_type}")
+        
+        return model
+    
+    def forward(self, x):
+        theta = self.loc_net(x)
+        grid = self.sampling_grid(theta)
+        return self.sampler(x, grid)
+    
 class ROIsProposal(nn.Module):
-    def __init__(self, crop_size: int, downsample_size: int, stn: bool = True):
+    def __init__(self, crop_size: int, downsample_size: int, stn: BackboneType = None):
         super(ROIsProposal, self).__init__()
         self.stn = stn
         self.crop_size = crop_size
         self.downsample_size = downsample_size
-        if stn:
-            self.loc_net1 = self._make_loc_net()
-            self.loc_net2 = self._make_loc_net()
-            self.sampling_grid = lambda t: F.affine_grid(t.view(-1, 2, 3), size=(t.size(0), 3, self.crop_size, self.crop_size), align_corners=False)
-            self.sampler = lambda x,g: F.grid_sample(x, g, align_corners=False)
-            
-    def _make_loc_net(self):
-        # Using ResNet-18 as the localization network
-        model = resnet18(weights="IMAGENET1K_V1")
-        model.fc = nn.Linear(model.fc.in_features, 6)
-        return model
-    
-    def _get_roi(self, x, loc_net):
-        theta = loc_net(x)
-        grid = self.sampling_grid(theta)
-        return self.sampler(x, grid)
+        
+        self.downsample_cropper = CroppingModule(crop_size, downsample_size)
+        
+        if stn is not None:
+            self.extractor1 = SpatialTransformerNetwork(crop_size, stn)
+            self.extractor2 = SpatialTransformerNetwork(crop_size, stn)
+        else:
+            self.extractor1 = CroppingModule(crop_size)
+            self.extractor2 = CroppingModule(crop_size)
     
     def forward(self, x):
-        downsampled_crop = transforms.Compose([
-            transforms.Resize((self.downsample_size, self.downsample_size)),
-            transforms.RandomCrop((self.crop_size, self.crop_size), pad_if_needed=True)
-        ])(x)
+        downsampled_crop = self.downsample_cropper(x)
         
-        if self.stn:
-            roi1 = self._get_roi(x, self.loc_net1)
-            roi2 = self._get_roi(x, self.loc_net2)
-        else:
-            # Not checking they are not overlapped, we do not care about it (at least for now)
-            roi1 = transforms.RandomCrop((self.crop_size, self.crop_size), pad_if_needed=True)(x)
-            roi2 = transforms.RandomCrop((self.crop_size, self.crop_size), pad_if_needed=True)(x)
+        roi1 = self.extractor1(x)
+        roi2 = self.extractor2(x)
         
         return roi1, roi2, downsampled_crop
 
@@ -118,13 +150,13 @@ class HandCraftedFeatures(nn.Module):
             hog(gray(img), orientations=6, pixels_per_cell=(16, 16), 
                 cells_per_block=(2, 2), block_norm='L2-Hys')
             for img in x_np
-        ]))
+        ]), dtype=torch.float32, device=x.device)
 
-class DeepMultibranchNetwork(nn.Module):
-    def __init__(self, num_classes: int, use_stn: bool = True, use_handcrafted: bool = True):
-        super(DeepMultibranchNetwork, self).__init__()
+class MultiBranchArtistNetwork(nn.Module):
+    def __init__(self, num_classes: int, stn: BackboneType = None, use_handcrafted: bool = True):
+        super(MultiBranchArtistNetwork, self).__init__()
         
-        self.crop = ROIsProposal(256, 224, stn=use_stn)
+        self.roi_extractor = ROIsProposal(256, 224, stn=stn)
         
         self.branch1 = self._make_branch(3, 256)
         self.branch2 = self._make_branch(3, 256)
@@ -160,7 +192,7 @@ class DeepMultibranchNetwork(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x1, x2, x3 = self.crop(x)
+        x1, x2, x3 = self.roi_extractor(x)
         
         b1 = self.branch1(x1)
         b2 = self.branch2(x2)
@@ -185,7 +217,7 @@ class DeepMultibranchNetwork(nn.Module):
         return out
 
 # Example usage:
-model = DeepMultibranchNetwork(num_classes=161, use_stn=False)
+# model = MultiBranchArtistNetwork(num_classes=161, stn=BackboneType.RESNET18)
 
 # modules = [(name, sum(p.numel() for p in module.parameters())) for name, module in model.named_children()]
 

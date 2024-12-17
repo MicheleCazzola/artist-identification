@@ -1,0 +1,38 @@
+{
+    "model_stn_resnet18_no_hcrf": {
+        "params": "48.75 M",
+        "size": "195.01 MB",
+        "latency": "665.51 ms",
+        "fps": "1.50 fps"
+    },
+    "model_stn_resnet18_hcrf": {
+        "params": "49.38 M",
+        "size": "197.50 MB",
+        "latency": "696.85 ms",
+        "fps": "1.44 fps"
+    },
+    "model_stn_mobilenetv3small_no_hcrf": {
+        "params": "30.34 M",
+        "size": "121.35 MB",
+        "latency": "409.12 ms",
+        "fps": "2.44 fps"
+    },
+    "model_stn_mobilenetv3small_hcrf": {
+        "params": "30.96 M",
+        "size": "123.84 MB",
+        "latency": "426.41 ms",
+        "fps": "2.35 fps"
+    },
+    "model_rnd_no_hcrf": {
+        "params": "27.43 M",
+        "size": "109.72 MB",
+        "latency": "360.76 ms",
+        "fps": "2.77 fps"
+    },
+    "model_rnd_hcrf": {
+        "params": "28.05 M",
+        "size": "112.21 MB",
+        "latency": "360.56 ms",
+        "fps": "2.77 fps"
+    }
+}
