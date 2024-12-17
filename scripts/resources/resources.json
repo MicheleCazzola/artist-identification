@@ -1,0 +1,100 @@
+{
+    "resnet18_no_hcrf": {
+        "params": "48.75 M",
+        "size": "195.01 MB",
+        "latency": "630.25 ms",
+        "fps": "1.59 fps",
+        "accuracy": 69.76
+    },
+    "resnet18_hcrf": {
+        "params": "49.38 M",
+        "size": "197.50 MB",
+        "latency": "599.44 ms",
+        "fps": "1.67 fps",
+        "accuracy": 69.76
+    },
+    "mobilenet_v3_small_no_hcrf": {
+        "params": "30.34 M",
+        "size": "121.35 MB",
+        "latency": "330.36 ms",
+        "fps": "3.03 fps",
+        "accuracy": 67.7
+    },
+    "mobilenet_v3_small_hcrf": {
+        "params": "30.96 M",
+        "size": "123.84 MB",
+        "latency": "347.79 ms",
+        "fps": "2.88 fps",
+        "accuracy": 67.7
+    },
+    "efficientnet_b0_no_hcrf": {
+        "params": "35.09 M",
+        "size": "140.35 MB",
+        "latency": "499.12 ms",
+        "fps": "2.00 fps",
+        "accuracy": 76.3
+    },
+    "efficientnet_b0_hcrf": {
+        "params": "35.71 M",
+        "size": "142.84 MB",
+        "latency": "520.25 ms",
+        "fps": "1.92 fps",
+        "accuracy": 76.3
+    },
+    "regnet_x_400mf_no_hcrf": {
+        "params": "37.15 M",
+        "size": "148.61 MB",
+        "latency": "429.95 ms",
+        "fps": "2.33 fps",
+        "accuracy": 77.6
+    },
+    "regnet_x_400mf_hcrf": {
+        "params": "37.78 M",
+        "size": "151.10 MB",
+        "latency": "447.89 ms",
+        "fps": "2.23 fps",
+        "accuracy": 77.6
+    },
+    "shufflenet_v2_x0_5_no_hcrf": {
+        "params": "28.09 M",
+        "size": "112.37 MB",
+        "latency": "337.60 ms",
+        "fps": "2.96 fps",
+        "accuracy": 60.3
+    },
+    "shufflenet_v2_x0_5_hcrf": {
+        "params": "28.72 M",
+        "size": "114.86 MB",
+        "latency": "353.80 ms",
+        "fps": "2.83 fps",
+        "accuracy": 60.3
+    },
+    "mnasnet0_5_no_hcrf": {
+        "params": "29.23 M",
+        "size": "116.93 MB",
+        "latency": "369.67 ms",
+        "fps": "2.71 fps",
+        "accuracy": 68.9
+    },
+    "mnasnet0_5_hcrf": {
+        "params": "29.86 M",
+        "size": "119.42 MB",
+        "latency": "369.41 ms",
+        "fps": "2.71 fps",
+        "accuracy": 68.9
+    },
+    "model_rnd_no_hcrf": {
+        "params": "27.43 M",
+        "size": "109.72 MB",
+        "latency": "299.32 ms",
+        "fps": "3.34 fps",
+        "accuracy": null
+    },
+    "model_rnd_hcrf": {
+        "params": "28.05 M",
+        "size": "112.21 MB",
+        "latency": "312.39 ms",
+        "fps": "3.20 fps",
+        "accuracy": null
+    }
+}

@@ -5,13 +5,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from torchvision.models import resnet18, mobilenet_v3_small
+from torchvision.models import resnet18, mobilenet_v3_small, efficientnet_b0, regnet_x_400mf
 from skimage.feature import hog
 from enum import Enum
+from torchvision.models import shufflenet_v2_x0_5
+from torchvision.models import mnasnet0_5
 
 class BackboneType(Enum):
     RESNET18 = "resnet18"
     MOBILENET_V3_SMALL = "mobilenet_v3_small"
+    EFFICIENTNET_B0 = "efficientnet_b0"
+    REGNET_X_400MF = "regnet_x_400mf"
+    SHUFFLENET_V2_X0_5 = "shufflenet_v2_x0_5"
+    MNASNET0_5 = "mnasnet0_5"
 
 class BottleneckBlock(nn.Module):
     """
@@ -85,6 +91,22 @@ class SpatialTransformerNetwork(nn.Module):
             model = mobilenet_v3_small(weights="IMAGENET1K_V1")
             last_in_features = model.classifier[3].in_features      # 512
             model.classifier[3] = nn.Linear(last_in_features, 6)
+        elif self.backbone_type == self.backbone_type.EFFICIENTNET_B0:
+            model = efficientnet_b0(weights="IMAGENET1K_V1")
+            last_in_features = model.classifier[1].in_features
+            model.classifier[1] = nn.Linear(last_in_features, 6)
+        elif self.backbone_type == self.backbone_type.REGNET_X_400MF:
+            model = regnet_x_400mf(weights="IMAGENET1K_V1")
+            last_in_features = model.fc.in_features
+            model.fc = nn.Linear(last_in_features, 6)   
+        elif self.backbone_type == self.backbone_type.SHUFFLENET_V2_X0_5:
+            model = shufflenet_v2_x0_5(weights="IMAGENET1K_V1")
+            last_in_features = model.fc.in_features
+            model.fc = nn.Linear(last_in_features, 6)
+        elif self.backbone_type == self.backbone_type.MNASNET0_5:
+            model = mnasnet0_5(weights="IMAGENET1K_V1")
+            last_in_features = model.classifier[1].in_features
+            model.classifier[1] = nn.Linear(last_in_features, 6)
         else:
             raise ValueError(f"Unknown backbone type: {self.backbone_type}")
         
@@ -170,9 +192,12 @@ class MultiBranchArtistNetwork(nn.Module):
         
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         
-        self.handcrafted = HandCraftedFeatures(256, 224) if use_handcrafted else None
-        
-        self.classifier = nn.Linear(2048 + 4056, num_classes) if use_handcrafted else nn.Linear(2048, num_classes)
+        if use_handcrafted:
+            self.handcrafted = HandCraftedFeatures(256, 224)
+            self.classifier = nn.Linear(2048 + 4056, num_classes)
+        else:
+            self.handcrafted = None
+            self.classifier = nn.Linear(2048, num_classes)
         
     def _make_branch(self, in_channels: int, out_channels: int) -> nn.Sequential:
         initial = nn.Sequential(
@@ -208,7 +233,7 @@ class MultiBranchArtistNetwork(nn.Module):
         
         out = torch.flatten(out, 1)
         
-        if self.handcrafted:
+        if self.handcrafted is not None:
             hand_crafted = self.handcrafted(x)
             out = torch.cat((out, hand_crafted), dim=1)
         
