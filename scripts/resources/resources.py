@@ -37,7 +37,7 @@ MODEL_NAMES = [
 ]
 
 model_variants = [
-    MultiBranchArtistNetwork(num_classes=NUM_CLASSES, stn=backbone, use_handcrafted=handcrafted)
+    MultiBranchArtistNetwork(num_classes=NUM_CLASSES, stn=backbone, use_handcrafted=handcrafted).to(DEVICE)
     for backbone in BACKBONES
     for handcrafted in HANDCRAFTED_FLAGS
 ]
