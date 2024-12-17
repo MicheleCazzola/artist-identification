@@ -1,3 +1,4 @@
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -12,17 +13,17 @@ class ResidualBlock(nn.Module):
         super(ResidualBlock, self).__init__()
         bottleneck_channels = out_channels // 4
 
-        self.conv1 = nn.Conv2d(in_channels, bottleneck_channels, kernel_size=1, stride=stride)
+        self.conv1 = nn.Conv2d(in_channels, bottleneck_channels, kernel_size=1, stride=stride, bias=False)
         self.bn1 = nn.BatchNorm2d(bottleneck_channels)
-        self.conv2 = nn.Conv2d(bottleneck_channels, bottleneck_channels, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(bottleneck_channels, bottleneck_channels, kernel_size=3, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(bottleneck_channels)
-        self.conv3 = nn.Conv2d(bottleneck_channels, out_channels, kernel_size=1)
+        self.conv3 = nn.Conv2d(bottleneck_channels, out_channels, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(out_channels)
 
         self.shortcut = nn.Sequential()
         if stride != 1 or in_channels != out_channels:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride),
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(out_channels)
             )
 
@@ -90,10 +91,17 @@ class HandCraftedFeatures(nn.Module):
         return torch.tensor(features, dtype=torch.float32, device=x.device)
 
 class MultibranchNetwork(nn.Module):
-    def __init__(self, out_classes, use_stn=True):
+    def __init__(
+        self,
+        out_classes: int,
+        use_stn: bool = True,
+        use_handcrafted: bool = True
+    ):
         super(MultibranchNetwork, self).__init__()
         
         self.out_classes = out_classes
+        self.use_stn = use_stn
+        self.use_handcrafted = use_handcrafted
 
         # ROI proposal module
         self.roi_proposal = ROIsProposal(use_stn=use_stn)
@@ -102,9 +110,6 @@ class MultibranchNetwork(nn.Module):
         self.branch1 = self._make_branch()
         self.branch2 = self._make_branch()
         self.branch3 = self._make_branch()
-
-        # Hand-crafted feature injection
-        self.hand_crafted_features = HandCraftedFeatures()
 
         # Concatenation processing
         self.join_layer = ResidualBlock(768, 256, stride=1)
@@ -115,18 +120,21 @@ class MultibranchNetwork(nn.Module):
         self.resblock3 = self._make_residual_block(1024, 2048, num_blocks=3, stride=2)
 
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-
-        self.fc_artist = nn.Linear(2048 + 4056, out_classes)
+        
+        # Hand-crafted feature injection
+        self.hand_crafted_features = HandCraftedFeatures() if use_handcrafted else None
+        
+        # Final classification layer
+        self.fc_artist = nn.Linear(2048 + 4056, out_classes) if use_handcrafted else nn.Linear(2048, out_classes)
 
     def _make_branch(self):
-        layers = [
+        return nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
             self._make_residual_block(64, 256, num_blocks=3, stride=1)
-        ]
-        return nn.Sequential(*layers)
+        )
 
     def _make_residual_block(self, in_channels, out_channels, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
@@ -154,6 +162,7 @@ class MultibranchNetwork(nn.Module):
         out = self.resblock1(out)
         out = self.resblock2(out)
         out = self.resblock3(out)
+        
         out = self.avg_pool(out)
         out = torch.flatten(out, 1)
 
@@ -168,3 +177,29 @@ class MultibranchNetwork(nn.Module):
         artist = self.fc_artist(out)
         
         return artist
+    
+# model = MultibranchNetwork(out_classes=161)
+
+# modules = [(name, sum(p.numel() for p in module.parameters())) for name, module in model.named_children()]
+
+# for name, size in modules:
+#     print(f"{name}: {size * 4 / 1024**2:.2f} MB")
+
+# tot_params = sum(p.numel() for p in model.parameters())
+# print(f"Total size: {tot_params * 4 / 1024**2:.2f} MB")
+
+# x = [torch.randn(4, 3, 512, 512) for _ in range(10)]
+
+# logelapsed = 0
+# start = time.time()
+# with torch.no_grad():
+#     for (step, batch) in enumerate(x):
+#         model(batch)
+        
+#         logtime = time.time()
+#         if (step + 1) % 2 == 0:
+#             print(f"Batch {step + 1}/{len(x)}") 
+#         logelapsed += time.time() - logtime
+    
+
+# print(f"Elapsed time per-batch: {(time.time() - start) / len(x):.3f} s, for log: {logelapsed:.3f} s")

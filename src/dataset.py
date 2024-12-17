@@ -104,6 +104,7 @@ def create_datasets(
         if reduction_factor is not None:
             trainset = reduce_dataset(trainset, reduction_factor)
             testset = reduce_dataset(testset, reduction_factor)
+            
         # A validation split is generated out of the train set
         if validation:
             trainset, validset = split_dataset(trainset, train_split_size)
@@ -115,12 +116,9 @@ def create_datasets(
     # Applied only basic evaluation transformations
     dataset = ArtistDataset(root, transform=transforms)
     
-    if reduce_dataset:
+    if reduction_factor is not None:
         dataset = reduce_dataset(dataset)
-    
-    if reduce_dataset:
-        dataset = reduce_dataset(dataset)
-    
+        
     return dataset
 
 

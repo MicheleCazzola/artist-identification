@@ -10,7 +10,7 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.backends import cudnn
 from src.config import Config
-from src.network import MultibranchNetwork
+from src.mutlti_branch_nn import MultibranchNetwork
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
 from torchmetrics.classification import Accuracy, MulticlassAccuracy
@@ -94,15 +94,14 @@ class Trainer:
         trainloader: DataLoader,
         validloader: DataLoader,
         testloader: DataLoader,
-        device: torch.device,
-        log_frequency: int
     ):
-        self.model: MultibranchNetwork = model.to(device)
+        self.model: MultibranchNetwork = model
         self.trainloader: DataLoader = trainloader
         self.validloader: DataLoader = validloader
         self.testloader: DataLoader = testloader
-        self.device: torch.device = device
-        self.log_frequency: int = log_frequency
+        
+        self.device: torch.device = None
+        self.log_frequency: int = None
         
         self.num_epochs: int = None
         self.lr: float = None
@@ -110,6 +109,7 @@ class Trainer:
         self.step_size: int = None
         self.gamma: float = None
         self.weight_decay: float = None
+        
         self.aug_train: Compose = None
         self.norm_eval: transforms.Normalize = None
         
@@ -125,29 +125,29 @@ class Trainer:
         self.training_results: TrainingResult = None
         self.test_results: EvaluationResult = None
         
-    def set_params(
-        self,
-        num_epochs: int,
-        lr: float,
-        momentum: float,
-        step_size: int,
-        gamma: float,
-        weight_decay: float,
-        top_k: int,
-        aug_train: Compose,
-        norm_eval: transforms.Normalize
-    ):
-        self.num_epochs = num_epochs
-        self.lr = lr
-        self.momentum = momentum
-        self.step_size = step_size
-        self.gamma = gamma
-        self.weight_decay = weight_decay
-        self.metrics = TrainingMetrics(num_classes=self.model.out_classes, top_k=top_k).to(self.device)
-        self.aug_train = aug_train
-        self.norm_eval = norm_eval
+    def build(self, cfg: Config):
+        self.device = cfg.device
+        self.log_frequency = cfg.log_frequency
+        self.num_epochs = cfg.num_epochs
+        self.lr = cfg.lr
+        self.momentum = cfg.momentum
+        self.step_size = cfg.scheduler_step_size
+        self.gamma = cfg.scheduler_gamma
+        self.weight_decay = cfg.weight_decay
+        self.top_k = cfg.top_k
         
-    def build_trainer(
+        self._prepare_training(cfg.criterion, cfg.optimizer, cfg.scheduler)
+        
+        self.metrics = TrainingMetrics(num_classes=cfg.num_classes, top_k=cfg.top_k)
+        
+        self.model = self.model.to(self.device)
+        self.metrics = self.metrics.to(self.device)
+        
+    def add_aug_transforms(self, transforms: dict):
+        self.aug_train = transforms["train"]
+        self.norm_eval = transforms["val"]
+        
+    def _prepare_training(
         self,
         criterion: str,
         optimizer: str,
@@ -241,11 +241,11 @@ class Trainer:
         self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _ = self.evaluate(self.trainloader, normalize=True)
+        losses, top_1_accuracies, _, _ = self.evaluate(self.trainloader)
         return losses, top_1_accuracies
     
     def validate(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _ = self.evaluate(self.validloader, normalize=True)
+        losses, top_1_accuracies, _, _ = self.evaluate(self.validloader)
         return losses, top_1_accuracies
     
     def test(self) -> EvaluationResult:
@@ -259,7 +259,7 @@ class Trainer:
         self.test_results = test_result
 
     @torch.no_grad()
-    def evaluate(self, dataloader: DataLoader, normalize: bool = False) -> EvaluationResult:
+    def evaluate(self, dataloader: DataLoader) -> EvaluationResult:
         
         self.model.eval()
 
@@ -273,8 +273,7 @@ class Trainer:
 
             data_len += inputs.size(0)
             
-            if self.norm_eval is not None and normalize:
-                inputs = torch.stack([self.norm_eval(input_img) for input_img in inputs])
+            inputs = torch.stack([self.norm_eval(input_img) for input_img in inputs])
 
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
@@ -318,15 +317,15 @@ class Trainer:
             plt.plot(val, label=label)
             plt.title(f"{name} vs. epochs")
         
-        plt.xticks(ticks=range(len(values)+1), labels=range(1, len(values)+2))
+        plt.xticks(ticks=range(self.num_epochs), labels=range(1, self.num_epochs + 1))
         plt.xlabel("Epochs")
         plt.ylabel(name)
         plt.grid(which="both")
         plt.legend()
-        plt.xlim(0, len(values)+0.2)
+        plt.xlim(0, self.num_epochs - 0.8)
         
         if name == "Accuracy":
-            plt.ylim(-0.1,1.1)
+            plt.ylim(-0.01, max(values[0] + values[1]) + 0.1)
             
         f.savefig(f"{save_path}/{name.lower()}_{file_id}.png")
     

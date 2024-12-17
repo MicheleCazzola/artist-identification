@@ -11,7 +11,7 @@ import json
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 NUM_WORKERS = 2 if DEVICE == "cuda" else 0
 DEFAULT_ROOT = "./scripts/stats/images/artist_dataset"
-OUTFILE = "stats.json"
+OUTFILE = "stats_all.json"
 
 def load_data():
     
@@ -31,12 +31,13 @@ def load_data():
     
     return dataset, dataloader
 
+@torch.no_grad()
 def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     assert isinstance(dataset, ArtistDataset), "Dataset must be of type ArtistDataset"
     
     keys = ["data_length", "categories_length", "avg_categories_size",
-             "categories_size", "mean", "devstd", "dimensions",
+             "categories_size", "mean", "std", "dimensions",
              "min_height", "max_height", "min_width", "max_width"]
     
     num_authors = len(dataset.categories)
@@ -86,9 +87,10 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
     
     return dict(zip(
         keys, 
-        [data_len, num_authors, mean(labels_counts.values()),
-        labels_counts, avg.flatten().tolist(), std.flatten().tolist(), dimensions,
-        h_min, h_max, w_min, w_max]
+        [
+            data_len, num_authors, mean(labels_counts.values()),
+            labels_counts, avg.flatten().tolist(), std.flatten().tolist(),
+            dimensions, h_min, h_max, w_min, w_max]
     ))
 
 print(f"Device: {DEVICE}\nWorkers: {NUM_WORKERS}")

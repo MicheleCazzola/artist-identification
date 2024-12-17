@@ -1,10 +1,12 @@
 import logging
+import os
 from src.config import Config
 from src.dataset import create_datasets
 from src.dataloader import create_dataloaders
+from src.stats import compute_stats
 from src.transformations import Transforms
 from src.train import Trainer
-from src.network import MultibranchNetwork
+from src.mutlti_branch_nn import MultibranchNetwork
 import sys
 
 
@@ -45,40 +47,34 @@ def main():
     
     logging.info(cfg.__dict__)
         
-    transformations = Transforms(config=cfg).get()
+    # Load datasets with base transformations (resize, crop, to tensor)
+    transformations = Transforms(config=cfg)
     trainset, validset, testset = create_datasets(
         root, 
         train_split_size=cfg.train_split_size, 
-        transforms=transformations,
+        transforms=transformations.get(),
         reduction_factor=cfg.reduce_factor,
     )
+    
+    # Compute mean and standard deviation (only for training set) for normalization
+    trainloader_stats = create_dataloaders([trainset], cfg.batch_size, shuffle=False, drop_last=False, num_workers=cfg.num_workers)
+    mean, std = map(compute_stats(trainset, trainloader_stats, cfg.device, cfg.norm_stats_file).get, ["mean", "std"])
+    transformations.set_norm(mean, std)
+    
+    # Create dataloaders for all the datasets: normalization applied during training
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
         cfg.batch_size,
-        drop_last=True,
         num_workers=cfg.num_workers
     )
 
+    # Model definition
     model = MultibranchNetwork(out_classes=cfg.num_classes)
     
     logging.info(f"Training setup...")
-    trainer = Trainer(model, trainloader, validloader, testloader, cfg.device, cfg.log_frequency)
-    trainer.set_params(
-        cfg.num_epochs,
-        cfg.lr,
-        cfg.momentum,
-        cfg.scheduler_step_size,
-        cfg.scheduler_gamma,
-        cfg.weight_decay,
-        cfg.top_k,
-        transformations["aug"]["train"],
-        transformations["aug"]["valid"]
-    )
-    trainer.build_trainer(
-        cfg.criterion,
-        cfg.optimizer,
-        cfg.scheduler
-    )
+    trainer = Trainer(model, trainloader, validloader, testloader)
+    trainer.build(cfg)
+    trainer.add_aug_transforms(transformations.get("aug"))
     
     logging.info(f"Training...")
     trainer.train()
@@ -87,8 +83,9 @@ def main():
     trainer.test()
     
     logging.info(f"Saving results...")
-    
     trainer.save_results(cfg, cfg.results_root)
+    
+    os.remove(cfg.norm_stats_file)
     
     logging.info(f"Done!")
 

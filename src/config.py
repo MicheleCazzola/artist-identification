@@ -5,6 +5,7 @@ class Config:
     
     default_root: str = "./data/artist_dataset"
     stats_file: str = "./scripts/stats/stats.json"
+    norm_stats_file: str = "./temp/norm_stats.json"
     results_root: str = "."
     plots_dir: str = "."
     files_dir: str = "."
@@ -47,7 +48,7 @@ class Config:
             "device": "cpu",
             "num_workers": 0,
             "batch_size": 2,
-            "num_epochs": 3,
+            "num_epochs": 5,
             "train_split_size": 0.66,
             "log_frequency": 1,
             "results_root": "./out",

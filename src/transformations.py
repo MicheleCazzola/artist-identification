@@ -81,29 +81,30 @@ class Transforms:
         
         self.type = type
         
+        # Default values for normalization (ImageNet)
+        self.mean = [0.485, 0.456, 0.406]
+        self.std = [0.229, 0.224, 0.225]
+        
         if type == "model":
             self.keys = ["train", "eval", "aug"]
-            mean, devstd = load_stats(config.stats_file)
             
-            train_transforms = transforms.Compose([
+            base_transforms = transforms.Compose([
                 Transforms.resizer(config.resize_dim),
                 Transforms.cropper(config.crop_dim),
                 Transforms.to_tensor()
             ])
-            eval_transforms = transforms.Compose([
-                Transforms.resizer(config.resize_dim),
-                Transforms.cropper(config.crop_dim),
-                Transforms.to_tensor(),
-                Transforms.normalizer(mean, devstd)
-            ])
+            
+            train_transforms = base_transforms
+            eval_transforms = base_transforms
+            
             aug_pipeline = {
                 "train": transforms.Compose([
                     Transforms.to_image(),
                     Augmentations(config.aug_probs),
                     Transforms.to_tensor(), 
-                    Transforms.normalizer(mean, devstd)
+                    transforms.Normalize(mean=self.mean, std=self.std)
                 ]),
-                "valid": Transforms.normalizer(mean, devstd)
+                "val": Transforms.normalizer(self.mean, self.std)
             } 
             
             self.transforms = dict(zip(self.keys, [train_transforms, eval_transforms, aug_pipeline]))
@@ -126,6 +127,9 @@ class Transforms:
         assert name is None or name in self.keys, f"Can get all or one transform into {self.keys}, found {name} instead"
                 
         return self.transforms[name] if name is not None else self.transforms
-            
+    
+    def set_norm(self, mean: list[float], std: list[float]):
+        self.mean = mean
+        self.std = std  
             
             
