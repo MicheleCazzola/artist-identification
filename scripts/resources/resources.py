@@ -1,6 +1,7 @@
 import json
 from statistics import mean
 import time
+from matplotlib import pyplot as plt
 import torch
 from src.network import MultiBranchArtistNetwork, BackboneType
 
@@ -31,7 +32,7 @@ HANDCRAFTED_FLAGS = [False, True]
 model_names = [
     name
     for backbone in BACKBONES
-    for name in ([f"{backbone.value}_no_hcrf", f"{backbone.value}_hcrf"] if backbone is not None else ["model_rnd_no_hcrf", "model_rnd_hcrf"])
+    for name in ([f"{backbone.value}_no_hcrf", f"{backbone.value}_hcrf"] if backbone is not None else ["rnd_no_hcrf", "rnd_hcrf"])
 ]
 
 model_variants = [
@@ -47,7 +48,7 @@ top1_acc_imagenet = {
     BackboneType.REGNET_X_400MF: 77.6,
     BackboneType.SHUFFLENET_V2_X0_5: 60.3,
     BackboneType.MNASNET0_5: 68.9,
-    None: None
+    None: 0.1
 }
 
 models = dict(zip(model_names, model_variants))
@@ -70,8 +71,30 @@ for (name, model) in models.items():
         "size": f"{memory_size / 1024 ** 2:.2f} MB",
         "latency": f"{latency:.2f} ms",
         "fps": f"{fps:.2f} fps",
-        "accuracy": top1_acc_imagenet.get(model.roi_extractor.stn, "None")
+        "accuracy": top1_acc_imagenet[model.roi_extractor.stn]
     }
 
 with open(OUTFILE, "w") as f:
     json.dump(model_stats, f, indent=4)
+    
+fig = plt.figure(figsize=(16,8))
+plt.subplots_adjust(left=0.05, right=0.75)  # Adjust the subplot to remove left margin and make space for legend
+
+names, acc, lat = zip(*[(name, stats["accuracy"], float(stats["latency"].split()[0])) for (name, stats) in model_stats.items()])
+colors = plt.cm.tab20.colors  # Use a colormap with enough distinct colors
+color_map = {name: colors[i % len(colors)] for i, name in enumerate(names)}
+
+for name, latency, accuracy in zip(names, lat, acc):
+    plt.scatter(latency, accuracy, color=color_map[name], label=name)
+
+handles, labels = plt.gca().get_legend_handles_labels()
+by_label = dict(zip(labels, handles))
+
+plt.legend(by_label.values(), by_label.keys(), loc='center left', bbox_to_anchor=(1, 0.5))
+
+plt.grid()
+plt.xlabel("Latency (ms)")
+plt.ylabel("Top-1 Accuracy on ImageNet (%)")
+plt.title("Top-1 Accuracy vs Latency")
+
+plt.savefig("./scripts/resources/accuracy_vs_latency.png")
