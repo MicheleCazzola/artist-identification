@@ -1,0 +1,64 @@
+{
+    "default_root": "./data/artist_dataset",
+    "stats_file": "./scripts/stats/stats.json",
+    "norm_stats_file": "./temp/norm_stats.json",
+    "results_root": ".",
+    "plots_dir": ".",
+    "files_dir": ".",
+    "device": "cuda",
+    "num_workers": 2,
+    "resize_dim": 512,
+    "crop_dim": 512,
+    "aug_probs": [
+        0.2,
+        0.2,
+        0.2,
+        0.5
+    ],
+    "train_split_size": 0.75,
+    "reduce_factor": 0.5,
+    "batch_size": 16,
+    "num_epochs": 5,
+    "log_frequency": 100,
+    "num_classes": 161,
+    "lr": 0.001,
+    "momentum": 0.9,
+    "weight_decay": 0,
+    "scheduler_step_size": 7,
+    "scheduler_gamma": 0.1,
+    "criterion": "cross_entropy",
+    "optimizer": "sgd",
+    "scheduler": "step_lr",
+    "top_k": 5,
+    "augment": false,
+    "train_accuracy": false,
+    "backbone_type": "resnet18",
+    "use_handcrafted": false,
+    "train_losses": [
+        4.79,
+        4.58,
+        4.39,
+        4.22,
+        4.08
+    ],
+    "train_accuracies": [],
+    "val_losses": [
+        4.63,
+        4.44,
+        4.51,
+        4.24,
+        4.24
+    ],
+    "val_accuracies": [
+        0.07,
+        0.083,
+        0.097,
+        0.127,
+        0.113
+    ],
+    "best_num_epochs": 4,
+    "loss": null,
+    "metrics": {
+        
+    }
+}
