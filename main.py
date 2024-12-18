@@ -57,9 +57,13 @@ def main():
         reduction_factor=cfg.reduce_factor,
     )
     
-    # Compute mean and standard deviation (only for training set) for normalization
-    trainloader_stats = create_dataloaders([trainset], cfg.batch_size, shuffle=False, drop_last=False, num_workers=cfg.num_workers)
-    mean, std = map(compute_stats(trainset, trainloader_stats, cfg.device, cfg.norm_stats_file).get, ["mean", "std"])
+    if not cfg.pretrained:
+        # Compute mean and standard deviation (only for training set) for normalization
+        trainloader_stats = create_dataloaders([trainset], cfg.batch_size, shuffle=False, drop_last=False, num_workers=cfg.num_workers)
+        mean, std = map(compute_stats(trainset, trainloader_stats, cfg.device, cfg.norm_stats_file).get, ["mean", "std"])
+    else:
+        mean, std = transformations.mean, transformations.std
+    
     transformations.set_norm(mean, std)
     
     # Create dataloaders for all the datasets: normalization applied during training
@@ -70,7 +74,7 @@ def main():
     )
 
     # Model definition
-    model = MultiBranchArtistNetwork(num_classes=cfg.num_classes, stn=cfg.BackboneType, use_handcrafted=cfg.use_handcrafted)
+    model = MultiBranchArtistNetwork(num_classes=cfg.num_classes, stn=cfg.backbone_type, use_handcrafted=cfg.use_handcrafted)
     
     logging.info(f"Training setup...")
     trainer = Trainer(model, trainloader, validloader, testloader)
