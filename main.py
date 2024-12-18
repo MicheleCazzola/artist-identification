@@ -70,7 +70,7 @@ def main():
     )
 
     # Model definition
-    model = MultiBranchArtistNetwork(num_classes=cfg.num_classes, stn=BackboneType.RESNET18, use_handcrafted=True)
+    model = MultiBranchArtistNetwork(num_classes=cfg.num_classes, stn=cfg.BackboneType, use_handcrafted=cfg.use_handcrafted)
     
     logging.info(f"Training setup...")
     trainer = Trainer(model, trainloader, validloader, testloader)

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from src.network import BackboneType
 
 @dataclass
 class Config:
@@ -35,6 +36,9 @@ class Config:
     top_k: int = 5
     augment: bool = False
     train_accuracy: bool = False
+    
+    backbone_type = BackboneType = BackboneType.RESNET18
+    use_handcrafted: bool = True
         
     def __post_init__(self):
         self.top_k = min(5, self.num_classes)
