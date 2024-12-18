@@ -7,6 +7,7 @@ from src.stats import compute_stats
 from src.transformations import Transforms
 from src.train import Trainer
 from src.mutlti_branch_nn import MultibranchNetwork
+from src.network import BackboneType, MultiBranchArtistNetwork
 import sys
 
 
@@ -69,12 +70,12 @@ def main():
     )
 
     # Model definition
-    model = MultibranchNetwork(out_classes=cfg.num_classes)
+    model = MultiBranchArtistNetwork(num_classes=cfg.num_classes, stn=BackboneType.RESNET18, use_handcrafted=True)
     
     logging.info(f"Training setup...")
     trainer = Trainer(model, trainloader, validloader, testloader)
     trainer.build(cfg)
-    trainer.add_aug_transforms(transformations.get("aug"))
+    trainer.add_aug_norm_transforms(transformations.get("aug"))
     
     logging.info(f"Training...")
     trainer.train()

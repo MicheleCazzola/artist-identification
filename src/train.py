@@ -110,6 +110,7 @@ class Trainer:
         self.gamma: float = None
         self.weight_decay: float = None
         
+        self.augment: bool = None
         self.aug_train: Compose = None
         self.norm_eval: transforms.Normalize = None
         
@@ -117,6 +118,7 @@ class Trainer:
         self.optimizer: str = None
         self.scheduler: str = None
         self.metrics: TrainingMetrics = None
+        self.train_accuracy: bool = None
         
         self.best_num_epochs: int = None
         
@@ -135,6 +137,8 @@ class Trainer:
         self.gamma = cfg.scheduler_gamma
         self.weight_decay = cfg.weight_decay
         self.top_k = cfg.top_k
+        self.augment = cfg.augment
+        self.train_accuracy = cfg.train_accuracy
         
         self._prepare_training(cfg.criterion, cfg.optimizer, cfg.scheduler)
         
@@ -143,9 +147,14 @@ class Trainer:
         self.model = self.model.to(self.device)
         self.metrics = self.metrics.to(self.device)
         
-    def add_aug_transforms(self, transforms: dict):
-        self.aug_train = transforms["train"]
-        self.norm_eval = transforms["val"]
+    def add_aug_norm_transforms(self, transforms: dict):
+        
+        if not self.augment:
+            self.aug_train = transforms["val"]
+            self.norm_eval = transforms["val"]
+        else:
+            self.aug_train = transforms["train"]
+            self.norm_eval = transforms["val"]
         
     def _prepare_training(
         self,
@@ -176,19 +185,20 @@ class Trainer:
     def train(self) -> TrainingResult:
         
         if self.device == "cuda":
-            cudnn.benchmark
+            cudnn.benchmark = True
 
         val_losses, val_accuracies = [], []
         train_losses, train_accuracies = [], []
         best_accuracy = -1
         best_num_epochs = None
         
-        if len(self.aug_train.transforms) == 1:
+        if len(self.aug_train.transforms) == 1 and self.augment:
             logging.warning("No augmentation transforms found, only image normalization will be applied")
         
         for epoch in range(self.num_epochs):
             
             current_step = 0
+            epoch_losses = []
             
             self.model.train()
             for (inputs, labels) in self.trainloader:
@@ -204,6 +214,8 @@ class Trainer:
                 
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
+                
+                epoch_losses.append(loss.item())
 
                 # Backward pass
                 loss.backward()
@@ -214,7 +226,12 @@ class Trainer:
 
                 current_step += 1
 
-            train_loss, train_accuracy = self.training_eval()
+            if self.train_accuracy:
+                train_loss, train_accuracy = self.training_eval()
+            else:
+                train_loss = mean(epoch_losses)
+                train_accuracy = None
+                
             val_loss, val_accuracy = self.validate()
             
             if val_accuracy > best_accuracy:
@@ -223,13 +240,20 @@ class Trainer:
                 torch.save(self.model.state_dict(), self.model_path)
 
             logging.info(f"End of Epoch {epoch+1}")
-            logging.info(f"Training accuracy: {train_accuracy:.3f}, Training loss: {train_loss:.5f}")
+            
+            if self.train_accuracy:
+                logging.info(f"Training accuracy: {train_accuracy:.3f}, Training loss: {train_loss:.5f}")
+            else:
+                logging.info(f"Training loss: {train_loss:.3f}")
+                
             logging.info(f"Validation accuracy: {val_accuracy:.3f}, Validation loss: {val_loss:.5f}")
 
             val_losses.append(val_loss)
             val_accuracies.append(val_accuracy)
             train_losses.append(train_loss)
-            train_accuracies.append(train_accuracy)
+            
+            if self.train_accuracy:
+                train_accuracies.append(train_accuracy)
 
             # Scheduler is None if learning rate is constant
             if self.scheduler is not None:
@@ -264,7 +288,7 @@ class Trainer:
         self.model.eval()
 
         if self.device == "cuda":
-            cudnn.benchmark
+            cudnn.benchmark = True
 
         losses = []
         data_len = 0

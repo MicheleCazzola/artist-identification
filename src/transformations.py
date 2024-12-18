@@ -102,9 +102,11 @@ class Transforms:
                     Transforms.to_image(),
                     Augmentations(config.aug_probs),
                     Transforms.to_tensor(), 
-                    transforms.Normalize(mean=self.mean, std=self.std)
+                    Transforms.normalizer(self.mean, self.std)
                 ]),
-                "val": Transforms.normalizer(self.mean, self.std)
+                "val": transforms.Compose([
+                    Transforms.normalizer(self.mean, self.std)
+                ])
             } 
             
             self.transforms = dict(zip(self.keys, [train_transforms, eval_transforms, aug_pipeline]))

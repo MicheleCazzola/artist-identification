@@ -26,13 +26,15 @@ class Config:
     num_classes: int = 161
     lr: float = 1e-3
     momentum: float = 0.9
-    weight_decay: float = 1e-4
+    weight_decay: float = 0
     scheduler_step_size: int = 7
     scheduler_gamma: float = 0.1
     criterion: str = "cross_entropy"
     optimizer: str = "sgd"
     scheduler: str = "step_lr"
     top_k: int = 5
+    augment: bool = False
+    train_accuracy: bool = False
         
     def __post_init__(self):
         self.top_k = min(5, self.num_classes)
@@ -48,7 +50,7 @@ class Config:
             "device": "cpu",
             "num_workers": 0,
             "batch_size": 2,
-            "num_epochs": 5,
+            "num_epochs": 3,
             "train_split_size": 0.66,
             "log_frequency": 1,
             "results_root": "./out",

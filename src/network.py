@@ -85,7 +85,6 @@ class SpatialTransformerNetwork(nn.Module):
             model = resnet18(weights="IMAGENET1K_V1")
             last_in_features = model.fc.in_features     # 1024
             model.fc = nn.Linear(last_in_features, 6)
-            
         # Using MobileNetV3-Small as the localization network
         elif self.backbone_type == self.backbone_type.MOBILENET_V3_SMALL:
             model = mobilenet_v3_small(weights="IMAGENET1K_V1")
