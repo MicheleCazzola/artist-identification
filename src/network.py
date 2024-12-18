@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from torchvision.models import resnet18, mobilenet_v3_small, efficientnet_b0, regnet_x_400mf
+from torchvision.models import resnet18, mobilenet_v3_small, efficientnet_b0, regnet_x_400mf, efficientnet_v2_s
 from skimage.feature import hog
 from enum import Enum
 from torchvision.models import shufflenet_v2_x0_5
