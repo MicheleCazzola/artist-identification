@@ -23,7 +23,8 @@ class Config:
     reduce_factor: float = 1.0
     batch_size: int = 4
     num_epochs: int = 10
-    log_frequency: int = 100
+    train_log_frequency: int = 100
+    val_log_frequency: int = 10
         
     num_classes: int = 161
     lr: float = 1e-3
@@ -38,8 +39,10 @@ class Config:
     augment: bool = False
     train_accuracy: bool = False
     
-    backbone_type: BackboneType = BackboneType.RESNET18
+    backbone_type: BackboneType = None
     use_handcrafted: bool = True
+    
+    precision: int = 32
         
     def __post_init__(self):
         self.top_k = min(5, self.num_classes)
@@ -57,12 +60,14 @@ class Config:
             "batch_size": 2,
             "num_epochs": 3,
             "train_split_size": 0.66,
-            "log_frequency": 1,
+            "train_log_frequency": 2,
+            "val_log_frequency": 1,
             "results_root": "./out",
             "plots_dir": "plots",
             "files_dir": "files",
             "num_classes": 3,
-            "reduce_factor": None
+            "reduce_factor": None,
+            "precision": 32
         } if target == "local" else {}
         
         return Config(**params)

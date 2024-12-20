@@ -120,6 +120,8 @@ class Trainer:
         self.metrics: TrainingMetrics = None
         self.train_accuracy: bool = None
         
+        self.data_type: torch.dtype = torch.float32
+        
         self.best_num_epochs: int = None
         
         self.model_path: str = "./temp/best_model.pth"
@@ -128,8 +130,9 @@ class Trainer:
         self.test_results: EvaluationResult = None
         
     def build(self, cfg: Config):
-        self.device = cfg.device
-        self.log_frequency = cfg.log_frequency
+        self.device = torch.device(cfg.device)
+        self.train_log_frequency = cfg.train_log_frequency
+        self.val_log_frequency = cfg.val_log_frequency
         self.num_epochs = cfg.num_epochs
         self.lr = cfg.lr
         self.momentum = cfg.momentum
@@ -140,12 +143,25 @@ class Trainer:
         self.augment = cfg.augment
         self.train_accuracy = cfg.train_accuracy
         
+        self._set_precision(cfg.precision)
         self._prepare_training(cfg.criterion, cfg.optimizer, cfg.scheduler)
         
         self.metrics = TrainingMetrics(num_classes=cfg.num_classes, top_k=cfg.top_k)
         
         self.model = self.model.to(self.device)
         self.metrics = self.metrics.to(self.device)
+        
+    def _set_precision(self, precision: int):
+        if precision == 16:
+            self.data_type = torch.float16
+        elif precision == 32:
+            self.data_type = torch.float32
+        elif precision == 64:
+            self.data_type = torch.float64
+        elif precision == 8:
+            self.data_type = torch.float8_e5m2
+        else:
+            raise ValueError(f"Precision {precision} not supported")
         
     def add_aug_norm_transforms(self, transforms: dict):
         
@@ -182,7 +198,7 @@ class Trainer:
         else:
             raise ValueError(f"Scheduler {scheduler} not supported")
     
-    def train(self) -> TrainingResult:
+    def train(self):
         
         if self.device == "cuda":
             cudnn.benchmark = True
@@ -205,14 +221,17 @@ class Trainer:
                 
                 if self.aug_train is not None:
                     inputs = torch.stack([self.aug_train(input_img) for input_img in inputs])
-                
-                inputs = inputs.to(self.device)
+
+                inputs = inputs.type(self.data_type).to(self.device)
                 labels = labels.to(self.device)
+                
+                # print(inputs, labels)
 
                 # Forward pass
                 self.optimizer.zero_grad()
                 
                 outputs = self.model(inputs)
+                
                 loss = self.criterion(outputs, labels)
                 
                 epoch_losses.append(loss.item())
@@ -221,8 +240,9 @@ class Trainer:
                 loss.backward()
                 self.optimizer.step()
 
-                if current_step % self.log_frequency == 0:
-                    logging.info(f"Epoch {epoch+1}, Iteration {current_step}, Loss: {loss.item()}")
+                if (current_step + 1) % self.train_log_frequency == 0:
+                    logging.info(f"Training epoch {epoch + 1}, Iteration {current_step + 1}, "+
+                                 f"Loss: {mean(epoch_losses[current_step + 1 - self.train_log_frequency : current_step + 1]):.5f}")
 
                 current_step += 1
 
@@ -272,7 +292,7 @@ class Trainer:
         losses, top_1_accuracies, _, _ = self.evaluate(self.validloader)
         return losses, top_1_accuracies
     
-    def test(self) -> EvaluationResult:
+    def test(self):
         
         self.model.load_state_dict(torch.load(self.model_path, weights_only=True))
         
@@ -293,6 +313,7 @@ class Trainer:
         losses = []
         data_len = 0
         corrects = 0
+        current_step = 0
         for inputs, labels in dataloader:
 
             data_len += inputs.size(0)
@@ -307,11 +328,17 @@ class Trainer:
             loss = self.criterion(outputs, labels)
 
             losses.append(loss.item())
+            
+            if (current_step + 1) % self.val_log_frequency == 0:
+                logging.info(f"Validation iteration {current_step + 1}, " +
+                             f"Loss: {mean(losses[current_step + 1 - self.val_log_frequency : current_step + 1]):.5f}")
 
             # Calculate accuracy
             self.metrics.update(outputs, labels)
             predictions = torch.argmax(outputs, dim=1)
             corrects += torch.sum(predictions == labels).item()
+            
+            current_step += 1
 
         metrics = self.metrics.compute()
         self.metrics.reset()
