@@ -7,13 +7,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 import time
+
+import torchvision
 from src.config import Config
 from src.dataloader import create_dataloaders
-from src.dataset import ArtistDataset, create_datasets
-import skimage.data as data
-from torch.utils.data import DataLoader
+from src.dataset import create_datasets
 from skimage.feature import hog
-from sklearn.linear_model import LogisticRegression
 from torchmetrics import Accuracy
 
 from src.transformations import Transforms
@@ -29,20 +28,20 @@ def timeit(x, func, iter=10):
 	return runtime
 
 class HOGLayer(nn.Module):
-    def __init__(self, nbins=10, pool=8, max_angle=math.pi, stride=1, padding=1, dilation=1):
+    def __init__(self, **kwargs):
         super(HOGLayer, self).__init__()
-        self.nbins = nbins
-        self.stride = stride
-        self.padding = padding
-        self.dilation = dilation
-        self.pool = pool
-        self.max_angle = max_angle
+        self.nbins = kwargs.get("nbins", 10)
+        self.pool = kwargs.get("pool", 8)
+        self.max_angle = kwargs.get("max_angle", math.pi)
+        self.stride = kwargs.get("stride", 1)
+        self.padding = kwargs.get("padding", 1)
+        self.dilation = kwargs.get("dilation", 1)
         mat = torch.FloatTensor([[1, 0, -1],
                                  [2, 0, -2],
                                  [1, 0, -1]])
         mat = torch.cat((mat[None], mat.t()[None]), dim=0)
         self.register_buffer("weight", mat[:,None,:,:])
-        self.pooler = nn.AvgPool2d(pool, stride=pool, padding=0, ceil_mode=False, count_include_pad=True)
+        self.pooler = nn.AvgPool2d(self.pool, stride=self.pool, padding=0, ceil_mode=False, count_include_pad=True)
 
     def forward(self, x):
         with torch.no_grad():
@@ -64,10 +63,7 @@ class HOGLayer(nn.Module):
             out.scatter_(1, phase_int.floor().long()%self.nbins, norm)
             out.scatter_add_(1, phase_int.ceil().long()%self.nbins, 1 - norm)
 
-
             return self.pooler(out)
-
-
 
 
 class HOGLayerMoreComplicated(nn.Module):
@@ -155,6 +151,11 @@ else:
     cfg = Config.create("local")
     root = cfg.default_root
     
+if len(sys.argv) > 2:
+    train_model = sys.argv[2]
+else:
+    train_model = None
+    
 transformations = Transforms(config=cfg)
 trainset, validset, testset = create_datasets(
     cfg.default_root, 
@@ -169,15 +170,48 @@ trainloader, validloader, testloader = create_dataloaders(
     num_workers=cfg.num_workers   
 )
 
-class Classifier(nn.Module):
+class SkimageHOG(nn.Module):
+    def __init__(
+        self,
+        **kwargs
+    ):
+        super(SkimageHOG, self).__init__()
+        self.orientations = kwargs.get("orientations")
+        self.pixels_per_cell = kwargs.get("pixels_per_cell")
+        self.cells_per_block = kwargs.get("cells_per_block")
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return torch.tensor(np.array([
+            hog(
+                x_np,
+                orientations=self.orientations,
+                pixels_per_cell=self.pixels_per_cell,
+                cells_per_block=self.cells_per_block
+            )
+            for x_np in x.cpu().numpy()[:,0,:,:]
+        ]), device = x.device, dtype=torch.float32)
+
+
+class HogFeatureExtractor(nn.Module):
+    def __init__(self, type: str, transform: torchvision.transforms, **kwargs):
+        super(HogFeatureExtractor, self).__init__()
+        self.transform = transform
+        self.hog = HOGLayer(**kwargs) if type == "gpu" else SkimageHOG(**kwargs)
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.transform(x)
+        return self.hog(x)
+
+
+class LinearClassifier(nn.Module):
     def __init__(self, in_features, out_classes):
-        super(Classifier, self).__init__()
+        super(LinearClassifier, self).__init__()
         
         self.fc1 = nn.Linear(in_features, in_features // 2)
         self.fc2 = nn.Linear(in_features // 2, in_features // 4)
         self.fc3 = nn.Linear(in_features // 4, out_classes)
         
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         
         x = torch.flatten(x, 1)
         
@@ -189,15 +223,23 @@ class Classifier(nn.Module):
     
     
 class HOGClassifier(nn.Module):
-    def __init__(self, extractor, classifier):
+    def __init__(
+        self,
+        extractor_type: str,
+        input_transform: torchvision.transforms,
+        num_features: int,
+        out_classes: int,
+        **extraction_kwargs
+    ):
         super(HOGClassifier, self).__init__()
-        self.extractor = extractor
-        self.classifier = classifier
+        self.extractor = HogFeatureExtractor(extractor_type, input_transform, **extraction_kwargs)
+        self.classifier = LinearClassifier(num_features, out_classes)
     
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.extractor(x)
         x = self.classifier(x)
         return x    
+    
     
 def train(model, trainloader, validloader, transform, criterion, optimizer, num_epochs, device, scheduler = None, log_frequency = 2):
     
@@ -221,7 +263,7 @@ def train(model, trainloader, validloader, transform, criterion, optimizer, num_
             
             optimizer.zero_grad()
             
-            outputs = model(transform(inputs))
+            outputs = model(inputs)
             loss = criterion(outputs, labels)
             
             loss.backward()
@@ -272,7 +314,7 @@ def evaluate(model, dataloader, transform, criterion, device, log_frequency = 1)
         inputs = inputs.to(device)
         labels = labels.to(device)
         
-        outputs = model(transform(inputs))
+        outputs = model(inputs)
         loss = criterion(outputs, labels)
         
         accuracy.update(outputs, labels)
@@ -285,28 +327,86 @@ def evaluate(model, dataloader, transform, criterion, device, log_frequency = 1)
         
     return mean(losses), accuracy.compute().item()
         
-gray_custom = lambda img: (0.299 * img[:, 0, :, :] + 0.587 * img[:, 1, :, :] + 0.114 * img[:, 2, :, :]).unsqueeze(1)
-hog_custom: torch.Tensor = HOGLayer(nbins=6, pool=8, stride=4)
-hog_sklearn = lambda x: torch.tensor(np.array([
-                hog(x_np, orientations=6, pixels_per_cell=(64,64), cells_per_block=(2,2))
-                for x_np in x.cpu().numpy()[:,0,:,:]
-            ]), device = x.device, dtype=torch.float32)
+gray_custom = torchvision.transforms.Lambda(
+    lambda img: torch.unsqueeze(
+        0.299 * img[:, 0, :, :] + 0.587 * img[:, 1, :, :] + 0.114 * img[:, 2, :, :], 1
+    )
+)
 
-model = HOGClassifier(hog_custom, Classifier(1536, 161))
-model_official = HOGClassifier(hog_sklearn, Classifier(1176, 161))
-criterion = nn.CrossEntropyLoss()
-criterion_official = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
-optimizer_official = torch.optim.Adam(model_official.parameters(), lr = 0.001)
+INPUT_SIZE = cfg.crop_dim
+OUT_CLASSES = 161
+NUM_EPOCHS = cfg.num_epochs
 
-result = train(model, trainloader, validloader, gray_custom, criterion, optimizer, 5, cfg.device)
-model.load_state_dict(torch.load("best_model.pth", weights_only=True), strict=False)
-os.remove("best_model.pth")
-result_official = train(model_official, trainloader, validloader, gray_custom, criterion_official, optimizer_official, 5, cfg.device)
-model_official.load_state_dict(torch.load("best_model.pth", weights_only=True), strict=False)
+model = HOGClassifier("gpu", gray_custom, 1536, 161, nbins=6, pool=8, stride=4)
+model_official = HOGClassifier("sklearn", gray_custom, 1176, 161, orientations=6, pixels_per_cell=(64,64), cells_per_block=(2,2))
 
-test_loss, test_acc = evaluate(model, testloader, gray_custom, criterion, cfg.device) 
-print(f"Average test loss: {test_loss}, Test accuracy: {test_acc}")
-
-test_loss, test_acc = evaluate(model_official, testloader, gray_custom, criterion, cfg.device) 
-print(f"Average test loss: {test_loss}, Test accuracy: {test_acc}")
+if train_model == "gpu":
+    
+    model = HOGClassifier("gpu", gray_custom, 1536, 161, nbins=6, pool=8, stride=4)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+    
+    start = time.time()
+    result = train(model, trainloader, validloader, gray_custom, criterion, optimizer, NUM_EPOCHS, cfg.device)
+    train_time = time.time() - start
+    
+    model.load_state_dict(torch.load("best_model.pth", weights_only=True))
+    
+    start = time.time()
+    test_loss, test_acc = evaluate(model, testloader, gray_custom, criterion, cfg.device)
+    test_time = time.time() - start 
+    
+    print(f"GPU Average test loss: {test_loss}, Test accuracy: {test_acc}")
+    print(f"GPU Training time: {train_time}, Test time: {test_time}")
+elif train_model == "sklearn":
+    
+    model_official = HOGClassifier("sklearn", gray_custom, 1176, 161, orientations=6, pixels_per_cell=(64,64), cells_per_block=(2,2))
+    criterion_official = nn.CrossEntropyLoss()
+    optimizer_official = torch.optim.Adam(model_official.parameters(), lr = 0.001)
+    
+    start = time.time()
+    result_official = train(model_official, trainloader, validloader, gray_custom, criterion_official, optimizer_official, NUM_EPOCHS, cfg.device)
+    train_time = time.time() - start
+    
+    model_official.load_state_dict(torch.load("best_model.pth", weights_only=True))
+    
+    start = time.time()
+    test_loss, test_acc = evaluate(model_official, testloader, gray_custom, criterion_official, cfg.device) 
+    test_time = time.time() - start
+    
+    print(f"Sklearn Average test loss: {test_loss}, Test accuracy: {test_acc}")
+    print(f"Sklearn Training time: {train_time}, Test time: {test_time}")
+else:
+    model = HOGClassifier("gpu", gray_custom, 1536, 161, nbins=6, pool=8, stride=4)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+    
+    start = time.time()
+    result = train(model, trainloader, validloader, gray_custom, criterion, optimizer, NUM_EPOCHS, cfg.device)
+    train_time = time.time() - start
+    
+    model.load_state_dict(torch.load("best_model.pth", weights_only=True))
+    
+    start = time.time()
+    test_loss, test_acc = evaluate(model, testloader, gray_custom, criterion, cfg.device) 
+    test_time = time.time() - start
+    
+    print(f"GPU Average test loss: {test_loss}, Test accuracy: {test_acc}")
+    print(f"GPU Training time: {train_time}, Test time: {test_time}")
+    
+    model_official = HOGClassifier("sklearn", gray_custom, 1176, 161, orientations=6, pixels_per_cell=(64,64), cells_per_block=(2,2))
+    criterion_official = nn.CrossEntropyLoss()
+    optimizer_official = torch.optim.Adam(model_official.parameters(), lr = 0.001)
+    
+    start = time.time()
+    result_official = train(model_official, trainloader, validloader, gray_custom, criterion_official, optimizer_official, NUM_EPOCHS, cfg.device)
+    train_time = time.time() - start
+    
+    model_official.load_state_dict(torch.load("best_model.pth", weights_only=True))
+    
+    start = time.time()
+    test_loss, test_acc = evaluate(model_official, testloader, gray_custom, criterion_official, cfg.device) 
+    test_time = time.time() - start
+    
+    print(f"Sklearn Average test loss: {test_loss}, Test accuracy: {test_acc}")
+    print(f"Sklearn Training time: {train_time}, Test time: {test_time}")
