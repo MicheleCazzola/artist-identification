@@ -168,9 +168,8 @@ def train(model: HOGClassifier, trainloader, validloader, criterion, optimizer, 
         
         train_loss = mean(epoch_losses)
         val_loss, val_accuracy = evaluate(model, validloader, criterion, device, log_frequency=max(log_frequency // 3, 1))
-        
         print(f"End of epoch {epoch+1}/{num_epochs}, Train loss: {train_loss}, Validation loss: {val_loss}, Validation accuracy: {val_accuracy}")
-        
+       
         if scheduler is not None:
             scheduler.step()
             
@@ -316,6 +315,8 @@ def plot_results(result: dict, mode: str):
     axs[1].plot(result["val_acc"], label="Validation accuracy")
     axs[1].set_title("Validation accuracy")
     axs[1].legend()
+    
+    plt.savefig(f"{mode}_results.png")
     
     
 if train_model == "gpu":
