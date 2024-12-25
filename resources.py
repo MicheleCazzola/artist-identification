@@ -3,7 +3,9 @@ from statistics import mean
 import time
 from matplotlib import pyplot as plt
 import torch
-from src.network import MultiBranchArtistNetwork, BackboneType
+from src.network import MultiBranchArtistNetwork
+from src.utils import BackboneType
+from src.config import HOGConfig
 
 
 @torch.no_grad()
@@ -36,7 +38,12 @@ model_names = [
 ]
 
 model_variants = [
-    MultiBranchArtistNetwork(num_classes=NUM_CLASSES, stn=backbone, use_handcrafted=handcrafted).to(DEVICE)
+    MultiBranchArtistNetwork(
+        num_classes=NUM_CLASSES,
+        stn=backbone,
+        use_handcrafted=handcrafted,
+        hog_params=HOGConfig()
+    ).to(DEVICE)
     for backbone in BACKBONES
     for handcrafted in HANDCRAFTED_FLAGS
 ]
@@ -97,4 +104,5 @@ plt.xlabel("Latency (ms)")
 plt.ylabel("Top-1 Accuracy on ImageNet (%)")
 plt.title("Top-1 Accuracy vs Latency")
 
-plt.savefig("./scripts/resources/accuracy_vs_latency.png")
+OUTFILE_PLOT = "./scripts/resources/accuracy_vs_latency_new.png"
+plt.savefig(OUTFILE_PLOT)

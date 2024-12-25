@@ -2,99 +2,99 @@
     "resnet18_no_hcrf": {
         "params": "48.75 M",
         "size": "195.01 MB",
-        "latency": "667.06 ms",
-        "fps": "1.50 fps",
+        "latency": "736.71 ms",
+        "fps": "1.36 fps",
         "accuracy": 69.76
     },
     "resnet18_hcrf": {
-        "params": "49.38 M",
-        "size": "197.50 MB",
-        "latency": "604.06 ms",
-        "fps": "1.66 fps",
+        "params": "48.77 M",
+        "size": "195.06 MB",
+        "latency": "908.08 ms",
+        "fps": "1.10 fps",
         "accuracy": 69.76
     },
     "mobilenet_v3_small_no_hcrf": {
         "params": "30.34 M",
         "size": "121.35 MB",
-        "latency": "353.53 ms",
-        "fps": "2.83 fps",
+        "latency": "509.62 ms",
+        "fps": "1.96 fps",
         "accuracy": 67.7
     },
     "mobilenet_v3_small_hcrf": {
-        "params": "30.96 M",
-        "size": "123.84 MB",
-        "latency": "354.22 ms",
-        "fps": "2.82 fps",
+        "params": "30.35 M",
+        "size": "121.40 MB",
+        "latency": "479.32 ms",
+        "fps": "2.09 fps",
         "accuracy": 67.7
     },
     "efficientnet_b0_no_hcrf": {
         "params": "35.09 M",
         "size": "140.35 MB",
-        "latency": "496.92 ms",
-        "fps": "2.01 fps",
+        "latency": "707.09 ms",
+        "fps": "1.41 fps",
         "accuracy": 76.3
     },
     "efficientnet_b0_hcrf": {
-        "params": "35.71 M",
-        "size": "142.84 MB",
-        "latency": "512.47 ms",
-        "fps": "1.95 fps",
+        "params": "35.10 M",
+        "size": "140.40 MB",
+        "latency": "688.35 ms",
+        "fps": "1.45 fps",
         "accuracy": 76.3
     },
     "regnet_x_400mf_no_hcrf": {
         "params": "37.15 M",
         "size": "148.61 MB",
-        "latency": "425.19 ms",
-        "fps": "2.35 fps",
+        "latency": "581.64 ms",
+        "fps": "1.72 fps",
         "accuracy": 77.6
     },
     "regnet_x_400mf_hcrf": {
-        "params": "37.78 M",
-        "size": "151.10 MB",
-        "latency": "444.18 ms",
-        "fps": "2.25 fps",
+        "params": "37.16 M",
+        "size": "148.66 MB",
+        "latency": "1111.66 ms",
+        "fps": "0.90 fps",
         "accuracy": 77.6
     },
     "shufflenet_v2_x0_5_no_hcrf": {
         "params": "28.09 M",
         "size": "112.37 MB",
-        "latency": "355.97 ms",
-        "fps": "2.81 fps",
+        "latency": "515.67 ms",
+        "fps": "1.94 fps",
         "accuracy": 60.3
     },
     "shufflenet_v2_x0_5_hcrf": {
-        "params": "28.72 M",
-        "size": "114.86 MB",
-        "latency": "372.62 ms",
-        "fps": "2.68 fps",
+        "params": "28.11 M",
+        "size": "112.42 MB",
+        "latency": "546.26 ms",
+        "fps": "1.83 fps",
         "accuracy": 60.3
     },
     "mnasnet0_5_no_hcrf": {
         "params": "29.23 M",
         "size": "116.93 MB",
-        "latency": "362.64 ms",
-        "fps": "2.76 fps",
+        "latency": "726.13 ms",
+        "fps": "1.38 fps",
         "accuracy": 68.9
     },
     "mnasnet0_5_hcrf": {
-        "params": "29.86 M",
-        "size": "119.42 MB",
-        "latency": "386.80 ms",
-        "fps": "2.59 fps",
+        "params": "29.25 M",
+        "size": "116.98 MB",
+        "latency": "566.67 ms",
+        "fps": "1.76 fps",
         "accuracy": 68.9
     },
     "rnd_no_hcrf": {
         "params": "27.43 M",
         "size": "109.72 MB",
-        "latency": "303.65 ms",
-        "fps": "3.29 fps",
+        "latency": "447.44 ms",
+        "fps": "2.23 fps",
         "accuracy": 0.1
     },
     "rnd_hcrf": {
-        "params": "28.05 M",
-        "size": "112.21 MB",
-        "latency": "319.66 ms",
-        "fps": "3.13 fps",
+        "params": "27.44 M",
+        "size": "109.77 MB",
+        "latency": "663.14 ms",
+        "fps": "1.51 fps",
         "accuracy": 0.1
     }
 }

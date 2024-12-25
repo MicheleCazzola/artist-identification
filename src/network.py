@@ -227,11 +227,11 @@ class MultiBranchArtistNetwork(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         
-        print(x[0].shape)
+        # print(x[0].shape)
         
-        plt.figure()
-        plt.imshow(transforms.ToPILImage()(x[0]))
-        plt.show()
+        # plt.figure()
+        # plt.imshow(transforms.ToPILImage()(x[0]))
+        # plt.show()
         
         x1, x2, x3 = self.roi_extractor(x)
         
