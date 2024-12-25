@@ -2,14 +2,10 @@
 .vscode/
 
 # Datasets
-data/
+*artist_dataset*
 
-# Multimedia
-*.jpg
-*.png
-*.mp3
-*.mp4
-*.mov
+# Output files
+out/
 
 
 # Byte-compiled / optimized / DLL files
