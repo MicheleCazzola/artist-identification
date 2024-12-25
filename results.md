@@ -35,9 +35,8 @@
 **Notes**:
 - metrics are computed on a test set by default, otherwise look for (*)
 - HOG features are extracted from a 224x224 center-cropped image, obtained from a 256x256 downsampled image (original is 512x512)
-- 
 
-| Backbone Model | HOG | Batch size | Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter | Lighting noise | Gaussian blur| Geometric transform | Epochs | Reduction factor | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Training time (mins) |
+| Backbone Model | HOG | Batch size | Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Training time (mins) (***) |
 |:--------------:|:---:|:----------:|:-------------:|:------------:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|
 | Random crop | No | | | | | | | | | | | | | | | |
 | Random crop | 81 | | | | | | | | | | | | | | | |
@@ -54,5 +53,6 @@
 | MNasNet-X0.5 | No | | | | | | | | | | | | | | |
 | MNasNet-X0.5 | 81 | | | | | | | | | | | | | | |
 
-(*) value computed on training set  
-(**) in the form "probability - (param1, param2, ...)"
+(\*) value computed on training set  
+(*\*) in the form "probability - (param1, param2, ...)"  
+(\***) Global training time
