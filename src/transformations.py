@@ -35,6 +35,9 @@ class LightingNoise:
         
         return transforms.ToPILImage()(img.clamp(0, 1))
     
+    def __repr__(self):
+        return f"LightingNoise(alpha={self.alpha}, dim={self.dim})"
+    
 class Augmentations:
     def __init__(
         self,
@@ -65,6 +68,9 @@ class Augmentations:
             transforms.RandomApply([aug], p) for aug, p in zip(self.transformations, self.probabilities)
         ])
         return transform_chain(img)
+    
+    def __repr__(self):
+        return f"Augmentations(probabilities={self.probabilities}, transformations={self.transformations})"
 
 
 class Transforms:
@@ -134,5 +140,8 @@ class Transforms:
     def set_norm(self, mean: list[float], std: list[float]):
         self.mean = mean
         self.std = std  
+        
+    def __repr__(self):
+        return f"Transforms(type={self.type}, keys={self.keys}, mean={self.mean}, std={self.std}, transforms={self.transforms})"
             
             
