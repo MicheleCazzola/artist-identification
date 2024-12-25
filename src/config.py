@@ -1,5 +1,23 @@
-from dataclasses import dataclass
-from src.network import BackboneType
+from dataclasses import dataclass, field, asdict
+from src.utils import BackboneType
+import json
+
+@dataclass
+class HOGConfig:
+    downsample_size: int = 256
+    crop_size: int = 224
+    channel_coefficients: tuple[float] = (0.2989, 0.5870, 0.1140)
+    orientations: int = 9
+    pixels_per_cell: int = crop_size // 3
+    cells_per_block: int = 1
+    transform_sqrt: bool = False        # DO NOT CHANGE: images could have negative values after normalization
+    feature_vector: bool = True         # DO NOT CHANGE: want to use HOG as feature extractor
+    normalization: str = "L2-Hys"
+    
+    def __post_init__(self):
+        self.output_size = self.orientations * \
+            self.cells_per_block ** 2 * \
+            (self.crop_size // self.pixels_per_cell - self.cells_per_block + 1) ** 2
 
 @dataclass
 class Config:
@@ -14,10 +32,11 @@ class Config:
     device: str = "cuda"
     num_workers: int = 2
         
-    pretrained: bool = False
+    pretrained_stats: bool = False
     resize_dim: int = 512
     crop_dim: int = 512
     aug_probs: tuple[float] = (0.2, 0.2, 0.2, 0.5)
+    aug_mask: tuple[bool] = (True, True, True, True)
     
     train_split_size: float = 0.75
     reduce_factor: float = 1.0
@@ -33,14 +52,16 @@ class Config:
     scheduler_step_size: int = 7
     scheduler_gamma: float = 0.1
     criterion: str = "cross_entropy"
-    optimizer: str = "sgd"
+    optimizer: str = "adam"
     scheduler: str = "step_lr"
     top_k: int = 5
-    augment: bool = False
+    augment: bool = True
     train_accuracy: bool = False
     
-    backbone_type: BackboneType = None
+    backbone_type: BackboneType = BackboneType.RESNET18
     use_handcrafted: bool = True
+    
+    hog_params: HOGConfig = field(default_factory=HOGConfig)
     
     precision: int = 32
         
@@ -66,7 +87,7 @@ class Config:
             "plots_dir": "plots",
             "files_dir": "files",
             "num_classes": 3,
-            "reduce_factor": None,
+            "reduce_factor": 1.0,
             "precision": 32
         } if target == "local" else {}
         

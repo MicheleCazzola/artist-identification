@@ -1,0 +1,103 @@
+[
+    {
+        "img_dim": 512,
+        "orientations": 6,
+        "pixels_per_cell": 16,
+        "cells_per_block": 2,
+        "transform_sqrt": true,
+        "num_features": 23064,
+        "overweight": 1126.171875,
+        "elapsed": 50.36835980415344
+    },
+    {
+        "img_dim": 256,
+        "orientations": 6,
+        "pixels_per_cell": 16,
+        "cells_per_block": 2,
+        "transform_sqrt": true,
+        "num_features": 5400,
+        "overweight": 263.671875,
+        "elapsed": 11.812047004699707
+    },
+    {
+        "img_dim": 512,
+        "orientations": 9,
+        "pixels_per_cell": 170,
+        "cells_per_block": 2,
+        "transform_sqrt": true,
+        "num_features": 144,
+        "overweight": 7.03125,
+        "elapsed": 38.254167556762695
+    },
+    {
+        "img_dim": 256,
+        "orientations": 9,
+        "pixels_per_cell": 85,
+        "cells_per_block": 2,
+        "transform_sqrt": true,
+        "num_features": 144,
+        "overweight": 7.03125,
+        "elapsed": 8.75898265838623
+    },
+    {
+        "img_dim": 512,
+        "orientations": 9,
+        "pixels_per_cell": 170,
+        "cells_per_block": 1,
+        "transform_sqrt": true,
+        "num_features": 81,
+        "overweight": 3.955078125,
+        "elapsed": 37.10452175140381
+    },
+    {
+        "img_dim": 256,
+        "orientations": 9,
+        "pixels_per_cell": 85,
+        "cells_per_block": 1,
+        "transform_sqrt": true,
+        "num_features": 81,
+        "overweight": 3.955078125,
+        "elapsed": 7.853985786437988
+    },
+    {
+        "img_dim": 224,
+        "orientations": 6,
+        "pixels_per_cell": 16,
+        "cells_per_block": 2,
+        "transform_sqrt": false,
+        "num_features": 4056,
+        "overweight": 198.046875,
+        "elapsed": 7.975000381469727
+    },
+    {
+        "img_dim": 224,
+        "orientations": 6,
+        "pixels_per_cell": 16,
+        "cells_per_block": 2,
+        "transform_sqrt": true,
+        "num_features": 4056,
+        "overweight": 198.046875,
+        "elapsed": 7.868000507354736
+    },
+    {
+        "img_dim": 224,
+        "orientations": 9,
+        "pixels_per_cell": 74,
+        "cells_per_block": 1,
+        "transform_sqrt": true,
+        "num_features": 81,
+        "overweight": 3.955078125,
+        "elapsed": 5.555992364883423
+    },
+    {
+        "img_dim": 224,
+        "orientations": 9,
+        "pixels_per_cell": 74,
+        "cells_per_block": 1,
+        "transform_sqrt": true,
+        "multichannel": true,
+        "num_features": 81,
+        "overweight": 3.955078125,
+        "elapsed": 8.42996072769165
+    }
+]

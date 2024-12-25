@@ -88,7 +88,7 @@ def create_datasets(
         f"(merge_datasets:{merge_datasets}, validation_enabled:{validation}), train_split_size: {train_split_size:.2f}"
         
     assert train_split_size is None or 0 <= train_split_size <= 1, "Train split size must be a fraction"
-    assert reduction_factor is None or 0 <= reduction_factor <= 1, "Reduce factor must be a fraction"
+    assert reduction_factor is None or 0 < reduction_factor <= 1, "Reduce factor must be a fraction"
     
     # Dataset is loaded into training and test set
     if not merge_datasets:
@@ -101,7 +101,7 @@ def create_datasets(
         trainset = ArtistDataset(root, "train", transform=train_transforms)
         testset = ArtistDataset(root, "test", transform=eval_transforms)
  
-        if reduction_factor is not None:
+        if reduction_factor is not None and reduction_factor < 1:
             trainset = reduce_dataset(trainset, reduction_factor)
             testset = reduce_dataset(testset, reduction_factor)
             
@@ -116,7 +116,7 @@ def create_datasets(
     # Applied only basic evaluation transformations
     dataset = ArtistDataset(root, transform=transforms)
     
-    if reduction_factor is not None:
+    if reduction_factor is not None and reduction_factor < 1:
         dataset = reduce_dataset(dataset)
         
     return dataset
@@ -135,7 +135,7 @@ def split_dataset(
         train_size=train_size,
         random_state=random_state, 
         shuffle=shuffle,
-        stratify=dataset.get_labels() if not isinstance(dataset, Subset) else None
+        stratify=dataset.get_labels()# if not isinstance(dataset, Subset) else None
     )
 
     trainset = Subset(dataset, train_indexes)

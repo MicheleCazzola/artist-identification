@@ -1,23 +1,16 @@
 import sys
-import time
+from matplotlib import pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from torchvision.models import resnet18, mobilenet_v3_small, efficientnet_b0, regnet_x_400mf, efficientnet_v2_s
+from torchvision.models import resnet18, mobilenet_v3_small, efficientnet_b0, regnet_x_400mf, shufflenet_v2_x0_5, mnasnet0_5
 from skimage.feature import hog
-from enum import Enum
-from torchvision.models import shufflenet_v2_x0_5
-from torchvision.models import mnasnet0_5
+from src.utils import BackboneType
 
-class BackboneType(str, Enum):
-    RESNET18 = "resnet18"
-    MOBILENET_V3_SMALL = "mobilenet_v3_small"
-    EFFICIENTNET_B0 = "efficientnet_b0"
-    REGNET_X_400MF = "regnet_x_400mf"
-    SHUFFLENET_V2_X0_5 = "shufflenet_v2_x0_5"
-    MNASNET0_5 = "mnasnet0_5"
+from src.config import HOGConfig
+    
 class BottleneckBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, stride: int = 1, dtype=torch.float32):
         super(BottleneckBlock, self).__init__()
@@ -131,32 +124,55 @@ class JoinModule(nn.Module):
         return x
 
 class HandCraftedFeatures(nn.Module):
-    def __init__(self, downsample_size: int, crop_size: int, dtype=torch.float32):
+    def __init__(self, hog_params: HOGConfig, dtype=torch.float32):
         super(HandCraftedFeatures, self).__init__()
-        self.downsample_size = downsample_size
-        self.crop_size = crop_size
-        self.dtype = dtype
+        self.downsample_size: int = hog_params.downsample_size
+        self.crop_size: int = hog_params.crop_size
+        self.channel_coefficients: np.ndarray = np.array(hog_params.channel_coefficients)
+        self.orientations: int = hog_params.orientations
+        self.pixels_per_cell: int = hog_params.pixels_per_cell
+        self.cells_per_block: int = hog_params.cells_per_block
+        self.transform_sqrt: bool = hog_params.transform_sqrt
+        self.feature_vector: bool = hog_params.feature_vector
+        self.normalization: str = hog_params.normalization
+        self.dtype: torch.dtype = dtype
 
     def forward(self, x):
         x = transforms.Compose([
             transforms.Resize((self.downsample_size, self.downsample_size)),
-            transforms.RandomCrop((self.crop_size, self.crop_size), pad_if_needed=True)
+            transforms.CenterCrop((self.crop_size, self.crop_size))
         ])(x)
         
         x_np = x.cpu().numpy().transpose(0, 2, 3, 1)
-        gray = lambda img: 0.299 * img[:, :, 0] + 0.587 * img[:, :, 1] + 0.114 * img[:, :, 2]
+        
+        # gray = lambda img: 0.299 * img[:, :, 0] + 0.587 * img[:, :, 1] + 0.114 * img[:, :, 2]
         return torch.tensor(np.array([
-            hog(gray(img), orientations=6, pixels_per_cell=(16, 16), 
-                cells_per_block=(2, 2), block_norm='L2-Hys')
+            hog(
+                img @ self.channel_coefficients,
+                orientations=self.orientations,
+                pixels_per_cell=(self.pixels_per_cell, self.pixels_per_cell), 
+                cells_per_block=(self.cells_per_block, self.cells_per_block),
+                transform_sqrt=self.transform_sqrt,
+                feature_vector=self.feature_vector,
+                block_norm=self.normalization
+            )
             for img in x_np
         ]), dtype=self.dtype, device=x.device)
 
 class MultiBranchArtistNetwork(nn.Module):
-    def __init__(self, num_classes: int, stn: BackboneType = None, use_handcrafted: bool = True, precision=32):
+    def __init__(
+        self, num_classes: int,
+        stn: BackboneType = None,
+        use_handcrafted: bool = True,
+        hog_params: HOGConfig = None, 
+        precision: int = 32
+    ):
         super(MultiBranchArtistNetwork, self).__init__()
         
         if precision != 32 and stn:
             raise ValueError("STN only supported with 32-bit precision")
+        
+        assert not use_handcrafted or hog_params is not None, "HOG configuration must be provided if handcrafted features are used"
         
         self.dtype = self._get_dtype(precision)
         
@@ -175,8 +191,8 @@ class MultiBranchArtistNetwork(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1)).type(self.dtype)
         
         if use_handcrafted:
-            self.handcrafted = HandCraftedFeatures(256, 224, dtype=self.dtype)
-            self.classifier = nn.Linear(2048 + 4056, num_classes, dtype=self.dtype)
+            self.handcrafted = HandCraftedFeatures(hog_params, dtype=self.dtype)
+            self.classifier = nn.Linear(2048 + hog_params.output_size, num_classes, dtype=self.dtype)
         else:
             self.handcrafted = None
             self.classifier = nn.Linear(2048, num_classes, dtype=self.dtype)
@@ -201,6 +217,7 @@ class MultiBranchArtistNetwork(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
         resblocks = self._make_residual_block(64, out_channels, num_blocks=3, stride=2)
+        
         return nn.Sequential(initial, resblocks)
 
     def _make_residual_block(self, in_channels: int, out_channels: int, num_blocks: int, stride: int) -> nn.Sequential:
@@ -209,6 +226,12 @@ class MultiBranchArtistNetwork(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        
+        print(x[0].shape)
+        
+        plt.figure()
+        plt.imshow(transforms.ToPILImage()(x[0]))
+        plt.show()
         
         x1, x2, x3 = self.roi_extractor(x)
         

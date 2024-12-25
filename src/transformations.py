@@ -39,6 +39,7 @@ class Augmentations:
     def __init__(
         self,
         probabilities: list[float] | tuple[float],
+        mask: list[bool] | tuple[bool],
         jitter_brightness: float = 0.1, 
         jitter_contrast: float = 0.1,
         jitter_saturation: float = 0.1,
@@ -56,7 +57,7 @@ class Augmentations:
         # 512x512 to preserve image dimension, 0.85 to 1.0 to have slight zoom in, 0.8 to 1.25 to have slight change in proportions
         geometric_transform = transforms.RandomResizedCrop(size=(512, 512), scale=crop_scale, ratio=crop_ratio)
         
-        self.probabilities = probabilities
+        self.probabilities = [probability * flag for probability, flag in zip(probabilities, mask)]
         self.transformations = [color_jitter, lighting_noise, gaussian_blur, geometric_transform]
         
     def __call__(self, img: Image) -> Image:   
@@ -100,7 +101,7 @@ class Transforms:
             aug_pipeline = {
                 "train": transforms.Compose([
                     Transforms.to_image(),
-                    Augmentations(config.aug_probs),
+                    Augmentations(config.aug_probs, config.aug_mask),
                     Transforms.to_tensor(), 
                     Transforms.normalizer(self.mean, self.std)
                 ]),

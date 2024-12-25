@@ -208,8 +208,10 @@ class Trainer:
         best_accuracy = -1
         best_num_epochs = None
         
-        if len(self.aug_train.transforms) == 1 and self.augment:
-            logging.warning("No augmentation transforms found, only image normalization will be applied")
+        if self.norm_eval is None and self.aug_train is None:
+            logging.warning("Neither augmentation nor normalization transforms found")
+        elif self.aug_train == self.norm_eval:
+            logging.info("No augmentation found, only normalization will be applied")
         
         for epoch in range(self.num_epochs):
             
@@ -318,7 +320,8 @@ class Trainer:
 
             data_len += inputs.size(0)
             
-            inputs = torch.stack([self.norm_eval(input_img) for input_img in inputs])
+            if self.norm_eval is not None:
+                inputs = torch.stack([self.norm_eval(input_img) for input_img in inputs])
 
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
@@ -382,6 +385,7 @@ class Trainer:
     
     def _save_files(self, cfg: Config, save_path: str, file_id: str):
         result = cfg.__dict__.copy()
+        result["hog_params"] = cfg.hog_params.__dict__
         result.update(self.training_results.__dict__)
         result.update(self.test_results.__dict__)
         
