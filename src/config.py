@@ -26,8 +26,6 @@ class Config:
     stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./temp/norm_stats.json"
     results_root: str = "."
-    plots_dir: str = "."
-    files_dir: str = "."
         
     device: str = "cuda"
     num_workers: int = 2
@@ -36,7 +34,7 @@ class Config:
     resize_dim: int = 512
     crop_dim: int = 512
     aug_probs: tuple[float] = (0.2, 0.2, 0.2, 0.5)
-    aug_mask: tuple[bool] = (True, True, True, True)
+    aug_mask: tuple[bool] = (True, False, True, True)
     
     train_split_size: float = 0.75
     reduce_factor: float = 1.0
@@ -49,13 +47,13 @@ class Config:
     lr: float = 1e-3
     momentum: float = 0.9
     weight_decay: float = 0
-    scheduler_step_size: int = 7
+    scheduler_step_size: int = 10
     scheduler_gamma: float = 0.1
     criterion: str = "cross_entropy"
     optimizer: str = "adam"
     scheduler: str = "step_lr"
     top_k: int = 5
-    augment: bool = True
+    augment: bool = False
     train_accuracy: bool = False
     
     backbone_type: BackboneType = BackboneType.RESNET18
@@ -79,13 +77,11 @@ class Config:
             "device": "cpu",
             "num_workers": 0,
             "batch_size": 2,
-            "num_epochs": 3,
+            "num_epochs": 2,
             "train_split_size": 0.66,
             "train_log_frequency": 2,
             "val_log_frequency": 1,
             "results_root": "./out",
-            "plots_dir": "plots",
-            "files_dir": "files",
             "num_classes": 3,
             "reduce_factor": 1.0,
             "precision": 32

@@ -13,8 +13,10 @@ from src.config import Config
 from src.mutlti_branch_nn import MultibranchNetwork
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
-from torchmetrics.classification import Accuracy, MulticlassAccuracy
+from torchmetrics.classification import Accuracy, MulticlassAccuracy, ConfusionMatrix, MulticlassConfusionMatrix
 from torchvision import transforms
+
+from src.utils import execution_time
 
 class TrainingMetrics:
     def __init__(self, num_classes: int, top_k: int):
@@ -24,28 +26,35 @@ class TrainingMetrics:
         
         self.num_classes = num_classes
         self.top_k = top_k
-        self.top_1_accuracy: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes)
-        self.top_k_accuracy: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, top_k=top_k)
-        self.mca: MulticlassAccuracy = Accuracy(task="multiclass", num_classes=num_classes, average=None)
+        self.top_1_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes=num_classes)
+        self.top_k_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes=num_classes, top_k=top_k)
+        self.mca: MulticlassAccuracy = MulticlassAccuracy(num_classes=num_classes, average=None)
+        self.confusion_matrix: MulticlassConfusionMatrix = MulticlassConfusionMatrix(num_classes=num_classes, normalize="true")
+        # TODO: Add Kaggle score (optional)
         
     def update(self, outputs: torch.Tensor, labels: torch.Tensor):
         self.top_1_accuracy.update(outputs, labels)
         self.top_k_accuracy.update(outputs, labels)
         self.mca.update(outputs, labels)
+        self.confusion_matrix.update(outputs, labels)
         
     def reset(self):
         self.top_1_accuracy.reset()
         self.top_k_accuracy.reset()
         self.mca.reset()
+        self.confusion_matrix.reset()
         
     def compute(self):
         top_1_accuracy = self.top_1_accuracy.compute().item()
         top_k_accuracy = self.top_k_accuracy.compute().item()
         mca_result = self.mca.compute().mean().item()
+        top_1_confusion_matrix = self.confusion_matrix.compute().tolist()
+        
         return {
             "top-1_accuracy": top_1_accuracy,
             f"top-{self.top_k}_accuracy": top_k_accuracy,
-            "mca": mca_result
+            "mca": mca_result,
+            "confusion_matrix": top_1_confusion_matrix
         }
         
     def to(self, device: torch.device):
@@ -54,7 +63,8 @@ class TrainingMetrics:
             self.top_k,
             self.top_1_accuracy.to(device),
             self.top_k_accuracy.to(device),
-            self.mca.to(device)
+            self.mca.to(device),
+            self.confusion_matrix.to(device)
         )
 
     @staticmethod
@@ -63,6 +73,7 @@ class TrainingMetrics:
         new_metrics.top_1_accuracy = metrics[0]
         new_metrics.top_k_accuracy = metrics[1]
         new_metrics.mca = metrics[2]
+        new_metrics.confusion_matrix = metrics[3]
 
         return new_metrics
 
@@ -185,7 +196,7 @@ class Trainer:
             raise ValueError(f"Criterion {criterion} not supported")
         
         if optimizer == "adam":
-            self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
+            self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         elif optimizer == "sgd":
             self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
         else:
@@ -193,11 +204,12 @@ class Trainer:
         
         if scheduler == "step_lr":
             self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, self.step_size, self.gamma)
-        elif scheduler == "constant":
+        elif scheduler == "constant" or scheduler is None:
             self.scheduler = None
         else:
             raise ValueError(f"Scheduler {scheduler} not supported")
     
+    @execution_time
     def train(self):
         
         if self.device == "cuda":
@@ -287,13 +299,14 @@ class Trainer:
         self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _ = self.evaluate(self.trainloader)
+        losses, top_1_accuracies, _, _, _ = self.evaluate(self.trainloader)
         return losses, top_1_accuracies
     
     def validate(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _ = self.evaluate(self.validloader)
+        losses, top_1_accuracies, _, _, _ = self.evaluate(self.validloader)
         return losses, top_1_accuracies
     
+    @execution_time
     def test(self):
         
         self.model.load_state_dict(torch.load(self.model_path, weights_only=True))
@@ -348,14 +361,18 @@ class Trainer:
         
         return EvaluationResult(mean(losses), metrics)
     
-    def save_results(self, cfg: Config, save_path: str):
-        id = time.strftime("%Y%m%d-%H%M%S")
+    def save_results(self, cfg: Config, save_path: str, training_time: float, test_time: float):
+        id = time.strftime("%Y%m%d_%H%M%S")
         
-        self._save_files(cfg, f"{save_path}/{cfg.files_dir}", id)
-        self._save_plots("Loss", f"{save_path}/{cfg.plots_dir}", id)
-        self._save_plots("Accuracy", f"{save_path}/{cfg.plots_dir}", id)
+        full_save_path = f"{save_path}/{id}"
+        os.makedirs(full_save_path)
+        
+        self._save_files(cfg, full_save_path, training_time, test_time)
+        self._save_plots("Loss", full_save_path)
+        self._save_plots("Accuracy", full_save_path)
+        self._save_confusion_matrix(full_save_path)
     
-    def _save_plots(self, name: str, save_path: str, file_id: str):
+    def _save_plots(self, name: str, save_path: str):
         
         assert name in ["Loss", "Accuracy"], f"Plot name must be either 'Loss' or 'Accuracy', found {name}"
         
@@ -381,13 +398,30 @@ class Trainer:
         if name == "Accuracy":
             plt.ylim(-0.01, max(values[0] + values[1]) + 0.1)
             
-        f.savefig(f"{save_path}/{name.lower()}_{file_id}.png")
+        f.savefig(f"{save_path}/{name.lower()}.png")
     
-    def _save_files(self, cfg: Config, save_path: str, file_id: str):
+    def _save_files(self, cfg: Config, save_path: str, training_time: float, test_time: float):
         result = cfg.__dict__.copy()
         result["hog_params"] = cfg.hog_params.__dict__
+        result["training_time"] = training_time
+        result["test_time"] = test_time
         result.update(self.training_results.__dict__)
         result.update(self.test_results.__dict__)
         
-        with open(f"{save_path}/config_{file_id}.json", "w") as f:
+        with open(f"{save_path}/result.json", "w") as f:
             json.dump(result, f, indent=4)
+            
+    def _save_confusion_matrix(self, save_path: str):
+        confusion_matrix = self.test_results.metrics["confusion_matrix"]
+        
+        f = plt.figure("Confusion Matrix")
+        plt.imshow(confusion_matrix, cmap="coolwarm", interpolation='nearest')
+        plt.colorbar()
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        plt.title("Confusion Matrix")
+        
+        plt.xticks(ticks=range(len(confusion_matrix)), labels=range(len(confusion_matrix)))
+        plt.yticks(ticks=range(len(confusion_matrix)), labels=range(len(confusion_matrix)))
+        
+        f.savefig(f"{save_path}/confusion_matrix.png")

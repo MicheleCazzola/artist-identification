@@ -12,6 +12,8 @@ from src.train import Trainer
 from src.network import MultiBranchArtistNetwork
 import sys
 
+from src.utils import execution_time
+
 
 # def check(*dataloaders):
 #     for dataloader in dataloaders:
@@ -84,11 +86,17 @@ def main():
     logging.info(f"Training...")
     trainer.train()
     
+    training_time = trainer.train.time
+    
     logging.info(f"Inference...")
     trainer.test()
     
+    test_time = trainer.test.time
+    
+    print(f"Test accuracy: {trainer.test_results.metrics['top-1_accuracy']}, Test loss: {trainer.test_results.loss}")
+    
     logging.info(f"Saving results...")
-    trainer.save_results(cfg, cfg.results_root)
+    trainer.save_results(cfg, cfg.results_root, training_time, test_time)
     
     os.remove(cfg.norm_stats_file)
     
