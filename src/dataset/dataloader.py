@@ -1,6 +1,5 @@
 from torch.utils.data import DataLoader, Subset
-from src.config import Config
-from src.dataset import ArtistDataset
+from .dataset import ArtistDataset
 
 def create_dataloaders(
     datasets: list[ArtistDataset | Subset],

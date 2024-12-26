@@ -1,10 +1,9 @@
 import json
-from sys import argv
 from torch.utils.data import DataLoader, Dataset
 import torch
 
 @torch.no_grad()
-def compute_stats(dataset: Dataset, dataloader: DataLoader, device: torch.device, out_file: str = "./temp/stats.json") -> dict:
+def compute_stats(dataset: Dataset, dataloader: DataLoader, device: torch.device, out_file: str) -> dict:
     
     assert isinstance(dataset, Dataset), "Dataset must be of type Dataset"
     

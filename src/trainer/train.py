@@ -9,73 +9,15 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 from torch.backends import cudnn
-from src.config import Config
-from src.mutlti_branch_nn import MultibranchNetwork
+
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
-from torchmetrics.classification import Accuracy, MulticlassAccuracy, ConfusionMatrix, MulticlassConfusionMatrix
 from torchvision import transforms
 
-from src.utils import execution_time
-
-class TrainingMetrics:
-    def __init__(self, num_classes: int, top_k: int):
-        
-        if top_k > num_classes:
-            logging.error(f"Top-k value {top_k} cannot be greater than number of classes {num_classes}")
-        
-        self.num_classes = num_classes
-        self.top_k = top_k
-        self.top_1_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes=num_classes)
-        self.top_k_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes=num_classes, top_k=top_k)
-        self.mca: MulticlassAccuracy = MulticlassAccuracy(num_classes=num_classes, average=None)
-        self.confusion_matrix: MulticlassConfusionMatrix = MulticlassConfusionMatrix(num_classes=num_classes, normalize="true")
-        # TODO: Add Kaggle score (optional)
-        
-    def update(self, outputs: torch.Tensor, labels: torch.Tensor):
-        self.top_1_accuracy.update(outputs, labels)
-        self.top_k_accuracy.update(outputs, labels)
-        self.mca.update(outputs, labels)
-        self.confusion_matrix.update(outputs, labels)
-        
-    def reset(self):
-        self.top_1_accuracy.reset()
-        self.top_k_accuracy.reset()
-        self.mca.reset()
-        self.confusion_matrix.reset()
-        
-    def compute(self):
-        top_1_accuracy = self.top_1_accuracy.compute().item()
-        top_k_accuracy = self.top_k_accuracy.compute().item()
-        mca_result = self.mca.compute().mean().item()
-        top_1_confusion_matrix = self.confusion_matrix.compute().tolist()
-        
-        return {
-            "top-1_accuracy": top_1_accuracy,
-            f"top-{self.top_k}_accuracy": top_k_accuracy,
-            "mca": mca_result,
-            "confusion_matrix": top_1_confusion_matrix
-        }
-        
-    def to(self, device: torch.device):
-        return TrainingMetrics.from_metrics(
-            self.num_classes,
-            self.top_k,
-            self.top_1_accuracy.to(device),
-            self.top_k_accuracy.to(device),
-            self.mca.to(device),
-            self.confusion_matrix.to(device)
-        )
-
-    @staticmethod
-    def from_metrics(num_classes, top_k, *metrics) -> "TrainingMetrics":
-        new_metrics = TrainingMetrics(num_classes, top_k)
-        new_metrics.top_1_accuracy = metrics[0]
-        new_metrics.top_k_accuracy = metrics[1]
-        new_metrics.mca = metrics[2]
-        new_metrics.confusion_matrix = metrics[3]
-
-        return new_metrics
+from ..config.config import Config
+from ..utils.utils import execution_time
+from ..model.network import MultiBranchArtistNetwork
+from .metrics import Metrics
 
 @dataclass
 class TrainingResult:
@@ -101,12 +43,12 @@ class EvaluationResult:
 class Trainer: 
     def __init__(
         self,
-        model: MultibranchNetwork, 
+        model: MultiBranchArtistNetwork, 
         trainloader: DataLoader,
         validloader: DataLoader,
         testloader: DataLoader,
     ):
-        self.model: MultibranchNetwork = model
+        self.model: MultiBranchArtistNetwork = model
         self.trainloader: DataLoader = trainloader
         self.validloader: DataLoader = validloader
         self.testloader: DataLoader = testloader
@@ -128,36 +70,37 @@ class Trainer:
         self.criterion: str = None
         self.optimizer: str = None
         self.scheduler: str = None
-        self.metrics: TrainingMetrics = None
+        self.metrics: Metrics = None
         self.train_accuracy: bool = None
         
         self.data_type: torch.dtype = torch.float32
         
         self.best_num_epochs: int = None
-        
-        self.model_path: str = "./temp/best_model.pth"
+        self.best_model_path: str = None
         
         self.training_results: TrainingResult = None
         self.test_results: EvaluationResult = None
         
     def build(self, cfg: Config):
-        self.device = torch.device(cfg.device)
-        self.train_log_frequency = cfg.train_log_frequency
-        self.val_log_frequency = cfg.val_log_frequency
-        self.num_epochs = cfg.num_epochs
-        self.lr = cfg.lr
-        self.momentum = cfg.momentum
-        self.step_size = cfg.scheduler_step_size
-        self.gamma = cfg.scheduler_gamma
-        self.weight_decay = cfg.weight_decay
-        self.top_k = cfg.top_k
-        self.augment = cfg.augment
-        self.train_accuracy = cfg.train_accuracy
         
-        self._set_precision(cfg.precision)
-        self._prepare_training(cfg.criterion, cfg.optimizer, cfg.scheduler)
+        self.device = torch.device(cfg.env.device)
+        self.train_log_frequency = cfg.train.train_log_frequency
+        self.val_log_frequency = cfg.train.val_log_frequency
+        self.num_epochs = cfg.train.num_epochs
+        self.lr = cfg.train.lr
+        self.momentum = cfg.train.momentum
+        self.step_size = cfg.train.scheduler_step_size
+        self.gamma = cfg.train.scheduler_gamma
+        self.weight_decay = cfg.train.weight_decay
+        self.top_k = cfg.train.top_k
+        self.augment = cfg.data.augment
+        self.train_accuracy = cfg.train.train_accuracy
+        self.best_model_path = cfg.path.best_model_path
         
-        self.metrics = TrainingMetrics(num_classes=cfg.num_classes, top_k=cfg.top_k)
+        self._set_precision(cfg.model.precision)
+        self._prepare_training(cfg.train.criterion, cfg.train.optimizer, cfg.train.scheduler)
+        
+        self.metrics = Metrics(num_classes=cfg.train.num_classes, top_k=cfg.train.top_k)
         
         self.model = self.model.to(self.device)
         self.metrics = self.metrics.to(self.device)
@@ -196,9 +139,18 @@ class Trainer:
             raise ValueError(f"Criterion {criterion} not supported")
         
         if optimizer == "adam":
-            self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+            self.optimizer = optim.Adam(
+                self.model.parameters(), 
+                lr=self.lr, 
+                weight_decay=self.weight_decay
+            )
         elif optimizer == "sgd":
-            self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
+            self.optimizer = optim.SGD(
+                self.model.parameters(), 
+                lr=self.lr, 
+                momentum=self.momentum, 
+                weight_decay=self.weight_decay
+            )
         else:
             raise ValueError(f"Optimizer {optimizer} not supported")
         
@@ -268,10 +220,10 @@ class Trainer:
                 
             val_loss, val_accuracy = self.validate()
             
-            if val_accuracy > best_accuracy:
+            if val_accuracy > best_accuracy or val_accuracy == best_accuracy and val_loss < val_losses[best_num_epochs - 1]:
                 best_accuracy = val_accuracy
                 best_num_epochs = epoch + 1
-                torch.save(self.model.state_dict(), self.model_path)
+                torch.save(self.model.state_dict(), self.best_model_path)
 
             logging.info(f"End of Epoch {epoch+1}")
             
@@ -309,10 +261,10 @@ class Trainer:
     @execution_time
     def test(self):
         
-        self.model.load_state_dict(torch.load(self.model_path, weights_only=True))
+        self.model.load_state_dict(torch.load(self.best_model_path, weights_only=True))
         
         # Remove model file to free memory
-        os.remove(self.model_path)
+        os.remove(self.best_model_path)
         test_result = self.evaluate(self.testloader)
         
         self.test_results = test_result
@@ -402,9 +354,16 @@ class Trainer:
     
     def _save_files(self, cfg: Config, save_path: str, training_time: float, test_time: float):
         result = cfg.__dict__.copy()
-        result["hog_params"] = cfg.hog_params.__dict__
+        
+        result["train"] = cfg.train.__dict__
+        result["model"] = cfg.model.__dict__
+        result["data"] = cfg.data.__dict__
+        result["env"] = cfg.env.__dict__
+        result["path"] = cfg.path.__dict__
+        result["hog"] = cfg.hog.__dict__
         result["training_time"] = training_time
         result["test_time"] = test_time
+        
         result.update(self.training_results.__dict__)
         result.update(self.test_results.__dict__)
         
@@ -421,7 +380,7 @@ class Trainer:
         plt.ylabel("Actual")
         plt.title("Confusion Matrix")
         
-        plt.xticks(ticks=range(len(confusion_matrix)), labels=range(len(confusion_matrix)))
-        plt.yticks(ticks=range(len(confusion_matrix)), labels=range(len(confusion_matrix)))
+        plt.xticks(range(0, len(confusion_matrix), max(1, len(confusion_matrix) // 4)))
+        plt.yticks(range(0, len(confusion_matrix), max(1, len(confusion_matrix) // 4)))
         
         f.savefig(f"{save_path}/confusion_matrix.png")

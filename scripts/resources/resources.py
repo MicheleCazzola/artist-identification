@@ -3,9 +3,9 @@ from statistics import mean
 import time
 from matplotlib import pyplot as plt
 import torch
-from src.network import MultiBranchArtistNetwork
+from src.model.network import MultiBranchArtistNetwork
 from src.utils import BackboneType
-from src.config import HOGConfig
+from src.config.config import HOGConfig
 
 
 @torch.no_grad()

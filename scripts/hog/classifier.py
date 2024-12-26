@@ -16,7 +16,7 @@ from skimage.feature import hog
 from torchmetrics import Accuracy
 import matplotlib.pyplot as plt
 
-from src.transformations import Transforms
+from src.transformations.transformations import Transforms
 
 
 class HOGLayer(nn.Module):
@@ -232,7 +232,7 @@ else:
 
 print(f"Info aquired - Root: '{root}', Train model: '{train_model}'")
     
-transformations = Transforms(config=cfg)
+transformations = Transforms(data_config=cfg)
 trainset, validset, testset = create_datasets(
     cfg.default_root, 
     train_split_size=cfg.train_split_size, 

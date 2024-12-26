@@ -1,18 +1,14 @@
 import logging
 import os
 
-from matplotlib import pyplot as plt
-import torchvision
-from src.config import Config
-from src.dataset import create_datasets
-from src.dataloader import create_dataloaders
-from src.stats import compute_stats
-from src.transformations import Transforms
-from src.train import Trainer
-from src.network import MultiBranchArtistNetwork
+from src.config.config import Config
+from src.dataset.dataset import ArtistDataset
+from src.dataset.dataloader import create_dataloaders
+from src.utils.stats import compute_stats
+from src.transformations.transformations import Transforms
+from src.trainer.train import Trainer
+from src.model.network import MultiBranchArtistNetwork
 import sys
-
-from src.utils import execution_time
 
 
 # def check(*dataloaders):
@@ -40,23 +36,32 @@ def main():
         root = sys.argv[1]
     else:
         cfg = Config.create("local")
-        root = cfg.default_root
+        root = cfg.path.default_root
     
     logging.info(cfg.__dict__)
         
     # Load datasets with base transformations (resize, crop, to tensor)
-    transformations = Transforms(config=cfg)
-    trainset, validset, testset = create_datasets(
+    transformations = Transforms(data_config=cfg.data)
+    trainset, validset, testset = ArtistDataset.create(
         root, 
-        train_split_size=cfg.train_split_size, 
+        train_split_size=cfg.data.train_split_size, 
         transforms=transformations.get(),
-        reduction_factor=cfg.reduce_factor,
+        reduction_factor=cfg.data.reduce_factor,
     )
     
-    if not cfg.pretrained_stats:
+    if not cfg.data.pretrained_stats:
         # Compute mean and standard deviation (only for training set) for normalization
-        trainloader_stats = create_dataloaders([trainset], cfg.batch_size, shuffle=False, drop_last=False, num_workers=cfg.num_workers)
-        mean, std = map(compute_stats(trainset, trainloader_stats, cfg.device, cfg.norm_stats_file).get, ["mean", "std"])
+        trainloader_stats = create_dataloaders(
+            [trainset],
+            cfg.data.batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=cfg.env.num_workers
+        )
+        mean, std = map(
+            compute_stats(trainset, trainloader_stats, cfg.env.device, cfg.path.norm_stats_file).get, 
+            ["mean", "std"]
+        )
     else:
         mean, std = transformations.mean, transformations.std
     
@@ -65,40 +70,42 @@ def main():
     # Create dataloaders for all the datasets: normalization applied during training
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
-        cfg.batch_size,
-        num_workers=cfg.num_workers
+        cfg.data.batch_size,
+        num_workers=cfg.env.num_workers
     )
 
     # Model definition
     model = MultiBranchArtistNetwork(
-        num_classes=cfg.num_classes,
-        stn=cfg.backbone_type,
-        use_handcrafted=cfg.use_handcrafted,
-        hog_params=cfg.hog_params,
-        precision=cfg.precision
+        num_classes=cfg.train.num_classes,
+        stn=cfg.model.backbone_type,
+        use_handcrafted=cfg.model.use_handcrafted,
+        hog_params=cfg.hog,
+        precision=cfg.model.precision
     )
     
     logging.info(f"Training setup...")
+    
     trainer = Trainer(model, trainloader, validloader, testloader)
     trainer.build(cfg)
     trainer.add_aug_norm_transforms(transformations.get("aug"))
     
     logging.info(f"Training...")
-    trainer.train()
     
+    trainer.train()
     training_time = trainer.train.time
     
     logging.info(f"Inference...")
-    trainer.test()
     
+    trainer.test()
     test_time = trainer.test.time
     
-    print(f"Test accuracy: {trainer.test_results.metrics['top-1_accuracy']}, Test loss: {trainer.test_results.loss}")
+    print(f"Test accuracy: {trainer.test_results.metrics['top-1_accuracy']:.3f}, Test loss: {trainer.test_results.loss:.5f}")
     
     logging.info(f"Saving results...")
-    trainer.save_results(cfg, cfg.results_root, training_time, test_time)
     
-    os.remove(cfg.norm_stats_file)
+    trainer.save_results(cfg, cfg.path.results_root, training_time, test_time)
+    
+    os.remove(cfg.path.norm_stats_file)
     
     logging.info(f"Done!")
 
