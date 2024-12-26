@@ -1,4 +1,5 @@
 import json
+import logging
 from torch.utils.data import DataLoader, Dataset
 import torch
 
@@ -21,7 +22,7 @@ def compute_stats(dataset: Dataset, dataloader: DataLoader, device: torch.device
         inputs = inputs.to(device)
         labels = labels.to(device)
         
-        print(f"Processing batch {step+1}/{tot_batches}")
+        logging.info(f"Processing batch {step+1}/{tot_batches}")
         
         b, _, h, w = inputs.shape
         

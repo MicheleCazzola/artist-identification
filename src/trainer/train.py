@@ -163,9 +163,6 @@ class Trainer:
     
     @execution_time
     def train(self):
-        
-        if self.device == "cuda":
-            cudnn.benchmark = True
 
         val_losses, val_accuracies = [], []
         train_losses, train_accuracies = [], []
@@ -274,9 +271,6 @@ class Trainer:
         
         self.model.eval()
 
-        if self.device == "cuda":
-            cudnn.benchmark = True
-
         losses = []
         data_len = 0
         corrects = 0
@@ -353,14 +347,7 @@ class Trainer:
         f.savefig(f"{save_path}/{name.lower()}.png")
     
     def _save_files(self, cfg: Config, save_path: str, training_time: float, test_time: float):
-        result = cfg.__dict__.copy()
-        
-        result["train"] = cfg.train.__dict__
-        result["model"] = cfg.model.__dict__
-        result["data"] = cfg.data.__dict__
-        result["env"] = cfg.env.__dict__
-        result["path"] = cfg.path.__dict__
-        result["hog"] = cfg.hog.__dict__
+        result = cfg.to_dict()
         result["training_time"] = training_time
         result["test_time"] = test_time
         

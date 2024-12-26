@@ -36,22 +36,22 @@
 - metrics are computed on a test set by default, otherwise look for (*)
 - HOG features are extracted from a 224x224 center-cropped image, obtained from a 256x256 downsampled image (original is 512x512)
 
-| Backbone Model | HOG | Batch size | Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Training time (mins) (***) | Output file |
-|:--------------:|:---:|:----------:|:-------------:|:------------:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|
-| Random crop | No | | | | | | | | | | | | | | | | |
-| Random crop | 81 | | | | | | | | | | | | | | | | |
-| ResNet18 | No | | | | | | | | | | | | | | | | |
-| ResNet18 | 81 | | | | | | | | | | | | | | | | |
-| MobileNetV3-S | No | | | | | | | | | | | | | | | |
-| MobileNetV3-S | 81 | | | | | | | | | | | | | | | |
-| EfficientNet-B0 | No | | | | | | | | | | | | | | | |
-| EfficientNet-B0 | 81 | | | | | | | | | | | | | | | |
-| RegNetX-400MF | No | | | | | | | | | | | | | | | |
-| RegNetX-400MF | 81 | | | | | | | | | | | | | | | |
-| ShuffleNetV2-X0.5 | No | | | | | | | | | | | | | | | |
-| ShuffleNetV2-X0.5 | 81 | | | | | | | | | | | | | | | |
-| MNasNet-X0.5 | No | | | | | | | | | | | | | | | |
-| MNasNet-X0.5 | 81 | | | | | | | | | | | | | | | |
+| Backbone Model | HOG | Batch size | Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Test loss | Test epochs | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Training time (mins) (***) | Output folder |
+|:--------------:|:---:|:----------:|:-------------:|:------------:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Random crop | No | | | | | | | | | | | | | | | | | |[link]() |
+| Random crop | 81 | | | | | | | | | | | | | | | | | |[link]() |
+| ResNet18 | No | | | | | | | | | | | | | | | | | |[link]() |
+| ResNet18 | 81 | | | | | | | | | | | | | | | | | |[link]() |
+| MobileNetV3-S | No | | | | | | | | | | | | | | | | | |[link]() |
+| MobileNetV3-S | 81 | | | | | | | | | | | | | | | | | |[link]() |
+| EfficientNet-B0 | No | | | | | | | | | | | | | | | | | |[link]() |
+| EfficientNet-B0 | 81 | | | | | | | | | | | | | | | | | | [link]() |
+| RegNetX-400MF | No | | | | | | | | | | | | | | | | | | [link]() |
+| RegNetX-400MF | 81 | | | | | | | | | | | | | | | | | |[link]() |
+| ShuffleNetV2-X0.5 | No | | | | | | | | | | | | | | | | | |[link]() |
+| ShuffleNetV2-X0.5 | 81 | | | | | | | | | | | | | | | | | |[link]() |
+| MNasNet-X0.5 | No | | | | | | | | | | | | | | | | | |[link]() |
+| MNasNet-X0.5 | 81 | | | | | | | | | | | | | | | | | |[link]() |
 
 (\*) Value computed on training set  
 (*\*) In the form "probability - (param1, param2, ...)"  

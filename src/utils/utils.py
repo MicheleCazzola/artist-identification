@@ -1,6 +1,7 @@
 from enum import Enum
 import time
 from functools import wraps
+import torch
 
 class BackboneType(str, Enum):
     RESNET18 = "resnet18"
@@ -14,9 +15,21 @@ class BackboneType(str, Enum):
 def execution_time(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        start_time = time.time()
-        func(*args, **kwargs)
-        end_time = time.time()
-        wrapper.time = end_time - start_time
+        if torch.cuda.is_available():
+            start_event = torch.cuda.Event(enable_timing=True)
+            end_event = torch.cuda.Event(enable_timing=True)
+            
+            start_event.record()
+            func(*args, **kwargs)
+            end_event.record()
+            
+            torch.cuda.synchronize()
+            
+            wrapper.time = start_event.elapsed_time(end_event) / 1000
+        else:
+            start_time = time.time()
+            func(*args, **kwargs)
+            end_time = time.time()
+            wrapper.time = end_time - start_time
         
     return wrapper

@@ -1,4 +1,4 @@
-from ..config.config import DataConfig
+from ..config.components import DataConfig
 from torchvision.transforms import transforms
 from .augmentations import Augmentations
 
