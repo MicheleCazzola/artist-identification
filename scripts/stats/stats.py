@@ -2,9 +2,9 @@ from sys import argv
 from torch.utils.data import DataLoader
 from torchvision import transforms
 import torch
-from src.dataset import ArtistDataset, create_datasets
+from src.dataset.dataset import ArtistDataset
 from src.transformations.transformations import Transforms
-from src.dataloader import create_dataloaders
+from src.dataset.dataloader import create_dataloaders
 from statistics import mean
 import json
 
@@ -26,7 +26,7 @@ def load_data():
         
         
     transformations = Transforms(type = "stats").get("tensor")
-    dataset = create_datasets(root, merge_datasets=True, transforms=transformations)
+    dataset = ArtistDataset.create(root, merge_datasets=True, transforms=transformations)
     dataloader = create_dataloaders([dataset], batch_size=1, shuffle=False, drop_last=False, num_workers=NUM_WORKERS)
     
     return dataset, dataloader

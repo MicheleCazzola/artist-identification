@@ -20,7 +20,7 @@ def execution_time(func):
             end_event = torch.cuda.Event(enable_timing=True)
             
             start_event.record()
-            func(*args, **kwargs)
+            result = func(*args, **kwargs)
             end_event.record()
             
             torch.cuda.synchronize()
@@ -28,8 +28,10 @@ def execution_time(func):
             wrapper.time = start_event.elapsed_time(end_event) / 1000
         else:
             start_time = time.time()
-            func(*args, **kwargs)
+            result = func(*args, **kwargs)
             end_time = time.time()
             wrapper.time = end_time - start_time
+            
+        return result
         
     return wrapper

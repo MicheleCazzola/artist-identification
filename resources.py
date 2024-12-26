@@ -1,11 +1,14 @@
 import json
 from statistics import mean
-import time
 from matplotlib import pyplot as plt
 import torch
 from src.model.network import MultiBranchArtistNetwork
-from src.utils import BackboneType
+from src.utils.utils import BackboneType, execution_time
 from src.config.config import HOGConfig
+
+@execution_time
+def call_model(x):
+    return model(x)
 
 
 @torch.no_grad()
@@ -14,19 +17,18 @@ def compute_latency(model: torch.nn.Module, dataset, device):
     model.eval()
     for step, x in enumerate(dataset):
         x = x.to(device)
-        start = time.time()
-        out = model(x)
-        end = time.time()
-        latency.append(end - start)
+        out = call_model(x)
+        latency.append(call_model.time)
         
         if (step + 1) % 20 == 0:
             print(f"Step {step + 1} / {len(dataset)}")
         
     return mean(latency) * 1000     # latency in ms
 
-OUTFILE = "./scripts/resources/resources.json"
+OUTFILE = "./scripts/resources/resources_prova.json"
+OUTFILE_PLOT = "./scripts/resources/accuracy_vs_latency_prova.png"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-DATASET_SIZE = 10
+DATASET_SIZE = 1000
 NUM_CLASSES = 161
 BACKBONES = list(BackboneType) + [None]
 HANDCRAFTED_FLAGS = [False, True]
@@ -104,5 +106,5 @@ plt.xlabel("Latency (ms)")
 plt.ylabel("Top-1 Accuracy on ImageNet (%)")
 plt.title("Top-1 Accuracy vs Latency")
 
-OUTFILE_PLOT = "./scripts/resources/accuracy_vs_latency_new.png"
+
 plt.savefig(OUTFILE_PLOT)

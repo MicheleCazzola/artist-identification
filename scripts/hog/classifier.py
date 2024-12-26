@@ -9,9 +9,9 @@ import math
 import time
 
 import torchvision
-from src.config import Config
-from src.dataloader import create_dataloaders
-from src.dataset import create_datasets
+from src.config.config import Config
+from src.dataset.dataloader import create_dataloaders
+from src.dataset.dataset import ArtistDataset, create_datasets
 from skimage.feature import hog
 from torchmetrics import Accuracy
 import matplotlib.pyplot as plt
@@ -41,12 +41,10 @@ class HOGLayer(nn.Module):
             gxy = F.conv2d(x, self.weight.to(x.device), None, self.stride,
                             self.padding, self.dilation, 1)
 
-            #2. Mag/ Phase
             mag = gxy.norm(dim=1)
             norm = mag[:,None,:,:]
             phase = torch.atan2(gxy[:,0,:,:], gxy[:,1,:,:])
 
-            #3. Binning Mag with linear interpolation
             phase_int = phase / self.max_angle * self.nbins
             phase_int = phase_int[:,None,:,:]
 
@@ -199,7 +197,7 @@ def evaluate(model, dataloader, criterion, device, log_frequency = 1):
 
     current_step = 0
     losses = []
-    accuracy = Accuracy("multiclass", num_classes=cfg.num_classes).to(device)
+    accuracy = Accuracy("multiclass", num_classes=cfg.train.num_classes).to(device)
     for inputs, labels in dataloader:
         inputs = inputs.to(device)
         labels = labels.to(device)
@@ -223,7 +221,7 @@ if len(sys.argv) > 1:
     root = sys.argv[1]
 else:
     cfg = Config.create("local")
-    root = cfg.default_root
+    root = cfg.path.default_root
     
 if len(sys.argv) > 2:
     train_model = sys.argv[2]
@@ -233,19 +231,19 @@ else:
 print(f"Info aquired - Root: '{root}', Train model: '{train_model}'")
     
 transformations = Transforms(data_config=cfg)
-trainset, validset, testset = create_datasets(
-    cfg.default_root, 
-    train_split_size=cfg.train_split_size, 
+trainset, validset, testset = ArtistDataset.create(
+    cfg.path.default_root, 
+    train_split_size=cfg.data.train_split_size, 
     transforms=transformations.get(),
-    reduction_factor=cfg.reduce_factor
+    reduction_factor=cfg.data.reduce_factor
 )
 
 print(f"Datasets created, with sizes {len(trainset)}, {len(validset)}, {len(testset)}")
 
 trainloader, validloader, testloader = create_dataloaders(
     [trainset, validset, testset],
-    cfg.batch_size,
-    num_workers=cfg.num_workers   
+    cfg.data.batch_size,
+    num_workers=cfg.env.num_workers   
 )
 
 print(f"Dataloders created, with sizes {len(trainloader)}, {len(validloader)}, {len(testloader)}")
@@ -258,8 +256,8 @@ gray_custom = torchvision.transforms.Lambda(
 
 GPU_HOG_FEATURES = 1536
 SKLEARN_HOG_FEATURES = 1176
-OUT_CLASSES = cfg.num_classes
-NUM_EPOCHS = cfg.num_epochs
+OUT_CLASSES = cfg.train.num_classes
+NUM_EPOCHS = cfg.train.num_epochs
 
 def train_hog_gpu():
     model = HOGClassifier("gpu", gray_custom, GPU_HOG_FEATURES, OUT_CLASSES, nbins=6, pool=8, stride=4)
@@ -267,13 +265,13 @@ def train_hog_gpu():
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
     
     start = time.time()
-    result = train(model, trainloader, validloader, criterion, optimizer, NUM_EPOCHS, cfg.device, log_frequency = cfg.train_log_frequency)
+    result = train(model, trainloader, validloader, criterion, optimizer, NUM_EPOCHS, cfg.env.device, log_frequency = cfg.train.train_log_frequency)
     train_time = time.time() - start
     
     model.load_state_dict(torch.load("best_model.pth", weights_only=True))
     
     start = time.time()
-    test_loss, test_acc = evaluate(model, testloader, criterion, cfg.device, log_frequency=cfg.val_log_frequency)
+    test_loss, test_acc = evaluate(model, testloader, criterion, cfg.env.device, log_frequency=cfg.train.val_log_frequency)
     test_time = time.time() - start 
     
     print(f"GPU Average test loss: {test_loss:.5f}, Test accuracy: {test_acc:.3f}")
@@ -287,13 +285,13 @@ def train_hog_sklearn():
     optimizer_official = torch.optim.Adam(model_official.parameters(), lr = 0.001)
     
     start = time.time()
-    result_official = train(model_official, trainloader, validloader, criterion_official, optimizer_official, NUM_EPOCHS, cfg.device, log_frequency=cfg.train_log_frequency)
+    result_official = train(model_official, trainloader, validloader, criterion_official, optimizer_official, NUM_EPOCHS, cfg.env.device, log_frequency=cfg.train.train_log_frequency)
     train_time = time.time() - start
     
     model_official.load_state_dict(torch.load("best_model.pth", weights_only=True))
     
     start = time.time()
-    test_loss, test_acc = evaluate(model_official, testloader, criterion_official, cfg.device, log_frequency=cfg.val_log_frequency) 
+    test_loss, test_acc = evaluate(model_official, testloader, criterion_official, cfg.env.device, log_frequency=cfg.train.val_log_frequency) 
     test_time = time.time() - start
     
     print(f"Sklearn Average test loss: {test_loss:.5f}, Test accuracy: {test_acc:.3f}")
