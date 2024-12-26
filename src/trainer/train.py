@@ -2,21 +2,20 @@ from dataclasses import dataclass
 import json
 import logging
 import os
-from statistics import mean
 import time
-from matplotlib import pyplot as plt
-import torch
-import torch.optim as optim
-import torch.nn as nn
-from torch.backends import cudnn
+from statistics import mean
 
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose
 from torchvision import transforms
+from torchvision.transforms import Compose
 
 from ..config.config import Config
-from ..utils.utils import execution_time
 from ..model.network import MultiBranchArtistNetwork
+from ..utils.utils import execution_time
 from .metrics import Metrics
 
 @dataclass

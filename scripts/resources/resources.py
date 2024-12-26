@@ -39,12 +39,14 @@ model_names = [
     for name in ([f"{backbone.value}_no_hcrf", f"{backbone.value}_hcrf"] if backbone is not None else ["rnd_no_hcrf", "rnd_hcrf"])
 ]
 
+hog_config = HOGConfig()
+
 model_variants = [
     MultiBranchArtistNetwork(
         num_classes=NUM_CLASSES,
         stn=backbone,
         use_handcrafted=handcrafted,
-        hog_params=HOGConfig()
+        hog_params=hog_config
     ).to(DEVICE)
     for backbone in BACKBONES
     for handcrafted in HANDCRAFTED_FLAGS
@@ -73,7 +75,7 @@ for (name, model) in models.items():
     
     num_params = sum(p.numel() for p in model.parameters())
     memory_size = num_params * 4
-    latency = compute_latency(model, dataset, DEVICE, DATASET_SIZE // 10)
+    latency = compute_latency(model, dataset, DEVICE, max(1, DATASET_SIZE // 10))
     fps = 1000 / latency
     
     model_stats[name] = {
