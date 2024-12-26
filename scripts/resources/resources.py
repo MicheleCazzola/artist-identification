@@ -12,7 +12,7 @@ def call_model(x):
 
 
 @torch.no_grad()
-def compute_latency(model: torch.nn.Module, dataset, device):
+def compute_latency(model: torch.nn.Module, dataset, device, log_frequency):
     latency = []
     model.eval()
     for step, x in enumerate(dataset):
@@ -20,7 +20,7 @@ def compute_latency(model: torch.nn.Module, dataset, device):
         out = call_model(x)
         latency.append(call_model.time)
         
-        if (step + 1) % 20 == 0:
+        if (step + 1) % log_frequency == 0:
             print(f"Step {step + 1} / {len(dataset)}")
         
     return mean(latency) * 1000     # latency in ms
@@ -64,15 +64,16 @@ models = dict(zip(model_names, model_variants))
 # _ = [print(name, model) for name, (_, model) in zip(MODEL_NAMES, model_variants)]
 # models = dict(zip(MODEL_NAMES, [m[0] for m in model_variants]))
 
+dataset = [torch.randn(1, 3, 512, 512) for _ in range(DATASET_SIZE)]
+
 model_stats = {}
 for (name, model) in models.items():
     
     print(f"Running model: {name}")
     
-    dataset = [torch.randn(1, 3, 512, 512) for _ in range(DATASET_SIZE)]
     num_params = sum(p.numel() for p in model.parameters())
     memory_size = num_params * 4
-    latency = compute_latency(model, dataset, DEVICE)
+    latency = compute_latency(model, dataset, DEVICE, DATASET_SIZE // 10)
     fps = 1000 / latency
     
     model_stats[name] = {
