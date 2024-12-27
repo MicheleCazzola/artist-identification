@@ -114,13 +114,14 @@ def main():
     classifier = trainer.model.classifier.state_dict()
     weights, biases = classifier["weight"], classifier["bias"]
     net_weights, hog_features = weights[:, :2048], weights[:, 2048:]
-    print(weights.shape, biases.shape)
-    net_mean, net_std, net_min, net_max = map(lambda x: x, (torch.mean(weights, dim=1), torch.std(weights, dim=1), torch.min(weights, dim=1).values, torch.max(weights, dim=1).values))
-    hog_mean, hog_std, hog_min, hog_max = map(lambda x: x, (torch.mean(hog_features, dim=1), torch.std(hog_features, dim=1), torch.min(hog_features, dim=1).values, torch.max(hog_features, dim=1).values))
-    bias_mean, bias_std, bias_min, bias_max = map(lambda x: x, (torch.mean(biases), torch.std(biases), torch.min(biases), torch.max(biases)))
+    print(net_weights.shape, hog_features.shape, biases.shape)
+    net_mean, net_std, net_min, net_max = net_weights.mean(), net_weights.std(), net_weights.min(), net_weights.max()
+    hog_mean, hog_std, hog_min, hog_max = hog_features.mean(), hog_features.std(), hog_features.min(), hog_features.max()
     
-    print(f"Net width: {net_max - net_min}, Net mean: {net_mean}, Net std: {net_std}")
-    print(f"HOG width: {hog_max - hog_min}, HOG mean: {hog_mean}, HOG std: {hog_std}")
+    print(net_max)
+    
+    print(f"Net width: {net_max - net_min:.3f}, Net mean: {net_mean:.3f}, Net std: {net_std:.3f}")
+    print(f"HOG width: {hog_max - hog_min:.3f}, HOG mean: {hog_mean:.3f}, HOG std: {hog_std:.3f}")
     
     logging.info(f"Done!")
 
