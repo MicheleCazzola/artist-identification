@@ -71,6 +71,9 @@ class Transforms:
         self.mean = mean
         self.std = std  
         
+        self.transforms.get("aug")["train"].transforms[-1] = Transforms.normalizer(self.mean, self.std)
+        self.transforms.get("aug")["val"].transforms[-1] = Transforms.normalizer(self.mean, self.std)
+        
     def __repr__(self):
         return f"Transforms(type={self.type}, keys={self.keys}, mean={self.mean}, std={self.std}, transforms={self.transforms})"
             
