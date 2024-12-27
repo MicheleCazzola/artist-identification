@@ -97,12 +97,12 @@ class ArtistDataset(VisionDataset):
             testset = ArtistDataset(root, "test", transform=eval_transforms)
     
             if reduction_factor is not None and reduction_factor < 1:
-                trainset = trainset._reduce(reduction_factor)
-                testset = testset._reduce(reduction_factor)
+                trainset = ArtistDataset._reduce(trainset, reduction_factor)
+                testset = ArtistDataset._reduce(testset, reduction_factor)
                 
             # A validation split is generated out of the train set
             if validation:
-                trainset, validset = trainset._split(train_split_size)
+                trainset, validset = ArtistDataset._split(trainset, train_split_size)
                 return trainset, validset, testset
             
             return trainset, testset
@@ -112,34 +112,36 @@ class ArtistDataset(VisionDataset):
         dataset = ArtistDataset(root, transform=transforms)
         
         if reduction_factor is not None and reduction_factor < 1:
-            dataset = dataset._reduce(reduction_factor)
+            dataset = ArtistDataset._reduce(dataset, reduction_factor)
             
         return dataset
 
+    @staticmethod
     def _split(
-        self, 
+        dataset: Union["ArtistDataset", Subset],
         train_size: float, 
         random_state: int = 42, 
         shuffle: bool = True
     ) -> tuple[Subset, Subset]:
 
-        indexes = range(0, len(self))
+        indexes = range(0, len(dataset))
         train_indexes, val_indexes = train_test_split(
             indexes,
             train_size=train_size,
             random_state=random_state, 
             shuffle=shuffle,
-            stratify=self.get_labels() if not isinstance(self, Subset) else None
+            stratify=dataset.get_labels() if not isinstance(dataset, Subset) else None
         )
 
-        trainset = Subset(self, train_indexes)
-        validset = Subset(self, val_indexes)
+        trainset = Subset(dataset, train_indexes)
+        validset = Subset(dataset, val_indexes)
         
         return trainset, validset
 
-    def _reduce(self,reduction_factor: float) -> Subset:
+    @staticmethod
+    def _reduce(dataset: Union["ArtistDataset", Subset], reduction_factor: float) -> Subset:
 
-        reduced_dataset, _ = self._split(reduction_factor)
+        reduced_dataset, _ = ArtistDataset._split(dataset, reduction_factor)
 
         return reduced_dataset
     

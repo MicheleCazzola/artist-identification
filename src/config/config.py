@@ -42,7 +42,8 @@ class Config:
                 ),
                 data=DataConfig(
                     batch_size=2,
-                    train_split_size=0.66
+                    train_split_size=0.66,
+                    reduce_factor=0.7
                 ),
                 train=TrainConfig(
                     num_epochs=1,
