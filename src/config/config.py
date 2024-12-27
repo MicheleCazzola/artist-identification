@@ -45,7 +45,7 @@ class Config:
                     train_split_size=0.66
                 ),
                 train=TrainConfig(
-                    num_epochs=2,
+                    num_epochs=1,
                     train_log_frequency=2,
                     val_log_frequency=1,
                     num_classes=3

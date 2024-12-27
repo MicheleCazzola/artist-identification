@@ -67,6 +67,8 @@ def main():
     
     transformations.set_norm(mean, std)
     
+    logging.info(transformations.to_dict())
+    
     # Create dataloaders for all the datasets: normalization applied during training
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
@@ -103,7 +105,7 @@ def main():
     
     logging.info(f"Saving results...")
     
-    trainer.save_results(cfg, cfg.path.results_root, training_time, test_time)
+    trainer.save_results(cfg, cfg.path.results_root, transformations, training_time, test_time)
     
     os.remove(cfg.path.norm_stats_file)
     

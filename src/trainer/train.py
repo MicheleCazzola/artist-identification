@@ -13,6 +13,8 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.transforms import Compose
 
+from src.transformations.transformations import Transforms
+
 from ..config.config import Config
 from ..model.network import MultiBranchArtistNetwork
 from ..utils.utils import execution_time
@@ -71,6 +73,7 @@ class Trainer:
         self.scheduler: str = None
         self.metrics: Metrics = None
         self.train_accuracy: bool = None
+        self.sanity_check: bool = None
         
         self.data_type: torch.dtype = torch.float32
         
@@ -95,6 +98,7 @@ class Trainer:
         self.augment = cfg.data.augment
         self.train_accuracy = cfg.train.train_accuracy
         self.best_model_path = cfg.path.best_model_path
+        self.sanity_check = cfg.train.sanity_check
         
         self._set_precision(cfg.model.precision)
         self._prepare_training(cfg.train.criterion, cfg.train.optimizer, cfg.train.scheduler)
@@ -172,6 +176,26 @@ class Trainer:
             logging.warning("Neither augmentation nor normalization transforms found")
         elif self.aug_train == self.norm_eval:
             logging.info("No augmentation found, only normalization will be applied")
+            
+        train_loss, train_accuracy = self.training_eval()
+        val_loss, val_accuracy = self.validate()
+        
+        train_losses.append(train_loss)
+        
+        if self.train_accuracy:
+            train_accuracies.append(train_accuracy)
+        
+        val_losses.append(val_loss)
+        val_accuracies.append(val_accuracy)
+        
+        logging.info(f"Sanity check - Before training")
+            
+        if self.train_accuracy:
+            logging.info(f"Training accuracy: {train_accuracy:.3f}, Training loss: {train_loss:.5f}")
+        else:
+            logging.info(f"Training loss: {train_loss:.3f}")
+            
+        logging.info(f"Validation accuracy: {val_accuracy:.3f}, Validation loss: {val_loss:.5f}")
         
         for epoch in range(self.num_epochs):
             
@@ -186,8 +210,6 @@ class Trainer:
 
                 inputs = inputs.type(self.data_type).to(self.device)
                 labels = labels.to(self.device)
-                
-                # print(inputs, labels)
 
                 # Forward pass
                 self.optimizer.zero_grad()
@@ -202,10 +224,10 @@ class Trainer:
                 loss.backward()
                 self.optimizer.step()
 
-                if (current_step + 1) % self.train_log_frequency == 0:
+                if (current_step + 1) % self.train_log_frequency == 0 or current_step == 0:
                     logging.info(f"Training epoch {epoch + 1}, Iteration {current_step + 1}, "+
                                  f"Loss: {mean(epoch_losses[current_step + 1 - self.train_log_frequency : current_step + 1]):.5f}")
-
+                
                 current_step += 1
 
             if self.train_accuracy:
@@ -247,12 +269,12 @@ class Trainer:
         self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _, _ = self.evaluate(self.trainloader)
-        return losses, top_1_accuracies
+        losses, top_1_acc, _, _, _ = self.evaluate(self.trainloader)
+        return losses, top_1_acc
     
     def validate(self) -> EvaluationResult:
-        losses, top_1_accuracies, _, _, _ = self.evaluate(self.validloader)
-        return losses, top_1_accuracies
+        losses, top_1_acc, _, _, _ = self.evaluate(self.validloader)
+        return losses, top_1_acc
     
     @execution_time
     def test(self):
@@ -260,7 +282,7 @@ class Trainer:
         self.model.load_state_dict(torch.load(self.best_model_path, weights_only=True))
         
         # Remove model file to free memory
-        os.remove(self.best_model_path)
+        #os.remove(self.best_model_path)
         test_result = self.evaluate(self.testloader)
         
         self.test_results = test_result
@@ -272,7 +294,6 @@ class Trainer:
 
         losses = []
         data_len = 0
-        corrects = 0
         current_step = 0
         for inputs, labels in dataloader:
 
@@ -293,11 +314,11 @@ class Trainer:
             if (current_step + 1) % self.val_log_frequency == 0:
                 logging.info(f"Validation iteration {current_step + 1}, " +
                              f"Loss: {mean(losses[current_step + 1 - self.val_log_frequency : current_step + 1]):.5f}")
-
+            elif current_step == 0:
+                logging.info(f"Validation iteration {current_step + 1}, Loss: {loss.item():.5f}")
+            
             # Calculate accuracy
             self.metrics.update(outputs, labels)
-            predictions = torch.argmax(outputs, dim=1)
-            corrects += torch.sum(predictions == labels).item()
             
             current_step += 1
 
@@ -306,13 +327,13 @@ class Trainer:
         
         return EvaluationResult(mean(losses), metrics)
     
-    def save_results(self, cfg: Config, save_path: str, training_time: float, test_time: float):
+    def save_results(self, cfg: Config, save_path: str, transformations: Transforms, training_time: float, test_time: float):
         id = time.strftime("%Y%m%d_%H%M%S")
         
         full_save_path = f"{save_path}/{id}"
         os.makedirs(full_save_path)
         
-        self._save_files(cfg, full_save_path, training_time, test_time)
+        self._save_files(cfg, full_save_path, transformations, training_time, test_time)
         self._save_plots("Loss", full_save_path)
         self._save_plots("Accuracy", full_save_path)
         self._save_confusion_matrix(full_save_path)
@@ -345,8 +366,9 @@ class Trainer:
             
         f.savefig(f"{save_path}/{name.lower()}.png")
     
-    def _save_files(self, cfg: Config, save_path: str, training_time: float, test_time: float):
+    def _save_files(self, cfg: Config, save_path: str, transformations: Transforms, training_time: float, test_time: float):
         result = cfg.to_dict()
+        result["transformations"] = transformations.to_dict()
         result["training_time"] = training_time
         result["test_time"] = test_time
         

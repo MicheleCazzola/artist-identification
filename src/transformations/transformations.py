@@ -77,4 +77,16 @@ class Transforms:
     def __repr__(self):
         return f"Transforms(type={self.type}, keys={self.keys}, mean={self.mean}, std={self.std}, transforms={self.transforms})"
             
-            
+    def to_dict(self) -> dict:
+        transforms_dict = {
+            k: list(str(t) for t in v.transforms) for k, v in self.transforms.items() if isinstance(v, transforms.Compose)
+        }
+        transforms_dict.update({k: {t: list(str(tr) for tr in val.transforms)} for k, v in self.transforms.items() if isinstance(v, dict) for t, val in v.items() })
+        
+        return {
+            "type": self.type,
+            "keys": self.keys,
+            "mean": self.mean,
+            "std": self.std,
+            "transforms": transforms_dict
+        }        

@@ -23,32 +23,33 @@ class DataConfig:
     crop_dim: int = 512
     aug_probs: tuple[float] = (0.2, 0.2, 0.2, 0.5)
     aug_mask: tuple[bool] = (True, True, True, True)
-    augment: bool = True
+    augment: bool = False
     reduce_factor: float = 1.0
-    batch_size: int = 4
+    batch_size: int = 16
     train_split_size: float = 0.75
 
 @dataclass
 class TrainConfig:
-    num_epochs: int = 10
-    train_log_frequency: int = 100
+    num_epochs: int = 2
+    train_log_frequency: int = 30
     val_log_frequency: int = 10
     train_accuracy: bool = False
     num_classes: int = 161
-    lr: float = 1e-3
+    lr: float = 1e-4
     momentum: float = 0.9
-    weight_decay: float = 0
+    weight_decay: float = 1e-5
     scheduler_step_size: int = 10
     scheduler_gamma: float = 0.1
     criterion: str = "cross_entropy"
     optimizer: str = "adam"
     scheduler: str = "step_lr"
     top_k: int = 5
+    sanity_check: bool = True
 
 @dataclass
 class ModelConfig:
     backbone_type: BackboneType = BackboneType.RESNET18
-    use_handcrafted: bool = True
+    use_handcrafted: bool = False
     precision: int = 32
 
 @dataclass
