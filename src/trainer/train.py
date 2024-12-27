@@ -176,26 +176,27 @@ class Trainer:
             logging.warning("Neither augmentation nor normalization transforms found")
         elif self.aug_train == self.norm_eval:
             logging.info("No augmentation found, only normalization will be applied")
+        
+        if self.sanity_check:    
+            train_loss, train_accuracy = self.training_eval()
+            val_loss, val_accuracy = self.validate()
             
-        train_loss, train_accuracy = self.training_eval()
-        val_loss, val_accuracy = self.validate()
-        
-        train_losses.append(train_loss)
-        
-        if self.train_accuracy:
-            train_accuracies.append(train_accuracy)
-        
-        val_losses.append(val_loss)
-        val_accuracies.append(val_accuracy)
-        
-        logging.info(f"Sanity check - Before training")
+            train_losses.append(train_loss)
             
-        if self.train_accuracy:
-            logging.info(f"Training accuracy: {train_accuracy:.3f}, Training loss: {train_loss:.5f}")
-        else:
-            logging.info(f"Training loss: {train_loss:.3f}")
+            if self.train_accuracy:
+                train_accuracies.append(train_accuracy)
             
-        logging.info(f"Validation accuracy: {val_accuracy:.3f}, Validation loss: {val_loss:.5f}")
+            val_losses.append(val_loss)
+            val_accuracies.append(val_accuracy)
+            
+            logging.info(f"Sanity check - Before training")
+                
+            if self.train_accuracy:
+                logging.info(f"Training accuracy: {train_accuracy:.3f}, Training loss: {train_loss:.5f}")
+            else:
+                logging.info(f"Training loss: {train_loss:.3f}")
+                
+            logging.info(f"Validation accuracy: {val_accuracy:.3f}, Validation loss: {val_loss:.5f}")
         
         for epoch in range(self.num_epochs):
             

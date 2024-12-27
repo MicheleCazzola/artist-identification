@@ -24,13 +24,13 @@ class DataConfig:
     aug_probs: tuple[float] = (0.2, 0.2, 0.2, 0.5)
     aug_mask: tuple[bool] = (True, True, True, True)
     augment: bool = False
-    reduce_factor: float = 1.0
+    reduce_factor: float = 0.1
     batch_size: int = 16
     train_split_size: float = 0.75
 
 @dataclass
 class TrainConfig:
-    num_epochs: int = 2
+    num_epochs: int = 10
     train_log_frequency: int = 30
     val_log_frequency: int = 10
     train_accuracy: bool = False
