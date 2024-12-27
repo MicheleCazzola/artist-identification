@@ -5,7 +5,9 @@
 *artist_dataset*
 
 # Output files
-out/
+out/*
+!out/official/
+!out/official/**
 
 # Temporary files
 temp/

@@ -1,6 +1,8 @@
 import logging
 import os
 
+import torch
+
 from src.config.config import Config
 from src.dataset.dataset import ArtistDataset
 from src.dataset.dataloader import create_dataloaders
@@ -108,6 +110,17 @@ def main():
     trainer.save_results(cfg, cfg.path.results_root, transformations, training_time, test_time)
     
     os.remove(cfg.path.norm_stats_file)
+    
+    classifier = trainer.model.classifier.state_dict()
+    weights, biases = classifier["weight"], classifier["bias"]
+    net_weights, hog_features = weights[:, :2048], weights[:, 2048:]
+    print(weights.shape, biases.shape)
+    net_mean, net_std, net_min, net_max = map(lambda x: x, (torch.mean(weights, dim=1), torch.std(weights, dim=1), torch.min(weights, dim=1).values, torch.max(weights, dim=1).values))
+    hog_mean, hog_std, hog_min, hog_max = map(lambda x: x, (torch.mean(hog_features, dim=1), torch.std(hog_features, dim=1), torch.min(hog_features, dim=1).values, torch.max(hog_features, dim=1).values))
+    bias_mean, bias_std, bias_min, bias_max = map(lambda x: x, (torch.mean(biases), torch.std(biases), torch.min(biases), torch.max(biases)))
+    
+    print(f"Net width: {net_max - net_min}, Net mean: {net_mean}, Net std: {net_std}")
+    print(f"HOG width: {hog_max - hog_min}, HOG mean: {hog_mean}, HOG std: {hog_std}")
     
     logging.info(f"Done!")
 

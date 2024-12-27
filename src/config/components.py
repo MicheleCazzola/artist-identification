@@ -44,12 +44,12 @@ class TrainConfig:
     optimizer: str = "adam"
     scheduler: str = "step_lr"
     top_k: int = 5
-    sanity_check: bool = True
+    sanity_check: bool = False
 
 @dataclass
 class ModelConfig:
     backbone_type: BackboneType = BackboneType.RESNET18
-    use_handcrafted: bool = False
+    use_handcrafted: bool = True
     precision: int = 32
 
 @dataclass
