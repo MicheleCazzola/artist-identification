@@ -7,9 +7,9 @@ from torchmetrics.classification import MulticlassAccuracy, MulticlassConfusionM
 class WeightedTopKMCA(MulticlassAccuracy):
     def __init__(self, num_classes: int, top_k: int):
         super(WeightedTopKMCA, self).__init__(num_classes, top_k)
-        self.scores = torch.zeros(num_classes, top_k, dtype=torch.long)
-        self.weights = torch.tensor([1 / (k + 1) for k in range(top_k)])
-        self.samples_per_class = torch.zeros(num_classes)
+        self.scores = torch.zeros(num_classes, top_k, dtype=torch.long).to(self.device)
+        self.weights = torch.tensor([1 / (k + 1) for k in range(top_k)]).to(self.device)
+        self.samples_per_class = torch.zeros(num_classes).to(self.device)
         
     def update(self, outputs: torch.Tensor, labels: torch.Tensor):
         outputs = torch.argsort(outputs, dim=1, descending=True)[:, :self.top_k]
@@ -23,15 +23,15 @@ class WeightedTopKMCA(MulticlassAccuracy):
         # N x C x K
         match_matrix = (labels_one_hot.unsqueeze(2) & outputs_one_hot).long()
         
-        self.scores += match_matrix.sum(dim=0)
-        self.samples_per_class += labels_one_hot.sum(dim=0)
+        self.scores += match_matrix.sum(dim=0).to(self.device)
+        self.samples_per_class += labels_one_hot.sum(dim=0).to(self.device)
             
     def reset(self):
-        self.scores = torch.zeros(self.num_classes, self.top_k)
-        self.samples_per_class = torch.zeros(self.num_classes)
+        self.scores = torch.zeros(self.num_classes, self.top_k).to(self.device)
+        self.samples_per_class = torch.zeros(self.num_classes).to(self.device)
     
     def compute(self):
-        weighted_scores = (self.scores * self.weights).sum(dim=1) / self.samples_per_class
+        weighted_scores = (self.scores * self.weights).sum(dim=1).to(self.device) / self.samples_per_class
         return weighted_scores.mean()
 
 class Metrics(Metric):
