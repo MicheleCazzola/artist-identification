@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 import logging
 import os
@@ -22,10 +22,10 @@ from .metrics import Metrics
 
 @dataclass
 class TrainingResult:
-    train_losses: list
-    train_accuracies: list
-    val_losses: list
-    val_accuracies: list
+    train_losses: list = field(default_factory=list)
+    train_accuracies: list = field(default_factory=list)
+    val_losses: list = field(default_factory=list)
+    val_accuracies: list = field(default_factory=list)
     best_num_epochs: int = None
     
     def __iter__(self):
@@ -34,8 +34,8 @@ class TrainingResult:
     
 @dataclass
 class EvaluationResult:
-    loss: float
-    metrics: dict
+    loss: float = field(default_factory=list)
+    metrics: dict = field(default_factory=dict.fromkeys(["top-1_accuracy", "top-5_accuracy", "mca", "weighted_top-5_mca", "confusion_matrix"]))
 
     def __iter__(self):
         return iter((self.loss, *self.metrics.values()))
@@ -79,9 +79,12 @@ class Trainer:
         
         self.best_num_epochs: int = None
         self.best_model_path: str = None
+        self.save_models: bool = None
         
         self.training_results: TrainingResult = None
         self.test_results: EvaluationResult = None
+        
+        
         
     def build(self, cfg: Config):
         
@@ -99,11 +102,21 @@ class Trainer:
         self.train_accuracy = cfg.train.train_accuracy
         self.best_model_path = cfg.path.best_model_path
         self.sanity_check = cfg.train.sanity_check
+        self.save_models = cfg.train.save_models
         
         self._set_precision(cfg.model.precision)
         self._prepare_training(cfg.train.criterion, cfg.train.optimizer, cfg.train.scheduler)
         
         self.metrics = Metrics(num_classes=cfg.train.num_classes, top_k=cfg.train.top_k)
+        
+        self.training_results: TrainingResult = TrainingResult()
+        self.test_results: EvaluationResult = EvaluationResult(
+            [], 
+            dict(zip(
+                ["top-1_accuracy", "top-5_accuracy", "mca", "weighted_top-5_mca", "confusion_matrix"],
+                [0,0,0,0, [[0] * cfg.train.num_classes] * cfg.train.num_classes]
+            ))
+        )
         
         self.model = self.model.to(self.device)
         self.metrics = self.metrics.to(self.device)
@@ -237,12 +250,16 @@ class Trainer:
                 train_loss = mean(epoch_losses)
                 train_accuracy = None
                 
+            if self.save_models:
+                torch.save(self.model.state_dict(), f"{self.best_model_path}_{epoch+1}.pth")
+                
             val_loss, val_accuracy = self.validate()
+            
             
             if val_accuracy > best_accuracy or val_accuracy == best_accuracy and val_loss < val_losses[best_num_epochs - 1]:
                 best_accuracy = val_accuracy
                 best_num_epochs = epoch + 1
-                torch.save(self.model.state_dict(), self.best_model_path)
+                torch.save(self.model.state_dict(), f"{self.best_model_path}.pth")
 
             logging.info(f"End of Epoch {epoch+1}")
             
@@ -270,20 +287,21 @@ class Trainer:
         self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        losses, top_1_acc, _, _, _ = self.evaluate(self.trainloader)
+        losses, top_1_acc, _, _, _, _ = self.evaluate(self.trainloader)
         return losses, top_1_acc
     
     def validate(self) -> EvaluationResult:
-        losses, top_1_acc, _, _, _ = self.evaluate(self.validloader)
+        losses, top_1_acc, _, _, _, _ = self.evaluate(self.validloader)
         return losses, top_1_acc
     
     @execution_time
-    def test(self):
+    def test(self, model_path: str = None):
         
-        self.model.load_state_dict(torch.load(self.best_model_path, weights_only=True))
+        if model_path is not None:
+            self.model.load_state_dict(torch.load(model_path, weights_only=True))
+        else:
+            self.model.load_state_dict(torch.load(f"{self.best_model_path}.pth", weights_only=True))
         
-        # Remove model file to free memory
-        #os.remove(self.best_model_path)
         test_result = self.evaluate(self.testloader)
         
         self.test_results = test_result
@@ -328,16 +346,28 @@ class Trainer:
         
         return EvaluationResult(mean(losses), metrics)
     
-    def save_results(self, cfg: Config, save_path: str, transformations: Transforms, training_time: float, test_time: float):
+    def save_results(
+        self,
+        cfg: Config,
+        save_path: str,
+        transformations: Transforms,
+        training_time: float,
+        test_time: float,
+        train_only: bool,
+        inference_only: bool
+    ):
         id = time.strftime("%Y%m%d_%H%M%S")
         
         full_save_path = f"{save_path}/{id}"
         os.makedirs(full_save_path)
         
         self._save_files(cfg, full_save_path, transformations, training_time, test_time)
-        self._save_plots("Loss", full_save_path)
-        self._save_plots("Accuracy", full_save_path)
-        self._save_confusion_matrix(full_save_path)
+        
+        if not inference_only:
+            self._save_plots("Loss", full_save_path)
+            self._save_plots("Accuracy", full_save_path)
+        if not train_only:
+            self._save_confusion_matrix(full_save_path)
     
     def _save_plots(self, name: str, save_path: str):
         

@@ -36,24 +36,24 @@
 - metrics are computed on a test set by default, otherwise look for (*)
 - HOG features are extracted from a 224x224 center-cropped image, obtained from a 256x256 downsampled image (original is 512x512)
 
-| Backbone Model | HOG | Batch size | Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Test loss | Test epochs | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Training time (mins) (***) | Output folder |
-|:--------------:|:---:|:----------:|:-------------:|:------------:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| Random crop | No | 32 | 1e-2 | 10 | 0.1 | 1e-6 | | | | | 2 | 1 | | | | | | |[link]() |
-| Random crop | 81 | 32 | 1e-2 | 10 | 0.1 | 1e-6 | | | | | 2 | 1 | | | | | | |[link]() |
-| ResNet18 | No | 16 | 1e-4 | - | - | 1e-5 | - | - | - | - | 2 | 1 | 4.1 | 2 | 5.2 | 18.6 | 5.2 | ~32 |[link](/out/official/20241227_184600/) |
-| ResNet18 | 81 | 16 | 1e-4 | - | - | 1e-5 | - | - | - | - | 2 | 1 | 5.01 | 2 | 5.1 | 18.6 | 5.1 | ~28 |[link](/out/official/20241227_184500/) |
-| ResNet18 | No | 16 | | | | | | | | | | | | | | | | |[link]() |
-| ResNet18 | 81 | 16 | | | | | | | | | | | | | | | | |[link]() |
-| MobileNetV3-S | No | 24 | | | | | | | | | | | | | | | | |[link]() |
-| MobileNetV3-S | 81 | 24 | | | | | | | | | | | | | | | | |[link]() |
-| EfficientNet-B0 | No | 8 | | | | | | | | | | | | | | | | |[link]() |
-| EfficientNet-B0 | 81 | 8 | | | | | | | | | | | | | | | | | [link]() |
-| RegNetX-400MF | No | 16 | | | | | | | | | | | | | | | | | [link]() |
-| RegNetX-400MF | 81 | 16 | | | | | | | | | | | | | | | | |[link]() |
-| ShuffleNetV2-X0.5 | No | 24 | | | | | | | | | | | | | | | | |[link]() |
-| ShuffleNetV2-X0.5 | 81 | 24 | | | | | | | | | | | | | | | | |[link]() |
-| MNasNet-X0.5 | No | 16 | | | | | | | | | | | | | | | | |[link]() |
-| MNasNet-X0.5 | 81 | 16 | | | | | | | | | | | | | | | | |[link]() |
+| Backbone Model | HOG | Batch size | Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Test loss | Test epochs | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Training time (mins) (***) | Output folder |
+|:--------------:|:---:|:----------:|:-------------:|:------------:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Random crop | No | 32 | 1e-2 | 10 | 0.1 | 1e-6 | | | | | 2 | 1 | | | | | | | |[link]() |
+| Random crop | 81 | 32 | 1e-2 | 10 | 0.1 | 1e-6 | | | | | 2 | 1 | | | | | | | |[link]() |
+| ResNet18 | No | 16 | 1e-4 | - | - | 1e-5 | - | - | - | - | 2 | 1 | 4.1 | 2 | 5.2 | 18.6 | 5.2 | - | ~32 |[link](/out/official/20241227_184600/) |
+| ResNet18 | 81 | 16 | 1e-4 | - | - | 1e-5 | - | - | - | - | 2 | 1 | 5.01 | 2 | 5.1 | 18.6 | 5.1 | - | ~28 |[link](/out/official/20241227_184500/) |
+| ResNet18 | No | 16 | | | | | | | | | | | | | | | | | |[link]() |
+| ResNet18 | 81 | 16 | | | | | | | | | | | | | | | | | |[link]() |
+| MobileNetV3-S | No | 24 | | | | | | | | | | | | | | | | | |[link]() |
+| MobileNetV3-S | 81 | 24 | | | | | | | | | | | | | | | | | |[link]() |
+| EfficientNet-B0 | No | 8 | | | | | | | | | | | | | | | | | |[link]() |
+| EfficientNet-B0 | 81 | 8 | | | | | | | | | | | | | | | | | | [link]() |
+| RegNetX-400MF | No | 16 | | | | | | | | | | | | | | | | | | [link]() |
+| RegNetX-400MF | 81 | 16 | | | | | | | | | | | | | | | | | |[link]() |
+| ShuffleNetV2-X0.5 | No | 24 | | | | | | | | | | | | | | | | | |[link]() |
+| ShuffleNetV2-X0.5 | 81 | 24 | | | | | | | | | | | | | | | | | |[link]() |
+| MNasNet-X0.5 | No | 16 | | | | | | | | | | | | | | | | | |[link]() |
+| MNasNet-X0.5 | 81 | 16 | | | | | | | | | | | | | | | | | |[link]() |
 
 (\*) Value computed on training set  
 (*\*) In the form "probability - (param1, param2, ...)"  

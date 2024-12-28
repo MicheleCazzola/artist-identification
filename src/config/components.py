@@ -8,7 +8,7 @@ class PathConfig:
     default_root: str = "./data/artist_dataset"
     stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./temp/norm_stats.json"
-    best_model_path: str = "./temp/best_model.pth"
+    best_model_path: str = "./temp/best_model"
     results_root: str = "."
 
 @dataclass
@@ -24,18 +24,18 @@ class DataConfig:
     aug_probs: tuple[float] = (0.2, 0.2, 0.2, 0.5)
     aug_mask: tuple[bool] = (True, True, True, True)
     augment: bool = False
-    reduce_factor: float = 0.1
+    reduce_factor: float = 1.0
     batch_size: int = 16
     train_split_size: float = 0.75
 
 @dataclass
 class TrainConfig:
-    num_epochs: int = 10
+    num_epochs: int = 2
     train_log_frequency: int = 30
     val_log_frequency: int = 10
     train_accuracy: bool = False
     num_classes: int = 161
-    lr: float = 1e-4
+    lr: float = 3e-4
     momentum: float = 0.9
     weight_decay: float = 1e-5
     scheduler_step_size: int = 10
@@ -45,11 +45,14 @@ class TrainConfig:
     scheduler: str = "step_lr"
     top_k: int = 5
     sanity_check: bool = False
+    save_models: bool = True
+    train_only: bool = False
+    inference_only: bool = False
 
 @dataclass
 class ModelConfig:
     backbone_type: BackboneType = BackboneType.RESNET18
-    use_handcrafted: bool = True
+    use_handcrafted: bool = False
     precision: int = 32
 
 @dataclass
