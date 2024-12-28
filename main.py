@@ -93,35 +93,40 @@ def main():
     trainer.build(cfg)
     trainer.add_aug_norm_transforms(transformations.get("aug"))
     
-    logging.info(f"Training...")
+    training_time = test_time = None
     
-    trainer.train()
-    training_time = trainer.train.time
-    
-    logging.info(f"Inference...")
-    
-    trainer.test()
-    test_time = trainer.test.time
-    
-    print(f"Test accuracy: {trainer.test_results.metrics['top-1_accuracy']:.3f}, Test loss: {trainer.test_results.loss:.5f}")
-    
+    if not cfg.train.inference_only:
+        logging.info(f"Training...")
+        
+        trainer.train()
+        training_time = trainer.train.time
+        
+    if not cfg.train.train_only:
+        logging.info(f"Inference...")
+        
+        if cfg.train.inference_only:
+            model_path = f"{cfg.path.best_model_path}.pth"
+            trainer.test(model_path)
+        else:
+            trainer.test()
+            
+        test_time = trainer.test.time
+        
+        print(f"Test accuracy: {trainer.test_results.metrics['top-1_accuracy']:.3f}, Test loss: {trainer.test_results.loss:.5f}")
+        
     logging.info(f"Saving results...")
     
-    trainer.save_results(cfg, cfg.path.results_root, transformations, training_time, test_time)
+    trainer.save_results(
+        cfg, 
+        cfg.path.results_root, 
+        transformations, 
+        training_time,
+        test_time,
+        cfg.train.train_only,
+        cfg.train.inference_only
+    )
     
     os.remove(cfg.path.norm_stats_file)
-    
-    classifier = trainer.model.classifier.state_dict()
-    weights, biases = classifier["weight"], classifier["bias"]
-    net_weights, hog_features = weights[:, :2048], weights[:, 2048:]
-    print(net_weights.shape, hog_features.shape, biases.shape)
-    net_mean, net_std, net_min, net_max = net_weights.mean(), net_weights.std(), net_weights.min(), net_weights.max()
-    hog_mean, hog_std, hog_min, hog_max = hog_features.mean(), hog_features.std(), hog_features.min(), hog_features.max()
-    
-    print(net_max)
-    
-    print(f"Net width: {net_max - net_min:.3f}, Net mean: {net_mean:.3f}, Net std: {net_std:.3f}")
-    print(f"HOG width: {hog_max - hog_min:.3f}, HOG mean: {hog_mean:.3f}, HOG std: {hog_std:.3f}")
     
     logging.info(f"Done!")
 

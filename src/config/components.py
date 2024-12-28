@@ -8,7 +8,7 @@ class PathConfig:
     default_root: str = "./data/artist_dataset"
     stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./temp/norm_stats.json"
-    best_model_path: str = "./temp/best_model.pth"
+    best_model_path: str = "./temp/best_model"
     results_root: str = "."
 
 @dataclass
@@ -24,7 +24,7 @@ class DataConfig:
     aug_probs: tuple[float] = (0.2, 0.2, 0.2, 0.5)
     aug_mask: tuple[bool] = (True, True, True, True)
     augment: bool = False
-    reduce_factor: float = 0.1
+    reduce_factor: float = 1.0
     batch_size: int = 16
     train_split_size: float = 0.75
 
@@ -45,6 +45,9 @@ class TrainConfig:
     scheduler: str = "step_lr"
     top_k: int = 5
     sanity_check: bool = False
+    save_models: bool = True
+    train_only: bool = False
+    inference_only: bool = False
 
 @dataclass
 class ModelConfig:

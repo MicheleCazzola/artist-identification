@@ -43,13 +43,15 @@ class Config:
                 data=DataConfig(
                     batch_size=2,
                     train_split_size=0.66,
-                    reduce_factor=0.7
+                    reduce_factor=1
                 ),
                 train=TrainConfig(
                     num_epochs=1,
                     train_log_frequency=2,
                     val_log_frequency=1,
-                    num_classes=3
+                    num_classes=3,
+                    train_only=False,
+                    inference_only=True
                 ),
                 model=ModelConfig(
                     precision=32

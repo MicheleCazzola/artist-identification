@@ -9,7 +9,8 @@ from .components import BottleneckBlock, JoinModule, HandCraftedFeatures
 
 class MultiBranchArtistNetwork(nn.Module):
     def __init__(
-        self, num_classes: int,
+        self,
+        num_classes: int,
         stn: BackboneType = None,
         use_handcrafted: bool = True,
         hog_params: HOGConfig = None, 
@@ -22,6 +23,7 @@ class MultiBranchArtistNetwork(nn.Module):
         
         assert not use_handcrafted or hog_params is not None, "HOG configuration must be provided if handcrafted features are used"
         
+        self.num_classes = num_classes
         self.dtype = self._get_dtype(precision)
         
         self.roi_extractor = ROIsProposal(256, 224, stn=stn).type(self.dtype)
