@@ -52,7 +52,7 @@ class TrainConfig:
 @dataclass
 class ModelConfig:
     backbone_type: BackboneType = BackboneType.RESNET18
-    use_handcrafted: bool = False
+    use_handcrafted: bool = True
     precision: int = 32
 
 @dataclass

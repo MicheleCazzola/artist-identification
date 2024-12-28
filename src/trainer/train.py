@@ -413,7 +413,7 @@ class Trainer:
         confusion_matrix = self.test_results.metrics["confusion_matrix"]
         
         f = plt.figure("Confusion Matrix")
-        plt.imshow(confusion_matrix, cmap="coolwarm", interpolation='nearest')
+        plt.imshow(confusion_matrix, cmap="coolwarm", interpolation='nearest', vmin=0, vmax=1)
         plt.colorbar()
         plt.xlabel("Predicted")
         plt.ylabel("Actual")
