@@ -126,7 +126,8 @@ def main():
         cfg.train.inference_only
     )
     
-    os.remove(cfg.path.norm_stats_file)
+    if os.path.exists(cfg.path.norm_stats_file):
+        os.remove(cfg.path.norm_stats_file)
     
     logging.info(f"Done!")
 

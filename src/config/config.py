@@ -41,6 +41,7 @@ class Config:
                     num_workers=0
                 ),
                 data=DataConfig(
+                    pretrained_stats=True,
                     batch_size=2,
                     train_split_size=0.66,
                     reduce_factor=1

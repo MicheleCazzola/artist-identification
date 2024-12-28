@@ -388,12 +388,11 @@ class Trainer:
         plt.ylabel(name)
         plt.grid(which="both")
         plt.legend()
-        plt.xlim(0, self.num_epochs - 0.8)
+        plt.xlim(-0.05, self.num_epochs - 0.8)
         
-        if name == "Accuracy":
-            plt.ylim(-0.01, max(values[0] + values[1]) + 0.1)
+        plt.ylim(-0.05, max(values[0] + values[1]) + 1)
             
-        f.savefig(f"{save_path}/{name.lower()}.png")
+        f.savefig(f"{save_path}/{name.lower()}.png", dpi=300)
     
     def _save_files(self, cfg: Config, save_path: str, transformations: Transforms, training_time: float, test_time: float):
         result = cfg.to_dict()
@@ -410,14 +409,14 @@ class Trainer:
     def _save_confusion_matrix(self, save_path: str):
         confusion_matrix = self.test_results.metrics["confusion_matrix"]
         
-        f = plt.figure("Confusion Matrix")
+        f = plt.figure("Confusion Matrix", figsize=(16,12))
         plt.imshow(confusion_matrix, cmap="coolwarm", interpolation='nearest', vmin=0, vmax=1)
-        plt.colorbar()
-        plt.xlabel("Predicted")
-        plt.ylabel("Actual")
-        plt.title("Confusion Matrix")
+        plt.colorbar().ax.tick_params(labelsize=18)
+        plt.xlabel("Predicted", fontsize=24, labelpad=10)
+        plt.ylabel("Actual", fontsize=24, labelpad=10)
+        plt.title("Confusion Matrix", fontsize=32, pad=20)
         
-        plt.xticks(range(0, len(confusion_matrix), max(1, len(confusion_matrix) // 4)))
-        plt.yticks(range(0, len(confusion_matrix), max(1, len(confusion_matrix) // 4)))
+        plt.xticks(range(0, len(confusion_matrix), max(1, len(confusion_matrix) // 4)), fontsize=18)
+        plt.yticks(range(0, len(confusion_matrix), max(1, len(confusion_matrix) // 4)), fontsize=18)
         
-        f.savefig(f"{save_path}/confusion_matrix.png")
+        f.savefig(f"{save_path}/confusion_matrix.png", dpi=100)
