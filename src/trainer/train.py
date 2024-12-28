@@ -84,8 +84,6 @@ class Trainer:
         self.training_results: TrainingResult = None
         self.test_results: EvaluationResult = None
         
-        
-        
     def build(self, cfg: Config):
         
         self.device = torch.device(cfg.env.device)

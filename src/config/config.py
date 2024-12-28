@@ -51,7 +51,7 @@ class Config:
                     val_log_frequency=1,
                     num_classes=3,
                     train_only=False,
-                    inference_only=True
+                    inference_only=False
                 ),
                 model=ModelConfig(
                     precision=32
