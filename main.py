@@ -13,6 +13,8 @@ from src.model.network import MultiBranchArtistNetwork
 import sys
 
 
+
+
 # def check(*dataloaders):
 #     for dataloader in dataloaders:
         
@@ -51,6 +53,7 @@ def main():
         reduction_factor=cfg.data.reduce_factor,
     )
     
+    
     if not cfg.data.pretrained_stats:
         # Compute mean and standard deviation (only for training set) for normalization
         trainloader_stats = create_dataloaders(
@@ -77,7 +80,7 @@ def main():
         cfg.data.batch_size,
         num_workers=cfg.env.num_workers
     )
-
+    
     # Model definition
     model = MultiBranchArtistNetwork(
         num_classes=cfg.train.num_classes,

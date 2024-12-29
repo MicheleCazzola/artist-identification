@@ -65,6 +65,11 @@ class ArtistDataset(VisionDataset):
     
     def get_labels(self) -> torch.Tensor:
         return self.labels
+    
+    def get_histogram(self, indices = None) -> torch.Tensor:
+        indices = range(0, len(self)) if indices is None else indices
+        indices = torch.tensor(indices) if not isinstance(indices, torch.Tensor) else indices
+        return torch.tensor(pd.Series(self.labels[indices]).value_counts(normalize=True, sort=False).values, dtype=torch.float32)
         
     @staticmethod
     def create(

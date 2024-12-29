@@ -52,7 +52,8 @@ class Config:
                     val_log_frequency=1,
                     num_classes=3,
                     train_only=False,
-                    inference_only=False
+                    inference_only=False,
+                    criterion="weighted_cross_entropy",
                 ),
                 model=ModelConfig(
                     precision=32

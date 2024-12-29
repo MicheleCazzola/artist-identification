@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from matplotlib import pyplot as plt
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from torchvision import transforms
 from torchvision.transforms import Compose
 
@@ -139,6 +139,16 @@ class Trainer:
         else:
             self.aug_train = transforms["train"]
             self.norm_eval = transforms["val"]
+            
+    def _get_weights(self):
+        
+        if isinstance(self.trainloader.dataset, Subset):
+            occ_labels = self.trainloader.dataset.dataset.get_histogram(self.trainloader.dataset.indices)
+        else:
+            occ_labels = self.trainloader.dataset.get_histogram()
+        
+        weights = 1 / occ_labels
+        return weights / weights.sum()
         
     def _prepare_training(
         self,
@@ -149,6 +159,9 @@ class Trainer:
         
         if criterion == "cross_entropy":
             self.criterion = nn.CrossEntropyLoss()
+        elif criterion == "weighted_cross_entropy":
+            weights = self._get_weights()
+            self.criterion = nn.CrossEntropyLoss(weight=weights)
         else:
             raise ValueError(f"Criterion {criterion} not supported")
         
