@@ -39,7 +39,8 @@
 | Backbone Model | HOG | Batch size | Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Test loss | Test epochs | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Training time (mins) (***) | Output folder |
 |:--------------:|:---:|:----------:|:-------------:|:------------:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | Random crop | No | 32 | 1e-2 | 10 | 0.1 | 1e-6 | | | | | 2 | 1 |  |  |  | | | | |[link]() |
-| Random crop | 81 | 32 | 1e-2 | 10 | 0.1 | 1e-6 | 0.2 | 0.2 | 0.2 | 0.5 | 2 | 1 | 4.7 | 2 | 1.0 | 4.2 | 1.0 | | ~20 |[link]() |
+| Random crop | No | 32 | 1e-3 | 10 | 0.1 | 1e-6 | - | - | - | - | 2 | 1 | 4.3 | 2 | 10.4 | 26.6 | 2.7 | 5.3 | ~20 |[link](./out/official/20241229_184457/) |
+| Random crop | No | 32 | 1e-4 | 10 | 0.1 | 1e-6 | - | - | - | - | 2 | 1 | 3.8 | 2 | 18.3 | 37.4 | 7.4 | 12.3 | ~21 |[link](./out/official/20241229_184711/) |
 | ResNet18 | 81 | 16 | 1e-4 | - | - | 1e-5 | - | - | - | - | 2 | 1 | 3.91 | 2 | 16.35 | 36.17 | 6 | 10.6 | ~33 |[link](/out/official/20241229_184539/) |
 | ResNet18 | No | 16 | 1e-4 | - | - | 1e-5 | - | - | - | - | 2 | 1 | 4 | 2 | 14.5 | 33.5 | 5.5 | 9.84 | ~28 |[link](/out/official/20241229_182211/) |
 | ResNet18 | No | 16 | | | | | | | | | | | | | | | | | |[link]() |
