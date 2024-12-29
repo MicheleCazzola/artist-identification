@@ -47,7 +47,7 @@ class Config:
                     reduce_factor=1
                 ),
                 train=TrainConfig(
-                    num_epochs=1,
+                    num_epochs=3,
                     train_log_frequency=2,
                     val_log_frequency=1,
                     num_classes=3,

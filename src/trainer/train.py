@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 import json
 import logging
+import math
 import os
 import time
 from statistics import mean
@@ -285,12 +286,12 @@ class Trainer:
         self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        losses, top_1_acc, _, _, _, _ = self.evaluate(self.trainloader)
-        return losses, top_1_acc
+        losses, top_1_acc, _, _, top_k_weighted_mca, _ = self.evaluate(self.trainloader)
+        return losses, top_k_weighted_mca
     
     def validate(self) -> EvaluationResult:
-        losses, top_1_acc, _, _, _, _ = self.evaluate(self.validloader)
-        return losses, top_1_acc
+        losses, top_1_acc, _, _, top_k_weighted_mca, _ = self.evaluate(self.validloader)
+        return losses, top_k_weighted_mca
     
     @execution_time
     def test(self, model_path: str = None):

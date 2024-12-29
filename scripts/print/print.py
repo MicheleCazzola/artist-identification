@@ -7815,7 +7815,7 @@ INFO:root:Done!
 test = False
 train_loss = []
 val_loss = []
-for line in string8.split("\n"):
+for line in string6.split("\n"):
     line = line.strip()
     
     if line.startswith("INFO:root:"):
@@ -7841,7 +7841,8 @@ print(len(val_loss))
 import matplotlib.pyplot as plt
 
 plt.plot(train_loss, label="Train")
-plt.plot(val_loss[-len(train_loss):], label="Validation")
+#plt.plot(val_loss[-len(train_loss):], label="Validation")
 plt.ylim(0, max(max(train_loss), max(val_loss)) + 0.5)
+plt.grid(which='both')
 plt.legend()
 plt.show()

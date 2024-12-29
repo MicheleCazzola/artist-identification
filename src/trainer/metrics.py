@@ -12,13 +12,13 @@ class WeightedTopKMCA(MulticlassAccuracy):
         self.samples_per_class = torch.zeros(num_classes)
         
     def update(self, outputs: torch.Tensor, labels: torch.Tensor):
-        outputs = torch.argsort(outputs, dim=1, descending=True)[:, :self.top_k]
+        preds = torch.topk(outputs, self.top_k, dim=1).indices
         
         # N x C
         labels_one_hot = F.one_hot(labels.long(), num_classes=self.num_classes).long()
         
         # N x C x K
-        outputs_one_hot = F.one_hot(outputs, num_classes=self.num_classes).long().transpose(1, 2)
+        outputs_one_hot = F.one_hot(preds, num_classes=self.num_classes).long().transpose(1, 2)
         
         # N x C x K
         match_matrix = (labels_one_hot.unsqueeze(2) & outputs_one_hot).long()
@@ -32,8 +32,9 @@ class WeightedTopKMCA(MulticlassAccuracy):
         self.weights = self.weights.to(self.device)
     
     def compute(self):
-        weighted_scores = (self.scores * self.weights).sum(dim=1).to(self.samples_per_class.device) / self.samples_per_class
-        return weighted_scores.mean()
+        return torch.mean(
+            (self.scores * self.weights).sum(dim=1).to(self.samples_per_class.device) / self.samples_per_class
+        )
 
 class Metrics(Metric):
     def __init__(self, num_classes: int, top_k: int):
@@ -45,9 +46,9 @@ class Metrics(Metric):
         
         self.num_classes: int = num_classes
         self.top_k: int = top_k
-        self.top_1_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes)
-        self.top_k_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes, top_k)
-        self.mca: MulticlassAccuracy = MulticlassAccuracy(num_classes, average=None)
+        self.top_1_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes, average="micro")
+        self.top_k_accuracy: MulticlassAccuracy = MulticlassAccuracy(num_classes, top_k, average="micro")
+        self.mca: MulticlassAccuracy = MulticlassAccuracy(num_classes, average="macro")
         self.weighted_top_k_mca: WeightedTopKMCA = WeightedTopKMCA(num_classes, top_k)
         self.confusion_matrix: MulticlassConfusionMatrix = MulticlassConfusionMatrix(num_classes, normalize="true")
         
@@ -68,7 +69,7 @@ class Metrics(Metric):
     def compute(self):
         top_1_accuracy = self.top_1_accuracy.compute().item()
         top_k_accuracy = self.top_k_accuracy.compute().item()
-        mca_result = self.mca.compute().mean().item()
+        mca_result = self.mca.compute().item()
         weighted_top_k_mca = self.weighted_top_k_mca.compute().item()
         top_1_confusion_matrix = self.confusion_matrix.compute().tolist()
         
