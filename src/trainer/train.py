@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 import json
 import logging
-import math
 import os
 import time
 from statistics import mean
@@ -253,7 +252,6 @@ class Trainer:
                 torch.save(self.model.state_dict(), f"{self.best_model_path}_{epoch+1}.pth")
                 
             val_loss, val_accuracy = self.validate()
-            
             
             if val_accuracy > best_accuracy or val_accuracy == best_accuracy and val_loss < val_losses[best_num_epochs - 1]:
                 best_accuracy = val_accuracy
