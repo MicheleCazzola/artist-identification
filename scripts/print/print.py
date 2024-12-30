@@ -13665,10 +13665,678 @@ INFO:root:Saving results...
 INFO:root:Done!
 """
 
+string18 = """
+INFO:root:{'path': PathConfig(default_root='./data/artist_dataset', test_root='./data/kaggle_test', stats_file='./scripts/stats/stats.json', norm_stats_file='./temp/norm_stats.json', best_model_path='./temp/best_model', results_root='.', trained_model_path='./temp/best_model_3.pth', predictions_path='./temp/predictions.csv'), 'env': EnvConfig(device='cuda', num_workers=2), 'data': DataConfig(pretrained_stats=False, resize_dim=512, crop_dim=512, aug_probs=(0.2, 0.2, 0.2, 0.5), aug_mask=(True, True, True, True), augment=False, reduce_factor=1.0, batch_size=32, train_split_size=0.75), 'train': TrainConfig(num_epochs=6, train_log_frequency=20, val_log_frequency=8, train_accuracy=False, num_classes=161, lr=0.0001, momentum=0.9, weight_decay=1e-06, scheduler_step_size=10, scheduler_gamma=0.1, criterion='cross_entropy', optimizer='adam', scheduler='step_lr', top_k=5, sanity_check=False, save_models=True, train_only=False, inference_only=False, save=False), 'model': ModelConfig(backbone_type=None, use_handcrafted=False, precision=32), 'hog': HOGConfig(downsample_size=256, crop_size=224, channel_coefficients=(0.2989, 0.587, 0.114), orientations=9, pixels_per_cell=74, cells_per_block=1, transform_sqrt=False, feature_vector=True, normalization='L2-Hys')}
+INFO:root:Processing batch 1/398
+INFO:root:Processing batch 2/398
+INFO:root:Processing batch 3/398
+INFO:root:Processing batch 4/398
+INFO:root:Processing batch 5/398
+INFO:root:Processing batch 6/398
+INFO:root:Processing batch 7/398
+INFO:root:Processing batch 8/398
+INFO:root:Processing batch 9/398
+INFO:root:Processing batch 10/398
+INFO:root:Processing batch 11/398
+INFO:root:Processing batch 12/398
+INFO:root:Processing batch 13/398
+INFO:root:Processing batch 14/398
+INFO:root:Processing batch 15/398
+INFO:root:Processing batch 16/398
+INFO:root:Processing batch 17/398
+INFO:root:Processing batch 18/398
+INFO:root:Processing batch 19/398
+INFO:root:Processing batch 20/398
+INFO:root:Processing batch 21/398
+INFO:root:Processing batch 22/398
+INFO:root:Processing batch 23/398
+INFO:root:Processing batch 24/398
+INFO:root:Processing batch 25/398
+INFO:root:Processing batch 26/398
+INFO:root:Processing batch 27/398
+INFO:root:Processing batch 28/398
+INFO:root:Processing batch 29/398
+INFO:root:Processing batch 30/398
+INFO:root:Processing batch 31/398
+INFO:root:Processing batch 32/398
+INFO:root:Processing batch 33/398
+INFO:root:Processing batch 34/398
+INFO:root:Processing batch 35/398
+INFO:root:Processing batch 36/398
+INFO:root:Processing batch 37/398
+INFO:root:Processing batch 38/398
+INFO:root:Processing batch 39/398
+INFO:root:Processing batch 40/398
+INFO:root:Processing batch 41/398
+INFO:root:Processing batch 42/398
+INFO:root:Processing batch 43/398
+INFO:root:Processing batch 44/398
+INFO:root:Processing batch 45/398
+INFO:root:Processing batch 46/398
+INFO:root:Processing batch 47/398
+INFO:root:Processing batch 48/398
+INFO:root:Processing batch 49/398
+INFO:root:Processing batch 50/398
+INFO:root:Processing batch 51/398
+INFO:root:Processing batch 52/398
+INFO:root:Processing batch 53/398
+INFO:root:Processing batch 54/398
+INFO:root:Processing batch 55/398
+INFO:root:Processing batch 56/398
+INFO:root:Processing batch 57/398
+INFO:root:Processing batch 58/398
+INFO:root:Processing batch 59/398
+INFO:root:Processing batch 60/398
+INFO:root:Processing batch 61/398
+INFO:root:Processing batch 62/398
+INFO:root:Processing batch 63/398
+INFO:root:Processing batch 64/398
+INFO:root:Processing batch 65/398
+INFO:root:Processing batch 66/398
+INFO:root:Processing batch 67/398
+INFO:root:Processing batch 68/398
+INFO:root:Processing batch 69/398
+INFO:root:Processing batch 70/398
+INFO:root:Processing batch 71/398
+INFO:root:Processing batch 72/398
+INFO:root:Processing batch 73/398
+INFO:root:Processing batch 74/398
+INFO:root:Processing batch 75/398
+INFO:root:Processing batch 76/398
+INFO:root:Processing batch 77/398
+INFO:root:Processing batch 78/398
+INFO:root:Processing batch 79/398
+INFO:root:Processing batch 80/398
+INFO:root:Processing batch 81/398
+INFO:root:Processing batch 82/398
+INFO:root:Processing batch 83/398
+INFO:root:Processing batch 84/398
+INFO:root:Processing batch 85/398
+INFO:root:Processing batch 86/398
+INFO:root:Processing batch 87/398
+INFO:root:Processing batch 88/398
+INFO:root:Processing batch 89/398
+INFO:root:Processing batch 90/398
+INFO:root:Processing batch 91/398
+INFO:root:Processing batch 92/398
+INFO:root:Processing batch 93/398
+INFO:root:Processing batch 94/398
+INFO:root:Processing batch 95/398
+INFO:root:Processing batch 96/398
+INFO:root:Processing batch 97/398
+INFO:root:Processing batch 98/398
+INFO:root:Processing batch 99/398
+INFO:root:Processing batch 100/398
+INFO:root:Processing batch 101/398
+INFO:root:Processing batch 102/398
+INFO:root:Processing batch 103/398
+INFO:root:Processing batch 104/398
+INFO:root:Processing batch 105/398
+INFO:root:Processing batch 106/398
+INFO:root:Processing batch 107/398
+INFO:root:Processing batch 108/398
+INFO:root:Processing batch 109/398
+INFO:root:Processing batch 110/398
+INFO:root:Processing batch 111/398
+INFO:root:Processing batch 112/398
+INFO:root:Processing batch 113/398
+INFO:root:Processing batch 114/398
+INFO:root:Processing batch 115/398
+INFO:root:Processing batch 116/398
+INFO:root:Processing batch 117/398
+INFO:root:Processing batch 118/398
+INFO:root:Processing batch 119/398
+INFO:root:Processing batch 120/398
+INFO:root:Processing batch 121/398
+INFO:root:Processing batch 122/398
+INFO:root:Processing batch 123/398
+INFO:root:Processing batch 124/398
+INFO:root:Processing batch 125/398
+INFO:root:Processing batch 126/398
+INFO:root:Processing batch 127/398
+INFO:root:Processing batch 128/398
+INFO:root:Processing batch 129/398
+INFO:root:Processing batch 130/398
+INFO:root:Processing batch 131/398
+INFO:root:Processing batch 132/398
+INFO:root:Processing batch 133/398
+INFO:root:Processing batch 134/398
+INFO:root:Processing batch 135/398
+INFO:root:Processing batch 136/398
+INFO:root:Processing batch 137/398
+INFO:root:Processing batch 138/398
+INFO:root:Processing batch 139/398
+INFO:root:Processing batch 140/398
+INFO:root:Processing batch 141/398
+INFO:root:Processing batch 142/398
+INFO:root:Processing batch 143/398
+INFO:root:Processing batch 144/398
+INFO:root:Processing batch 145/398
+INFO:root:Processing batch 146/398
+INFO:root:Processing batch 147/398
+INFO:root:Processing batch 148/398
+INFO:root:Processing batch 149/398
+INFO:root:Processing batch 150/398
+INFO:root:Processing batch 151/398
+INFO:root:Processing batch 152/398
+INFO:root:Processing batch 153/398
+INFO:root:Processing batch 154/398
+INFO:root:Processing batch 155/398
+INFO:root:Processing batch 156/398
+INFO:root:Processing batch 157/398
+INFO:root:Processing batch 158/398
+INFO:root:Processing batch 159/398
+INFO:root:Processing batch 160/398
+INFO:root:Processing batch 161/398
+INFO:root:Processing batch 162/398
+INFO:root:Processing batch 163/398
+INFO:root:Processing batch 164/398
+INFO:root:Processing batch 165/398
+INFO:root:Processing batch 166/398
+INFO:root:Processing batch 167/398
+INFO:root:Processing batch 168/398
+INFO:root:Processing batch 169/398
+INFO:root:Processing batch 170/398
+INFO:root:Processing batch 171/398
+INFO:root:Processing batch 172/398
+INFO:root:Processing batch 173/398
+INFO:root:Processing batch 174/398
+INFO:root:Processing batch 175/398
+INFO:root:Processing batch 176/398
+INFO:root:Processing batch 177/398
+INFO:root:Processing batch 178/398
+INFO:root:Processing batch 179/398
+INFO:root:Processing batch 180/398
+INFO:root:Processing batch 181/398
+INFO:root:Processing batch 182/398
+INFO:root:Processing batch 183/398
+INFO:root:Processing batch 184/398
+INFO:root:Processing batch 185/398
+INFO:root:Processing batch 186/398
+INFO:root:Processing batch 187/398
+INFO:root:Processing batch 188/398
+INFO:root:Processing batch 189/398
+INFO:root:Processing batch 190/398
+INFO:root:Processing batch 191/398
+INFO:root:Processing batch 192/398
+INFO:root:Processing batch 193/398
+INFO:root:Processing batch 194/398
+INFO:root:Processing batch 195/398
+INFO:root:Processing batch 196/398
+INFO:root:Processing batch 197/398
+INFO:root:Processing batch 198/398
+INFO:root:Processing batch 199/398
+INFO:root:Processing batch 200/398
+INFO:root:Processing batch 201/398
+INFO:root:Processing batch 202/398
+INFO:root:Processing batch 203/398
+INFO:root:Processing batch 204/398
+INFO:root:Processing batch 205/398
+INFO:root:Processing batch 206/398
+INFO:root:Processing batch 207/398
+INFO:root:Processing batch 208/398
+INFO:root:Processing batch 209/398
+INFO:root:Processing batch 210/398
+INFO:root:Processing batch 211/398
+INFO:root:Processing batch 212/398
+INFO:root:Processing batch 213/398
+INFO:root:Processing batch 214/398
+INFO:root:Processing batch 215/398
+INFO:root:Processing batch 216/398
+INFO:root:Processing batch 217/398
+INFO:root:Processing batch 218/398
+INFO:root:Processing batch 219/398
+INFO:root:Processing batch 220/398
+INFO:root:Processing batch 221/398
+INFO:root:Processing batch 222/398
+INFO:root:Processing batch 223/398
+INFO:root:Processing batch 224/398
+INFO:root:Processing batch 225/398
+INFO:root:Processing batch 226/398
+INFO:root:Processing batch 227/398
+INFO:root:Processing batch 228/398
+INFO:root:Processing batch 229/398
+INFO:root:Processing batch 230/398
+INFO:root:Processing batch 231/398
+INFO:root:Processing batch 232/398
+INFO:root:Processing batch 233/398
+INFO:root:Processing batch 234/398
+INFO:root:Processing batch 235/398
+INFO:root:Processing batch 236/398
+INFO:root:Processing batch 237/398
+INFO:root:Processing batch 238/398
+INFO:root:Processing batch 239/398
+INFO:root:Processing batch 240/398
+INFO:root:Processing batch 241/398
+INFO:root:Processing batch 242/398
+INFO:root:Processing batch 243/398
+INFO:root:Processing batch 244/398
+INFO:root:Processing batch 245/398
+INFO:root:Processing batch 246/398
+INFO:root:Processing batch 247/398
+INFO:root:Processing batch 248/398
+INFO:root:Processing batch 249/398
+INFO:root:Processing batch 250/398
+INFO:root:Processing batch 251/398
+INFO:root:Processing batch 252/398
+INFO:root:Processing batch 253/398
+INFO:root:Processing batch 254/398
+INFO:root:Processing batch 255/398
+INFO:root:Processing batch 256/398
+INFO:root:Processing batch 257/398
+INFO:root:Processing batch 258/398
+INFO:root:Processing batch 259/398
+INFO:root:Processing batch 260/398
+INFO:root:Processing batch 261/398
+INFO:root:Processing batch 262/398
+INFO:root:Processing batch 263/398
+INFO:root:Processing batch 264/398
+INFO:root:Processing batch 265/398
+INFO:root:Processing batch 266/398
+INFO:root:Processing batch 267/398
+INFO:root:Processing batch 268/398
+INFO:root:Processing batch 269/398
+INFO:root:Processing batch 270/398
+INFO:root:Processing batch 271/398
+INFO:root:Processing batch 272/398
+INFO:root:Processing batch 273/398
+INFO:root:Processing batch 274/398
+INFO:root:Processing batch 275/398
+INFO:root:Processing batch 276/398
+INFO:root:Processing batch 277/398
+INFO:root:Processing batch 278/398
+INFO:root:Processing batch 279/398
+INFO:root:Processing batch 280/398
+INFO:root:Processing batch 281/398
+INFO:root:Processing batch 282/398
+INFO:root:Processing batch 283/398
+INFO:root:Processing batch 284/398
+INFO:root:Processing batch 285/398
+INFO:root:Processing batch 286/398
+INFO:root:Processing batch 287/398
+INFO:root:Processing batch 288/398
+INFO:root:Processing batch 289/398
+INFO:root:Processing batch 290/398
+INFO:root:Processing batch 291/398
+INFO:root:Processing batch 292/398
+INFO:root:Processing batch 293/398
+INFO:root:Processing batch 294/398
+INFO:root:Processing batch 295/398
+INFO:root:Processing batch 296/398
+INFO:root:Processing batch 297/398
+INFO:root:Processing batch 298/398
+INFO:root:Processing batch 299/398
+INFO:root:Processing batch 300/398
+INFO:root:Processing batch 301/398
+INFO:root:Processing batch 302/398
+INFO:root:Processing batch 303/398
+INFO:root:Processing batch 304/398
+INFO:root:Processing batch 305/398
+INFO:root:Processing batch 306/398
+INFO:root:Processing batch 307/398
+INFO:root:Processing batch 308/398
+INFO:root:Processing batch 309/398
+INFO:root:Processing batch 310/398
+INFO:root:Processing batch 311/398
+INFO:root:Processing batch 312/398
+INFO:root:Processing batch 313/398
+INFO:root:Processing batch 314/398
+INFO:root:Processing batch 315/398
+INFO:root:Processing batch 316/398
+INFO:root:Processing batch 317/398
+INFO:root:Processing batch 318/398
+INFO:root:Processing batch 319/398
+INFO:root:Processing batch 320/398
+INFO:root:Processing batch 321/398
+INFO:root:Processing batch 322/398
+INFO:root:Processing batch 323/398
+INFO:root:Processing batch 324/398
+INFO:root:Processing batch 325/398
+INFO:root:Processing batch 326/398
+INFO:root:Processing batch 327/398
+INFO:root:Processing batch 328/398
+INFO:root:Processing batch 329/398
+INFO:root:Processing batch 330/398
+INFO:root:Processing batch 331/398
+INFO:root:Processing batch 332/398
+INFO:root:Processing batch 333/398
+INFO:root:Processing batch 334/398
+INFO:root:Processing batch 335/398
+INFO:root:Processing batch 336/398
+INFO:root:Processing batch 337/398
+INFO:root:Processing batch 338/398
+INFO:root:Processing batch 339/398
+INFO:root:Processing batch 340/398
+INFO:root:Processing batch 341/398
+INFO:root:Processing batch 342/398
+INFO:root:Processing batch 343/398
+INFO:root:Processing batch 344/398
+INFO:root:Processing batch 345/398
+INFO:root:Processing batch 346/398
+INFO:root:Processing batch 347/398
+INFO:root:Processing batch 348/398
+INFO:root:Processing batch 349/398
+INFO:root:Processing batch 350/398
+INFO:root:Processing batch 351/398
+INFO:root:Processing batch 352/398
+INFO:root:Processing batch 353/398
+INFO:root:Processing batch 354/398
+INFO:root:Processing batch 355/398
+INFO:root:Processing batch 356/398
+INFO:root:Processing batch 357/398
+INFO:root:Processing batch 358/398
+INFO:root:Processing batch 359/398
+INFO:root:Processing batch 360/398
+INFO:root:Processing batch 361/398
+INFO:root:Processing batch 362/398
+INFO:root:Processing batch 363/398
+INFO:root:Processing batch 364/398
+INFO:root:Processing batch 365/398
+INFO:root:Processing batch 366/398
+INFO:root:Processing batch 367/398
+INFO:root:Processing batch 368/398
+INFO:root:Processing batch 369/398
+INFO:root:Processing batch 370/398
+INFO:root:Processing batch 371/398
+INFO:root:Processing batch 372/398
+INFO:root:Processing batch 373/398
+INFO:root:Processing batch 374/398
+INFO:root:Processing batch 375/398
+INFO:root:Processing batch 376/398
+INFO:root:Processing batch 377/398
+INFO:root:Processing batch 378/398
+INFO:root:Processing batch 379/398
+INFO:root:Processing batch 380/398
+INFO:root:Processing batch 381/398
+INFO:root:Processing batch 382/398
+INFO:root:Processing batch 383/398
+INFO:root:Processing batch 384/398
+INFO:root:Processing batch 385/398
+INFO:root:Processing batch 386/398
+INFO:root:Processing batch 387/398
+INFO:root:Processing batch 388/398
+INFO:root:Processing batch 389/398
+INFO:root:Processing batch 390/398
+INFO:root:Processing batch 391/398
+INFO:root:Processing batch 392/398
+INFO:root:Processing batch 393/398
+INFO:root:Processing batch 394/398
+INFO:root:Processing batch 395/398
+INFO:root:Processing batch 396/398
+INFO:root:Processing batch 397/398
+INFO:root:Processing batch 398/398
+INFO:root:{'type': 'model', 'keys': ['train', 'eval', 'aug'], 'mean': [0.4748102128505707, 0.4196726083755493, 0.3590792119503021], 'std': [0.27919745445251465, 0.27405115962028503, 0.2634221911430359], 'transforms': {'train': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()'], 'eval': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()'], 'aug': {'val': ['Normalize(mean=[0.4748102128505707, 0.4196726083755493, 0.3590792119503021], std=[0.27919745445251465, 0.27405115962028503, 0.2634221911430359])']}}}
+INFO:root:Training setup...
+INFO:root:Training...
+INFO:root:No augmentation found, only normalization will be applied
+INFO:root:Training epoch 1, Iteration 1, Loss: 5.12181
+INFO:root:Training epoch 1, Iteration 20, Loss: 5.02060
+INFO:root:Training epoch 1, Iteration 40, Loss: 4.85412
+INFO:root:Training epoch 1, Iteration 60, Loss: 4.70104
+INFO:root:Training epoch 1, Iteration 80, Loss: 4.73047
+INFO:root:Training epoch 1, Iteration 100, Loss: 4.70259
+INFO:root:Training epoch 1, Iteration 120, Loss: 4.62085
+INFO:root:Training epoch 1, Iteration 140, Loss: 4.44954
+INFO:root:Training epoch 1, Iteration 160, Loss: 4.49375
+INFO:root:Training epoch 1, Iteration 180, Loss: 4.50556
+INFO:root:Training epoch 1, Iteration 200, Loss: 4.43162
+INFO:root:Training epoch 1, Iteration 220, Loss: 4.37833
+INFO:root:Training epoch 1, Iteration 240, Loss: 4.33866
+INFO:root:Training epoch 1, Iteration 260, Loss: 4.34328
+INFO:root:Training epoch 1, Iteration 280, Loss: 4.26671
+INFO:root:Training epoch 1, Iteration 300, Loss: 4.19448
+INFO:root:Training epoch 1, Iteration 320, Loss: 4.28215
+INFO:root:Training epoch 1, Iteration 340, Loss: 4.21621
+INFO:root:Training epoch 1, Iteration 360, Loss: 4.19455
+INFO:root:Training epoch 1, Iteration 380, Loss: 4.18966
+INFO:root:Validation iteration 1, Loss: 4.48065
+INFO:root:Validation iteration 8, Loss: 4.24114
+INFO:root:Validation iteration 16, Loss: 4.18637
+INFO:root:Validation iteration 24, Loss: 4.26884
+INFO:root:Validation iteration 32, Loss: 4.27248
+INFO:root:Validation iteration 40, Loss: 4.14462
+INFO:root:Validation iteration 48, Loss: 4.18178
+INFO:root:Validation iteration 56, Loss: 4.08260
+INFO:root:Validation iteration 64, Loss: 4.05621
+INFO:root:Validation iteration 72, Loss: 4.35225
+INFO:root:Validation iteration 80, Loss: 4.21388
+INFO:root:Validation iteration 88, Loss: 4.31909
+INFO:root:Validation iteration 96, Loss: 4.06321
+INFO:root:Validation iteration 104, Loss: 4.10485
+INFO:root:Validation iteration 112, Loss: 4.19278
+INFO:root:Validation iteration 120, Loss: 4.26429
+INFO:root:Validation iteration 128, Loss: 4.24022
+INFO:root:End of Epoch 1
+INFO:root:Training loss: 4.460
+INFO:root:Validation accuracy: 0.072, Validation loss: 4.20233
+INFO:root:Training epoch 2, Iteration 1, Loss: 4.06401
+INFO:root:Training epoch 2, Iteration 20, Loss: 4.05580
+INFO:root:Training epoch 2, Iteration 40, Loss: 4.07739
+INFO:root:Training epoch 2, Iteration 60, Loss: 4.12302
+INFO:root:Training epoch 2, Iteration 80, Loss: 4.00287
+INFO:root:Training epoch 2, Iteration 100, Loss: 3.91961
+INFO:root:Training epoch 2, Iteration 120, Loss: 4.03218
+INFO:root:Training epoch 2, Iteration 140, Loss: 3.99887
+INFO:root:Training epoch 2, Iteration 160, Loss: 3.98594
+INFO:root:Training epoch 2, Iteration 180, Loss: 4.01653
+INFO:root:Training epoch 2, Iteration 200, Loss: 3.98042
+INFO:root:Training epoch 2, Iteration 220, Loss: 3.96600
+INFO:root:Training epoch 2, Iteration 240, Loss: 3.97459
+INFO:root:Training epoch 2, Iteration 260, Loss: 3.88774
+INFO:root:Training epoch 2, Iteration 280, Loss: 3.92279
+INFO:root:Training epoch 2, Iteration 300, Loss: 3.93115
+INFO:root:Training epoch 2, Iteration 320, Loss: 3.95777
+INFO:root:Training epoch 2, Iteration 340, Loss: 3.93897
+INFO:root:Training epoch 2, Iteration 360, Loss: 3.88314
+INFO:root:Training epoch 2, Iteration 380, Loss: 3.89512
+INFO:root:Validation iteration 1, Loss: 4.10443
+INFO:root:Validation iteration 8, Loss: 4.05004
+INFO:root:Validation iteration 16, Loss: 3.75376
+INFO:root:Validation iteration 24, Loss: 3.97459
+INFO:root:Validation iteration 32, Loss: 3.94545
+INFO:root:Validation iteration 40, Loss: 3.93552
+INFO:root:Validation iteration 48, Loss: 3.96574
+INFO:root:Validation iteration 56, Loss: 3.96462
+INFO:root:Validation iteration 64, Loss: 3.94009
+INFO:root:Validation iteration 72, Loss: 3.99129
+INFO:root:Validation iteration 80, Loss: 3.94816
+INFO:root:Validation iteration 88, Loss: 3.98989
+INFO:root:Validation iteration 96, Loss: 3.85074
+INFO:root:Validation iteration 104, Loss: 3.87998
+INFO:root:Validation iteration 112, Loss: 4.06598
+INFO:root:Validation iteration 120, Loss: 3.93924
+INFO:root:Validation iteration 128, Loss: 3.95363
+INFO:root:End of Epoch 2
+INFO:root:Training loss: 3.969
+INFO:root:Validation accuracy: 0.109, Validation loss: 3.95526
+INFO:root:Training epoch 3, Iteration 1, Loss: 3.70348
+INFO:root:Training epoch 3, Iteration 20, Loss: 3.68382
+INFO:root:Training epoch 3, Iteration 40, Loss: 3.70016
+INFO:root:Training epoch 3, Iteration 60, Loss: 3.71894
+INFO:root:Training epoch 3, Iteration 80, Loss: 3.73353
+INFO:root:Training epoch 3, Iteration 100, Loss: 3.82627
+INFO:root:Training epoch 3, Iteration 120, Loss: 3.60757
+INFO:root:Training epoch 3, Iteration 140, Loss: 3.70472
+INFO:root:Training epoch 3, Iteration 160, Loss: 3.78943
+INFO:root:Training epoch 3, Iteration 180, Loss: 3.64003
+INFO:root:Training epoch 3, Iteration 200, Loss: 3.71938
+INFO:root:Training epoch 3, Iteration 220, Loss: 3.68919
+INFO:root:Training epoch 3, Iteration 240, Loss: 3.77684
+INFO:root:Training epoch 3, Iteration 260, Loss: 3.67529
+INFO:root:Training epoch 3, Iteration 280, Loss: 3.74131
+INFO:root:Training epoch 3, Iteration 300, Loss: 3.67915
+INFO:root:Training epoch 3, Iteration 320, Loss: 3.73248
+INFO:root:Training epoch 3, Iteration 340, Loss: 3.72757
+INFO:root:Training epoch 3, Iteration 360, Loss: 3.62142
+INFO:root:Training epoch 3, Iteration 380, Loss: 3.64276
+INFO:root:Validation iteration 1, Loss: 4.01272
+INFO:root:Validation iteration 8, Loss: 3.79114
+INFO:root:Validation iteration 16, Loss: 3.59628
+INFO:root:Validation iteration 24, Loss: 3.64320
+INFO:root:Validation iteration 32, Loss: 3.71835
+INFO:root:Validation iteration 40, Loss: 3.73657
+INFO:root:Validation iteration 48, Loss: 3.66604
+INFO:root:Validation iteration 56, Loss: 3.74870
+INFO:root:Validation iteration 64, Loss: 3.68379
+INFO:root:Validation iteration 72, Loss: 3.84241
+INFO:root:Validation iteration 80, Loss: 3.69967
+INFO:root:Validation iteration 88, Loss: 3.81370
+INFO:root:Validation iteration 96, Loss: 3.59281
+INFO:root:Validation iteration 104, Loss: 3.64036
+INFO:root:Validation iteration 112, Loss: 3.80907
+INFO:root:Validation iteration 120, Loss: 3.69662
+INFO:root:Validation iteration 128, Loss: 3.69782
+INFO:root:End of Epoch 3
+INFO:root:Training loss: 3.708
+INFO:root:Validation accuracy: 0.149, Validation loss: 3.71344
+INFO:root:Training epoch 4, Iteration 1, Loss: 3.29531
+INFO:root:Training epoch 4, Iteration 20, Loss: 3.55413
+INFO:root:Training epoch 4, Iteration 40, Loss: 3.55295
+INFO:root:Training epoch 4, Iteration 60, Loss: 3.56061
+INFO:root:Training epoch 4, Iteration 80, Loss: 3.47608
+INFO:root:Training epoch 4, Iteration 100, Loss: 3.64515
+INFO:root:Training epoch 4, Iteration 120, Loss: 3.58779
+INFO:root:Training epoch 4, Iteration 140, Loss: 3.53279
+INFO:root:Training epoch 4, Iteration 160, Loss: 3.47264
+INFO:root:Training epoch 4, Iteration 180, Loss: 3.49249
+INFO:root:Training epoch 4, Iteration 200, Loss: 3.50475
+INFO:root:Training epoch 4, Iteration 220, Loss: 3.61343
+INFO:root:Training epoch 4, Iteration 240, Loss: 3.48697
+INFO:root:Training epoch 4, Iteration 260, Loss: 3.49139
+INFO:root:Training epoch 4, Iteration 280, Loss: 3.40146
+INFO:root:Training epoch 4, Iteration 300, Loss: 3.40042
+INFO:root:Training epoch 4, Iteration 320, Loss: 3.47857
+INFO:root:Training epoch 4, Iteration 340, Loss: 3.45195
+INFO:root:Training epoch 4, Iteration 360, Loss: 3.48749
+INFO:root:Training epoch 4, Iteration 380, Loss: 3.38974
+INFO:root:Validation iteration 1, Loss: 3.90335
+INFO:root:Validation iteration 8, Loss: 3.80348
+INFO:root:Validation iteration 16, Loss: 3.44178
+INFO:root:Validation iteration 24, Loss: 3.57742
+INFO:root:Validation iteration 32, Loss: 3.58064
+INFO:root:Validation iteration 40, Loss: 3.60620
+INFO:root:Validation iteration 48, Loss: 3.54988
+INFO:root:Validation iteration 56, Loss: 3.65205
+INFO:root:Validation iteration 64, Loss: 3.53287
+INFO:root:Validation iteration 72, Loss: 3.60419
+INFO:root:Validation iteration 80, Loss: 3.55760
+INFO:root:Validation iteration 88, Loss: 3.64020
+INFO:root:Validation iteration 96, Loss: 3.43202
+INFO:root:Validation iteration 104, Loss: 3.39881
+INFO:root:Validation iteration 112, Loss: 3.59482
+INFO:root:Validation iteration 120, Loss: 3.57035
+INFO:root:Validation iteration 128, Loss: 3.52649
+INFO:root:End of Epoch 4
+INFO:root:Training loss: 3.499
+INFO:root:Validation accuracy: 0.179, Validation loss: 3.57490
+INFO:root:Training epoch 5, Iteration 1, Loss: 3.40911
+INFO:root:Training epoch 5, Iteration 20, Loss: 3.27510
+INFO:root:Training epoch 5, Iteration 40, Loss: 3.37312
+INFO:root:Training epoch 5, Iteration 60, Loss: 3.31038
+INFO:root:Training epoch 5, Iteration 80, Loss: 3.39167
+INFO:root:Training epoch 5, Iteration 100, Loss: 3.33676
+INFO:root:Training epoch 5, Iteration 120, Loss: 3.33500
+INFO:root:Training epoch 5, Iteration 140, Loss: 3.30472
+INFO:root:Training epoch 5, Iteration 160, Loss: 3.26986
+INFO:root:Training epoch 5, Iteration 180, Loss: 3.33907
+INFO:root:Training epoch 5, Iteration 200, Loss: 3.27603
+INFO:root:Training epoch 5, Iteration 220, Loss: 3.48624
+INFO:root:Training epoch 5, Iteration 240, Loss: 3.28934
+INFO:root:Training epoch 5, Iteration 260, Loss: 3.39373
+INFO:root:Training epoch 5, Iteration 280, Loss: 3.31631
+INFO:root:Training epoch 5, Iteration 300, Loss: 3.38033
+INFO:root:Training epoch 5, Iteration 320, Loss: 3.35744
+INFO:root:Training epoch 5, Iteration 340, Loss: 3.40628
+INFO:root:Training epoch 5, Iteration 360, Loss: 3.33203
+INFO:root:Training epoch 5, Iteration 380, Loss: 3.23218
+INFO:root:Validation iteration 1, Loss: 4.06748
+INFO:root:Validation iteration 8, Loss: 3.65564
+INFO:root:Validation iteration 16, Loss: 3.35551
+INFO:root:Validation iteration 24, Loss: 3.51527
+INFO:root:Validation iteration 32, Loss: 3.37329
+INFO:root:Validation iteration 40, Loss: 3.53927
+INFO:root:Validation iteration 48, Loss: 3.49397
+INFO:root:Validation iteration 56, Loss: 3.53725
+INFO:root:Validation iteration 64, Loss: 3.36141
+INFO:root:Validation iteration 72, Loss: 3.63184
+INFO:root:Validation iteration 80, Loss: 3.40443
+INFO:root:Validation iteration 88, Loss: 3.52146
+INFO:root:Validation iteration 96, Loss: 3.35329
+INFO:root:Validation iteration 104, Loss: 3.36781
+INFO:root:Validation iteration 112, Loss: 3.54299
+INFO:root:Validation iteration 120, Loss: 3.51656
+INFO:root:Validation iteration 128, Loss: 3.51430
+INFO:root:End of Epoch 5
+INFO:root:Training loss: 3.339
+INFO:root:Validation accuracy: 0.196, Validation loss: 3.48732
+INFO:root:Training epoch 6, Iteration 1, Loss: 3.14891
+INFO:root:Training epoch 6, Iteration 20, Loss: 3.20325
+INFO:root:Training epoch 6, Iteration 40, Loss: 3.32514
+INFO:root:Training epoch 6, Iteration 60, Loss: 3.27989
+INFO:root:Training epoch 6, Iteration 80, Loss: 3.24472
+INFO:root:Training epoch 6, Iteration 100, Loss: 3.06446
+INFO:root:Training epoch 6, Iteration 120, Loss: 3.16382
+INFO:root:Training epoch 6, Iteration 140, Loss: 3.18157
+INFO:root:Training epoch 6, Iteration 160, Loss: 3.11286
+INFO:root:Training epoch 6, Iteration 180, Loss: 3.26710
+INFO:root:Training epoch 6, Iteration 200, Loss: 3.29779
+INFO:root:Training epoch 6, Iteration 220, Loss: 3.23273
+INFO:root:Training epoch 6, Iteration 240, Loss: 3.16430
+INFO:root:Training epoch 6, Iteration 260, Loss: 3.07782
+INFO:root:Training epoch 6, Iteration 280, Loss: 3.22984
+INFO:root:Training epoch 6, Iteration 300, Loss: 3.30028
+INFO:root:Training epoch 6, Iteration 320, Loss: 3.21437
+INFO:root:Training epoch 6, Iteration 340, Loss: 3.19390
+INFO:root:Training epoch 6, Iteration 360, Loss: 3.10893
+INFO:root:Training epoch 6, Iteration 380, Loss: 3.20377
+INFO:root:Validation iteration 1, Loss: 3.63584
+INFO:root:Validation iteration 8, Loss: 3.55849
+INFO:root:Validation iteration 16, Loss: 3.29821
+INFO:root:Validation iteration 24, Loss: 3.53772
+INFO:root:Validation iteration 32, Loss: 3.42888
+INFO:root:Validation iteration 40, Loss: 3.43712
+INFO:root:Validation iteration 48, Loss: 3.43477
+INFO:root:Validation iteration 56, Loss: 3.47367
+INFO:root:Validation iteration 64, Loss: 3.28702
+INFO:root:Validation iteration 72, Loss: 3.66950
+INFO:root:Validation iteration 80, Loss: 3.38475
+INFO:root:Validation iteration 88, Loss: 3.45588
+INFO:root:Validation iteration 96, Loss: 3.44788
+INFO:root:Validation iteration 104, Loss: 3.24262
+INFO:root:Validation iteration 112, Loss: 3.51766
+INFO:root:Validation iteration 120, Loss: 3.42577
+INFO:root:Validation iteration 128, Loss: 3.31173
+INFO:root:End of Epoch 6
+INFO:root:Training loss: 3.203
+INFO:root:Validation accuracy: 0.211, Validation loss: 3.43781
+INFO:root:Best validation accuracy: 0.211 at epoch 6
+INFO:root:Inference...
+INFO:root:Validation iteration 1, Loss: 3.39943
+INFO:root:Validation iteration 8, Loss: 3.64617
+INFO:root:Validation iteration 16, Loss: 3.52583
+INFO:root:Validation iteration 24, Loss: 3.54796
+INFO:root:Validation iteration 32, Loss: 3.37326
+INFO:root:Validation iteration 40, Loss: 3.50051
+INFO:root:Validation iteration 48, Loss: 3.40266
+INFO:root:Validation iteration 56, Loss: 3.24070
+INFO:root:Validation iteration 64, Loss: 3.20024
+INFO:root:Validation iteration 72, Loss: 3.26308
+INFO:root:Validation iteration 80, Loss: 3.13849
+INFO:root:Validation iteration 88, Loss: 3.45928
+INFO:root:Validation iteration 96, Loss: 3.22747
+INFO:root:Validation iteration 104, Loss: 3.44451
+INFO:root:Validation iteration 112, Loss: 3.47266
+INFO:root:Validation iteration 120, Loss: 3.44653
+INFO:root:Validation iteration 128, Loss: 3.39082
+Test accuracy: 0.224, Test loss: 3.39625
+INFO:root:Saving results...
+INFO:root:Done!
+"""
+
 test = False
 train_loss = []
 val_loss = []
-for line in string17.split("\n"):
+for line in string18.split("\n"):
     line = line.strip()
     
     if line.startswith("INFO:root:"):
@@ -13678,7 +14346,7 @@ for line in string17.split("\n"):
     
     print(line)
     try:
-        if line.startswith("Training"):
+        if line.startswith("Training epoch"):
             train_loss.append(float(line.split(":")[1].strip()))
             
         if line.startswith("Validation iteration") and not test:

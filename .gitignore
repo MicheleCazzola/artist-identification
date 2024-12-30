@@ -12,6 +12,9 @@ out/*
 # Temporary files
 temp/
 
+# Kaggle directory
+kaggle/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

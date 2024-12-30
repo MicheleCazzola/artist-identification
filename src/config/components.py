@@ -28,7 +28,8 @@ class DataConfig:
     aug_mask: tuple[bool] = (True, True, True, True)
     augment: bool = False
     reduce_factor: float = 1.0
-    batch_size: int = 16
+    batch_size_model: int = 16
+    batch_size_stats: int = 256
     train_split_size: float = 0.75
 
 @dataclass
@@ -51,7 +52,7 @@ class TrainConfig:
     save_models: bool = True
     train_only: bool = False
     inference_only: bool = True
-    save: bool = False
+    save_predictions: bool = False
 
 @dataclass
 class ModelConfig:

@@ -43,7 +43,8 @@ class Config:
                 ),
                 data=DataConfig(
                     pretrained_stats=True,
-                    batch_size=2,
+                    batch_size_model=2,
+                    batch_size_stats=2,
                     train_split_size=0.66,
                     reduce_factor=1
                 ),
@@ -54,7 +55,7 @@ class Config:
                     num_classes=3,
                     train_only=False,
                     inference_only=True,
-                    save=True,
+                    save_predictions=True,
                     criterion="weighted_cross_entropy",
                 ),
                 model=ModelConfig(

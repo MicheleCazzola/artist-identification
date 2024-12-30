@@ -58,7 +58,7 @@ def main():
         # Compute mean and standard deviation (only for training set) for normalization
         trainloader_stats = create_dataloaders(
             [trainset],
-            cfg.data.batch_size,
+            cfg.data.batch_size_stats,
             shuffle=False,
             drop_last=False,
             num_workers=cfg.env.num_workers
@@ -77,7 +77,7 @@ def main():
     # Create dataloaders for all the datasets: normalization applied during training
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
-        cfg.data.batch_size,
+        cfg.data.batch_size_model,
         num_workers=cfg.env.num_workers
     )
     
@@ -109,15 +109,14 @@ def main():
         logging.info(f"Inference...")
         
         if cfg.train.inference_only:
-            if cfg.train.save:
-                root = cfg.path.default_root + "/test"
+            if cfg.train.save_predictions:
                 testset = UnlabeledArtistDataset(
                     cfg.path.test_root, 
                     transform=transformations.get("eval")
                 )
                 testloader = create_dataloaders(
                     [testset],
-                    cfg.data.batch_size,
+                    cfg.data.batch_size_model,
                     shuffle=False,
                     drop_last=False,
                     num_workers=cfg.env.num_workers
@@ -130,7 +129,7 @@ def main():
             
         test_time = trainer.test.time
         
-        if not cfg.train.save:
+        if not cfg.train.save_predictions:
             print(f"Test accuracy: {trainer.test_results.metrics.get(f"weighted_top-{cfg.train.top_k}_mca"):.3f}, Test loss: {trainer.test_results.loss:.5f}")
         
     logging.info(f"Saving results...")
