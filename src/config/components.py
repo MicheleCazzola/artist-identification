@@ -6,10 +6,13 @@ from ..utils.utils import BackboneType
 @dataclass
 class PathConfig:
     default_root: str = "./data/artist_dataset"
+    test_root: str = "./data/kaggle_test"
     stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./temp/norm_stats.json"
     best_model_path: str = "./temp/best_model"
     results_root: str = "."
+    trained_model_path: str = "./temp/best_model_3.pth"   # Change in case of custom inference-only model
+    predictions_path: str = "./temp/predictions.csv"    # Change according to trained model used
 
 @dataclass
 class EnvConfig:
@@ -47,7 +50,8 @@ class TrainConfig:
     sanity_check: bool = False
     save_models: bool = True
     train_only: bool = False
-    inference_only: bool = False
+    inference_only: bool = True
+    save: bool = False
 
 @dataclass
 class ModelConfig:

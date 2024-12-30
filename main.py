@@ -4,7 +4,7 @@ import os
 import torch
 
 from src.config.config import Config
-from src.dataset.dataset import ArtistDataset
+from src.dataset.dataset import ArtistDataset, UnlabeledArtistDataset
 from src.dataset.dataloader import create_dataloaders
 from src.utils.stats import compute_stats
 from src.transformations.transformations import Transforms
@@ -92,7 +92,8 @@ def main():
     
     logging.info(f"Training setup...")
     
-    trainer = Trainer(model, trainloader, validloader, testloader)
+    categories = testset.categories
+    trainer = Trainer(model, trainloader, validloader, testloader, categories)
     trainer.build(cfg)
     trainer.add_aug_norm_transforms(transformations.get("aug"))
     
@@ -108,14 +109,29 @@ def main():
         logging.info(f"Inference...")
         
         if cfg.train.inference_only:
-            model_path = f"{cfg.path.best_model_path}.pth"
-            trainer.test(model_path)
+            if cfg.train.save:
+                root = cfg.path.default_root + "/test"
+                testset = UnlabeledArtistDataset(
+                    cfg.path.test_root, 
+                    transform=transformations.get("eval")
+                )
+                testloader = create_dataloaders(
+                    [testset],
+                    cfg.data.batch_size,
+                    shuffle=False,
+                    drop_last=False,
+                    num_workers=cfg.env.num_workers
+                )
+                trainer.test(cfg.path.trained_model_path, testloader, cfg.path.predictions_path)
+            else:
+                trainer.test(cfg.path.trained_model_path)
         else:
             trainer.test()
             
         test_time = trainer.test.time
         
-        print(f"Test accuracy: {trainer.test_results.metrics['top-1_accuracy']:.3f}, Test loss: {trainer.test_results.loss:.5f}")
+        if not cfg.train.save:
+            print(f"Test accuracy: {trainer.test_results.metrics.get(f"weighted_top-{cfg.train.top_k}_mca"):.3f}, Test loss: {trainer.test_results.loss:.5f}")
         
     logging.info(f"Saving results...")
     

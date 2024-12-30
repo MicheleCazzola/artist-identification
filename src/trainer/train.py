@@ -48,11 +48,13 @@ class Trainer:
         trainloader: DataLoader,
         validloader: DataLoader,
         testloader: DataLoader,
+        categories: list
     ):
         self.model: MultiBranchArtistNetwork = model
         self.trainloader: DataLoader = trainloader
         self.validloader: DataLoader = validloader
         self.testloader: DataLoader = testloader
+        self.categories: list = categories
         
         self.device: torch.device = None
         self.log_frequency: int = None
@@ -305,16 +307,22 @@ class Trainer:
         return losses, top_k_weighted_mca
     
     @execution_time
-    def test(self, model_path: str = None):
+    def test(self, model_path: str = None, testloader: DataLoader = None, save_path: str = None):
         
         if model_path is not None:
             self.model.load_state_dict(torch.load(model_path, weights_only=True))
         else:
             self.model.load_state_dict(torch.load(f"{self.best_model_path}.pth", weights_only=True))
         
-        test_result = self.evaluate(self.testloader)
-        
-        self.test_results = test_result
+        if save_path is not None:
+            
+            assert testloader is not None, "Missing dataloader for working set"
+            
+            self.predict(testloader, save_path)
+        else:
+            test_result = self.evaluate(self.testloader)
+            
+            self.test_results = test_result
 
     @torch.no_grad()
     def evaluate(self, dataloader: DataLoader) -> EvaluationResult:
@@ -356,6 +364,33 @@ class Trainer:
         
         return EvaluationResult(mean(losses), metrics)
     
+    @torch.no_grad()
+    def predict(self, testloader: DataLoader, save_path: str) -> torch.Tensor:
+        self.model.eval()
+        
+        predictions = []
+        images = []
+        for inputs in testloader:
+            inputs = inputs.to(self.device)
+            outputs = self.model(inputs)
+            
+            predicted = torch.topk(outputs, self.top_k, dim=1).indices.cpu().numpy()
+            predicted = [[self.categories[p].replace("_", "-") for p in pred] for pred in predicted]
+            predictions.extend(predicted)
+            
+            for i in range(len(inputs)):
+                images.append(testloader.dataset.images_paths[i].split("/")[-1])
+
+        self._save_predictions(images, predictions, save_path)
+    
+    def _save_predictions(self, images: list, predictions: list, save_path: str):
+        with open(save_path, "w") as f:
+            classes = ",".join([f"Class{i}" for i in range(1, self.top_k + 1)])
+            f.write(f"Image Name,{classes}\n")
+            for image, pred in zip(images, predictions):
+                f.write(f"{image},{','.join(pred)}\n")
+        
+        
     def save_results(
         self,
         cfg: Config,

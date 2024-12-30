@@ -33,6 +33,7 @@ class Config:
             return Config(
                 path=PathConfig(
                     default_root="./scripts/stats/images/artist_dataset",
+                    test_root="./scripts/stats/images/kaggle_test",
                     stats_file="./scripts/stats/stats.json",
                     results_root="./out"
                 ),
@@ -52,7 +53,8 @@ class Config:
                     val_log_frequency=1,
                     num_classes=3,
                     train_only=False,
-                    inference_only=False,
+                    inference_only=True,
+                    save=True,
                     criterion="weighted_cross_entropy",
                 ),
                 model=ModelConfig(

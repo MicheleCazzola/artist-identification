@@ -151,7 +151,26 @@ class ArtistDataset(VisionDataset):
         return reduced_dataset
     
     @staticmethod
-    def __pil_loader(path: str) -> Image:
+    def pil_loader(path: str) -> Image:
         with open(path, 'rb') as f:
             img = Image.open(f)
             return img.convert('RGB')
+        
+
+class UnlabeledArtistDataset(VisionDataset):
+    def __init__(self, root: str, transform: transforms = None):
+        super(UnlabeledArtistDataset, self).__init__(root, transform=transform)
+        
+        self.images_paths = [f"{root}/{image}" for image in os.listdir(root)]
+        
+    def __len__(self) -> int:
+        return len(self.images_paths)
+    
+    def __getitem__(self, index) -> torch.Tensor:
+        img_path = self.images_paths[index]
+        img = ArtistDataset.pil_loader(img_path)
+        
+        if self.transform is not None:
+            img = self.transform(img)
+            
+        return img
