@@ -160,7 +160,7 @@ class Trainer:
         if criterion == "cross_entropy":
             self.criterion = nn.CrossEntropyLoss()
         elif criterion == "weighted_cross_entropy":
-            weights = self._get_weights()
+            weights = self._get_weights().to(self.device)
             self.criterion = nn.CrossEntropyLoss(weight=weights)
         else:
             raise ValueError(f"Criterion {criterion} not supported")
