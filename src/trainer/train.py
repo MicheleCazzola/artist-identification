@@ -370,25 +370,30 @@ class Trainer:
         
         predictions = []
         images = []
-        for inputs in testloader:
+        current_step = 0
+        for inputs, input_names in testloader:
             inputs = inputs.to(self.device)
             outputs = self.model(inputs)
             
-            predicted = torch.topk(outputs, self.top_k, dim=1).indices.cpu().numpy()
-            predicted = [[self.categories[p].replace("_", "-") for p in pred] for pred in predicted]
+            predicted = torch.topk(outputs, self.top_k, dim=1).indices.cpu().tolist()
             predictions.extend(predicted)
             
-            for i in range(len(inputs)):
-                images.append(testloader.dataset.images_paths[i].split("/")[-1])
+            for input_name in input_names:
+                images.append(input_name.split("/")[-1])
+                
+            if (current_step + 1) % self.val_log_frequency == 0:
+                logging.info(f"Prediction iteration {current_step + 1}")
+                
+            current_step += 1
 
         self._save_predictions(images, predictions, save_path)
     
-    def _save_predictions(self, images: list, predictions: list, save_path: str):
+    def _save_predictions(self, images: list, predictions: list[list[int]], save_path: str):
         with open(save_path, "w") as f:
             classes = ",".join([f"Class{i}" for i in range(1, self.top_k + 1)])
             f.write(f"Image Name,{classes}\n")
             for image, pred in zip(images, predictions):
-                f.write(f"{image},{','.join(pred)}\n")
+                f.write(f"{image},{','.join(self.categories[p].replace('_', '-') for p in pred)}\n")
         
         
     def save_results(

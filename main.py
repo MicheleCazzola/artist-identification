@@ -130,7 +130,7 @@ def main():
         test_time = trainer.test.time
         
         if not cfg.train.save_predictions:
-            print(f"Test accuracy: {trainer.test_results.metrics.get(f"weighted_top-{cfg.train.top_k}_mca"):.3f}, Test loss: {trainer.test_results.loss:.5f}")
+            print(f"Test accuracy: {trainer.test_results.metrics.get(f'weighted_top-{cfg.train.top_k}_mca'):.3f}, Test loss: {trainer.test_results.loss:.5f}")
         
     logging.info(f"Saving results...")
     

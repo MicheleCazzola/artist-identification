@@ -6,13 +6,13 @@ from ..utils.utils import BackboneType
 @dataclass
 class PathConfig:
     default_root: str = "./data/artist_dataset"
-    test_root: str = "./data/kaggle_test"
+    test_root: str = "./data/kaggle_testset"
     stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./temp/norm_stats.json"
     best_model_path: str = "./temp/best_model"
     results_root: str = "."
-    trained_model_path: str = "./temp/best_model_3.pth"   # Change in case of custom inference-only model
-    predictions_path: str = "./temp/predictions.csv"    # Change according to trained model used
+    trained_model_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/temp/best_model_6.pth"   # Change in case of custom inference-only model
+    predictions_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/predictions.csv"    # Change according to trained model used
 
 @dataclass
 class EnvConfig:
@@ -28,8 +28,8 @@ class DataConfig:
     aug_mask: tuple[bool] = (True, True, True, True)
     augment: bool = False
     reduce_factor: float = 1.0
-    batch_size_model: int = 16
-    batch_size_stats: int = 256
+    batch_size_model: int = 32
+    batch_size_stats: int = 128
     train_split_size: float = 0.75
 
 @dataclass
@@ -52,12 +52,12 @@ class TrainConfig:
     save_models: bool = True
     train_only: bool = False
     inference_only: bool = True
-    save_predictions: bool = False
+    save_predictions: bool = True
 
 @dataclass
 class ModelConfig:
-    backbone_type: BackboneType = BackboneType.RESNET18
-    use_handcrafted: bool = True
+    backbone_type: BackboneType = None
+    use_handcrafted: bool = False
     precision: int = 32
 
 @dataclass

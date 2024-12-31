@@ -45,7 +45,7 @@ class ArtistDataset(VisionDataset):
 
     def __getitem__(self, index) -> tuple[torch.Tensor, int]:
         img_path = self.data["image_path"].iloc[index]
-        img, label = ArtistDataset.__pil_loader(img_path), self.data["label"].iloc[index]
+        img, label = ArtistDataset.pil_loader(img_path), self.data["label"].iloc[index]
         
         if self.transform is not None:
             img = self.transform(img)
@@ -173,4 +173,4 @@ class UnlabeledArtistDataset(VisionDataset):
         if self.transform is not None:
             img = self.transform(img)
             
-        return img
+        return img, img_path
