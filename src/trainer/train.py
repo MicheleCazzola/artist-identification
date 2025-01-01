@@ -103,6 +103,8 @@ class Trainer:
         self.best_model_path = cfg.path.best_model_path
         self.sanity_check = cfg.train.sanity_check
         self.save_models = cfg.train.save_models
+        self.resume_training = cfg.train.resume_training
+        self.trained_model_path = cfg.path.trained_model_path
         
         self._set_precision(cfg.model.precision)
         self._prepare_training(cfg.train.criterion, cfg.train.optimizer, cfg.train.scheduler)
@@ -192,6 +194,9 @@ class Trainer:
     
     @execution_time
     def train(self):
+        
+        if self.resume_training:
+            self.model.load_state_dict(torch.load(self.trained_model_path, weights_only=True))
 
         val_losses, val_accuracies = [], []
         train_losses, train_accuracies = [], []

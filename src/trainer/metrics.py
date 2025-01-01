@@ -23,7 +23,10 @@ class WeightedTopKMCA(MulticlassAccuracy):
         # N x C x K
         match_matrix = (labels_one_hot.unsqueeze(2) & outputs_one_hot).long()
         
+        # C x K
         self.scores += match_matrix.sum(dim=0).to(self.scores.device)
+        
+        # C
         self.samples_per_class += labels_one_hot.sum(dim=0).to(self.samples_per_class.device)
             
     def reset(self):

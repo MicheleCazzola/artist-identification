@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+
+from src.utils.utils import BackboneType
 from .components import PathConfig, EnvConfig, DataConfig, TrainConfig, ModelConfig, HOGConfig
 
 @dataclass
@@ -35,7 +37,8 @@ class Config:
                     default_root="./scripts/stats/images/artist_dataset",
                     test_root="./scripts/stats/images/kaggle_test",
                     stats_file="./scripts/stats/stats.json",
-                    results_root="./out"
+                    results_root="./out",
+                    trained_model_path="./temp/best_model.pth",
                 ),
                 env=EnvConfig(
                     device="cpu",
@@ -54,12 +57,15 @@ class Config:
                     val_log_frequency=1,
                     num_classes=3,
                     train_only=False,
-                    inference_only=True,
-                    save_predictions=True,
+                    inference_only=False,
+                    save_predictions=False,
                     criterion="weighted_cross_entropy",
+                    resume_training=True
                 ),
                 model=ModelConfig(
-                    precision=32
+                    precision=32,
+                    use_handcrafted=True,
+                    backbone_type=BackboneType.RESNET18
                 )
             )
             
