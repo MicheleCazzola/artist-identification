@@ -59,8 +59,8 @@ class Config:
                     train_only=False,
                     inference_only=False,
                     save_predictions=False,
-                    criterion="weighted_cross_entropy",
-                    resume_training=True
+                    criterion="cross_entropy",
+                    resume_training=False
                 ),
                 model=ModelConfig(
                     precision=32,

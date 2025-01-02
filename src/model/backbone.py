@@ -33,6 +33,9 @@ class SpatialTransformerNetwork(nn.Module):
                 model = resnet18(weights="IMAGENET1K_V1")
                 last_in_features = model.fc.in_features
                 model.fc = nn.Linear(last_in_features, 6)
+                # Initialize the weights of the classifier to learn the identity transformation
+                model.fc.weight.data.zero_()
+                model.fc.bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
             case self.backbone_type.MOBILENET_V3_SMALL:
                 model = mobilenet_v3_small(weights="IMAGENET1K_V1")
                 last_in_features = model.classifier[3].in_features

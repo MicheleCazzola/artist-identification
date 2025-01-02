@@ -13,8 +13,6 @@ from src.model.network import MultiBranchArtistNetwork
 import sys
 
 
-
-
 # def check(*dataloaders):
 #     for dataloader in dataloaders:
         
