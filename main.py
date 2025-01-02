@@ -1,8 +1,6 @@
 import logging
 import os
 
-import torch
-
 from src.config.config import Config
 from src.dataset.dataset import ArtistDataset, UnlabeledArtistDataset
 from src.dataset.dataloader import create_dataloaders
