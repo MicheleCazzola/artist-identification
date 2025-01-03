@@ -17452,7 +17452,7 @@ INFO:root:Done!
 """
 
 PATH = "out/official/"
-CONF = "20250103_141138/"           # configuration name here
+CONF = "20250103_184412/"           # configuration name here
 with open(PATH + CONF + "log.txt", "r") as f:
     string = f.read()
 
@@ -17469,10 +17469,10 @@ for line in string.split("\n"):
     
     print(line)
     try:
-        if line.startswith("Training epoch"):
+        if line.startswith("Training epoch") and "Iteration 1," not in line:
             train_loss.append(float(line.split(":")[1].strip()))
             
-        if line.startswith("Validation iteration") and not test:
+        if line.startswith("Validation iteration") and not test and "iteration 1," not in line :
             val_loss.append(float(line.split(":")[1].strip()))
     except IndexError:
         pass
@@ -17486,8 +17486,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-plt.plot(train_loss[::20], label="Train")
-plt.plot(np.clip(val_loss[::17], 0, 6), label="Validation")
+plt.plot(train_loss[::], label="Train")
+plt.plot(np.clip(val_loss[::], 0, 6), label="Validation")
 #plt.ylim(0, max(max(train_loss), max(val_loss)) + 0.5)
 plt.grid(which='both')
 plt.legend()

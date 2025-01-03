@@ -49,7 +49,8 @@ class Config:
                     batch_size_model=2,
                     batch_size_stats=2,
                     train_split_size=0.66,
-                    reduce_factor=1
+                    reduce_factor=1,
+                    augment=True
                 ),
                 train=TrainConfig(
                     num_epochs=3,
