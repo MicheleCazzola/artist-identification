@@ -17451,12 +17451,8 @@ INFO:root:Saving results...
 INFO:root:Done!
 """
 
-
-string24_ovefitting_Peppe = """
-"""
-
 PATH = "out/official/"
-CONF = "20250102_222514/"           # configuration name here
+CONF = "20250103_141138/"           # configuration name here
 with open(PATH + CONF + "log.txt", "r") as f:
     string = f.read()
 
@@ -17490,8 +17486,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-plt.plot(train_loss[::], label="Train")
-#plt.plot(np.clip(val_loss, 0, 6), label="Validation")
+plt.plot(train_loss[::20], label="Train")
+plt.plot(np.clip(val_loss[::17], 0, 6), label="Validation")
 #plt.ylim(0, max(max(train_loss), max(val_loss)) + 0.5)
 plt.grid(which='both')
 plt.legend()
