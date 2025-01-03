@@ -68,8 +68,6 @@ def main():
     
     transformations.set_norm(mean, std)
     
-    logging.info(transformations.to_dict())
-    
     # Create dataloaders for all the datasets: normalization applied during training
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
@@ -92,6 +90,8 @@ def main():
     trainer = Trainer(model, trainloader, validloader, testloader, categories)
     trainer.build(cfg)
     trainer.add_aug_norm_transforms(transformations.get("aug"))
+    
+    logging.info(transformations.to_dict())
     
     training_time = test_time = None
     

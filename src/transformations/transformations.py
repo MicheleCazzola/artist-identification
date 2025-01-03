@@ -81,7 +81,9 @@ class Transforms:
         transforms_dict = {
             k: list(str(t) for t in v.transforms) for k, v in self.transforms.items() if isinstance(v, transforms.Compose)
         }
-        transforms_dict.update({k: {t: list(str(tr) for tr in val.transforms)} for k, v in self.transforms.items() if isinstance(v, dict) for t, val in v.items() })
+        
+        update_dict = {"aug": {t: list(str(tr) for tr in val.transforms) for t, val in self.transforms.get("aug").items()}}
+        transforms_dict.update(update_dict)
         
         return {
             "type": self.type,
