@@ -79,7 +79,7 @@ def main():
     
     logging.info(f"Training setup...")
     
-    categories = testset.categories
+    categories = testset.categories if isinstance(testset, ArtistDataset) else testset.dataset.categories
     trainer = Trainer(model, trainloader, validloader, testloader, categories)
     trainer.build(cfg)
     

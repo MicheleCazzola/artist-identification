@@ -124,7 +124,7 @@ class ArtistDataset(VisionDataset):
 
         indexes = range(0, len(dataset))
         stratify = dataset.get_labels() if isinstance(dataset, ArtistDataset) else None
-        train_indexes, val_indexes = train_test_split(
+        train_indexes, _ = train_test_split(
             indexes,
             train_size=reduction_factor,
             random_state=random_state, 
@@ -133,9 +133,8 @@ class ArtistDataset(VisionDataset):
         )
 
         trainset = Subset(dataset, train_indexes)
-        validset = Subset(dataset, val_indexes)
         
-        return trainset, validset
+        return trainset
     
     @staticmethod
     def pil_loader(path: str) -> Image:

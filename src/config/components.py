@@ -51,9 +51,9 @@ class TrainConfig:
     sanity_check: bool = False
     save_models: bool = True
     train_only: bool = False
-    inference_only: bool = True
-    save_predictions: bool = True
-    resume_training: bool = True
+    inference_only: bool = False
+    save_predictions: bool = False
+    resume_training: bool = False
 
 @dataclass
 class ModelConfig:
