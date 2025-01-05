@@ -1,0 +1,170 @@
+{
+    "path": {
+        "default_root": "./data/artist_dataset",
+        "test_root": "./data/kaggle_testset",
+        "stats_file": "./scripts/stats/stats.json",
+        "norm_stats_file": "./temp/norm_stats.json",
+        "best_model_path": "./temp/best_model",
+        "results_root": ".",
+        "trained_model_path": "/content/drive/MyDrive/mlvm_shared/20241230_225438/temp/best_model_10.pth",
+        "predictions_path": "/content/drive/MyDrive/mlvm_shared/20241230_225438/predictions.csv"
+    },
+    "env": {
+        "device": "cuda",
+        "num_workers": 2
+    },
+    "data": {
+        "pretrained_stats": false,
+        "resize_dim": 512,
+        "crop_dim": 512,
+        "aug_probs": [
+            0.5,
+            0.5,
+            0.5,
+            0.5
+        ],
+        "aug_mask": [
+            true,
+            true,
+            true,
+            true
+        ],
+        "augment": true,
+        "reduce_factor": 1.0,
+        "batch_size_model": 32,
+        "batch_size_stats": 128,
+        "train_split_size": 0.75
+    },
+    "train": {
+        "num_epochs": 10,
+        "train_log_frequency": 20,
+        "val_log_frequency": 8,
+        "train_accuracy": false,
+        "num_classes": 161,
+        "lr": 0.0001,
+        "momentum": 0.9,
+        "weight_decay": 1e-06,
+        "scheduler_step_size": 10,
+        "scheduler_gamma": 0.1,
+        "criterion": "cross_entropy",
+        "optimizer": "adam",
+        "scheduler": "step_lr",
+        "top_k": 5,
+        "sanity_check": false,
+        "save_models": true,
+        "train_only": false,
+        "inference_only": false,
+        "save_predictions": false,
+        "resume_training": false
+    },
+    "model": {
+        "backbone_type": null,
+        "use_handcrafted": false,
+        "precision": 32
+    },
+    "hog": {
+        "downsample_size": 256,
+        "crop_size": 224,
+        "channel_coefficients": [
+            0.2989,
+            0.587,
+            0.114
+        ],
+        "orientations": 9,
+        "pixels_per_cell": 74,
+        "cells_per_block": 1,
+        "transform_sqrt": false,
+        "feature_vector": true,
+        "normalization": "L2-Hys",
+        "output_size": 81
+    },
+    "transformations": {
+        "type": "model",
+        "keys": [
+            "train",
+            "eval",
+            "aug"
+        ],
+        "mean": [
+            0.4754009544849396,
+            0.4202651381492615,
+            0.35992151498794556
+        ],
+        "std": [
+            0.2790777385234833,
+            0.27421748638153076,
+            0.2639029026031494
+        ],
+        "transforms": {
+            "train": [
+                "Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)",
+                "CenterCrop(size=(512, 512))",
+                "ToTensor()"
+            ],
+            "eval": [
+                "Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)",
+                "CenterCrop(size=(512, 512))",
+                "ToTensor()"
+            ],
+            "aug": {
+                "train": [
+                    "ToPILImage()", 
+                    "Augmentations(probabilities=[0.5, 0.5, 0.5, 0.5], transformations=[ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1), saturation=(0.9, 1.1), hue=None), LightingNoise(alpha=0.1, dim=3), GaussianBlur(kernel_size=(5, 5), sigma=(0.5, 1.5)), RandomResizedCrop(size=(512, 512), scale=(0.85, 1.0), ratio=(0.8, 1.25), interpolation=bilinear, antialias=True)])", 
+                    "ToTensor()", 
+                    "Normalize(mean=[0.4754009544849396, 0.4202651381492615, 0.35992151498794556], std=[0.2790777385234833, 0.27421748638153076, 0.2639029026031494])"
+                ],
+                "val": [
+                    "Normalize(mean=[0.47481051087379456, 0.4196726083755493, 0.3590790629386902], std=[0.27919673919677734, 0.27405110001564026, 0.2634223699569702])"
+                ]
+            }
+        }
+    },
+    "training_time": null,
+    "test_time": null,
+    "train_losses": [
+        4.512,
+        4.032, 
+        3.790, 
+        3.633, 
+        3.483, 
+        3.338, 
+        3.218, 
+        3.104, 
+        2.999, 
+        2.903
+    ],
+    "train_accuracies": [],
+    "val_losses": [
+        4.21642, 
+        3.87164, 
+        3.77077, 
+        3.68968, 
+        3.59849, 
+        3.41517, 
+        3.42349, 
+        3.42776, 
+        3.25167, 
+        3.18109
+    ],
+    "val_accuracies": [
+        0.075, 
+        0.106, 
+        0.140, 
+        0.160, 
+        0.171, 
+        0.207, 
+        0.218, 
+        0.212, 
+        0.251, 
+        0.264
+    ],
+    "best_num_epochs": 10,
+    "loss": null,
+    "metrics": {
+        "top-1_accuracy": null,
+        "top-5_accuracy": null,
+        "mca": null,
+        "weighted_top-5_mca": null,
+        "confusion_matrix": null
+    }
+}
