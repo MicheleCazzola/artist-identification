@@ -4,9 +4,7 @@ from torch.utils.data import DataLoader, Dataset
 import torch
 
 @torch.no_grad()
-def compute_stats(dataset: Dataset, dataloader: DataLoader, device: torch.device, out_file: str) -> dict:
-    
-    assert isinstance(dataset, Dataset), "Dataset must be of type Dataset"
+def compute_stats(dataloader: DataLoader, device: torch.device, out_file: str) -> dict:
     
     avg = torch.zeros((1,3)).to(device)
     std = torch.zeros((1,3)).to(device)

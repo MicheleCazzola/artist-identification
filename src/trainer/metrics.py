@@ -12,8 +12,6 @@ class WeightedTopKMCA(MulticlassAccuracy):
         self.samples_per_class = torch.zeros(num_classes)
         
     def update(self, outputs: torch.Tensor, labels: torch.Tensor):
-        print(outputs)
-        print(labels)
         preds = torch.topk(outputs, self.top_k, dim=1).indices
         
         # N x C

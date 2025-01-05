@@ -22,7 +22,8 @@ class ArtistDataset(VisionDataset):
         assert split is None or split in ["train", "val", "test"], "Split must be either training, validation or test, or include all the dataset"
                 
         self.split = split
-        self.categories = os.listdir(self.root)
+        categories = os.listdir(self.root)
+        self.categories = dict(zip(categories, range(0, len(categories))))
 
         images_paths, labels = [], []
         split_file = lambda s: f"{root}/../{s}.txt"
@@ -31,7 +32,7 @@ class ArtistDataset(VisionDataset):
             images_paths_train, labels_train = self.__get_data_split(split_file("train"))
             images_paths_val, labels_val = self.__get_data_split(split_file("val"))
             images_paths_test, labels_test = self.__get_data_split(split_file("test"))
-            images_paths, labels = images_paths_train + images_paths_test, labels_train + labels_test
+            images_paths, labels = images_paths_train + images_paths_val + images_paths_test, labels_train + labels_val + labels_test
         else:
             images_paths, labels = self.__get_data_split(split_file(split))
 
@@ -51,6 +52,9 @@ class ArtistDataset(VisionDataset):
         if self.transform is not None:
             img = self.transform(img)
             
+        if self.target_transform is not None:
+            label = self.target_transform(label)
+            
         return img, label
     
     def __get_data_split(self, split_file: str) -> tuple[list[str], list[int]]:
@@ -60,7 +64,7 @@ class ArtistDataset(VisionDataset):
             category = path.split("/")[0]
             image_path = self.root + "/" + path
             images_paths.append(image_path)
-            labels.append(self.categories.index(category))
+            labels.append(self.categories.get(category))
         
         return images_paths, labels
     
@@ -77,6 +81,7 @@ class ArtistDataset(VisionDataset):
         root: str,
         train_split_size: float = None,
         merge_datasets: bool = False,
+        augment: bool = False,
         transforms: dict | Compose = None,
         reduction_factor: float = None
     ) -> Union[tuple[Union[Subset, "ArtistDataset"], ...], Subset, "ArtistDataset"]:
@@ -93,7 +98,7 @@ class ArtistDataset(VisionDataset):
         if not merge_datasets:
             
             if transforms:
-                train_transforms, eval_transforms = map(transforms.get, ["train", "eval"])
+                train_transforms, eval_transforms = map(transforms.get, ["train_norm" if not augment else "train_aug", "eval"])
             else:
                 train_transforms, eval_transforms = None, None
             
@@ -108,8 +113,7 @@ class ArtistDataset(VisionDataset):
                 
             return trainset, validset, testset
         
-        # Load all the dataset in one single object: useful for statistics
-        # Applied only basic evaluation transformations
+        # Load all the dataset in one single object: useful for some statistics
         dataset = ArtistDataset(root, transform=transforms)
         
         if reduction_factor is not None and reduction_factor < 1:
@@ -118,9 +122,9 @@ class ArtistDataset(VisionDataset):
         return dataset
 
     @staticmethod
-    def _split(
+    def _reduce(
         dataset: Union["ArtistDataset", Subset],
-        train_size: float, 
+        reduction_factor: float, 
         random_state: int = 42, 
         shuffle: bool = True
     ) -> tuple[Subset, Subset]:
@@ -129,7 +133,7 @@ class ArtistDataset(VisionDataset):
         stratify = dataset.get_labels() if isinstance(dataset, ArtistDataset) else None
         train_indexes, val_indexes = train_test_split(
             indexes,
-            train_size=train_size,
+            train_size=reduction_factor,
             random_state=random_state, 
             shuffle=shuffle,
             stratify=stratify
@@ -139,13 +143,6 @@ class ArtistDataset(VisionDataset):
         validset = Subset(dataset, val_indexes)
         
         return trainset, validset
-
-    @staticmethod
-    def _reduce(dataset: Union["ArtistDataset", Subset], reduction_factor: float) -> Subset:
-
-        reduced_dataset, _ = ArtistDataset._split(dataset, reduction_factor)
-
-        return reduced_dataset
     
     @staticmethod
     def pil_loader(path: str) -> Image:

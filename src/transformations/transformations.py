@@ -23,30 +23,21 @@ class Transforms:
         self.std = [0.229, 0.224, 0.225]
         
         if type == "model":
-            self.keys = ["train", "eval", "aug"]
+            self.keys = ["train_base", "train_norm", "train_aug", "eval"]
+            self.normalizer = lambda m, s: Transforms.normalizer(m, s)
             
-            base_transforms = transforms.Compose([
+            preprocessing = [
                 Transforms.resizer(data_config.resize_dim),
-                Transforms.cropper(data_config.crop_dim),
-                Transforms.to_tensor()
-            ])
+                Transforms.cropper(data_config.crop_dim)
+            ]
+            augmentations = Augmentations(data_config.aug_probs, data_config.aug_mask)
             
-            train_transforms = base_transforms
-            eval_transforms = base_transforms
+            train_transforms_base = transforms.Compose([*preprocessing, Transforms.to_tensor()])
+            train_transforms_norm = transforms.Compose([*preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
+            train_transforms_aug = transforms.Compose([*preprocessing, augmentations, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
+            eval_transforms = transforms.Compose([*preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
             
-            aug_pipeline = {
-                "train": transforms.Compose([
-                    Transforms.to_image(),
-                    Augmentations(data_config.aug_probs, data_config.aug_mask),
-                    Transforms.to_tensor(), 
-                    Transforms.normalizer(self.mean, self.std)
-                ]),
-                "val": transforms.Compose([
-                    Transforms.normalizer(self.mean, self.std)
-                ])
-            } 
-            
-            self.transforms = dict(zip(self.keys, [train_transforms, eval_transforms, aug_pipeline]))
+            self.transforms = dict(zip(self.keys, [train_transforms_base, train_transforms_norm, train_transforms_aug, eval_transforms]))
         else:
             self.keys = ["tensor", "adjust"]
             to_tensor = transforms.Compose([
@@ -61,29 +52,28 @@ class Transforms:
             
             self.transforms = dict(zip(self.keys, [to_tensor, to_adjusted]))
 
-    def get(self, name: str = None) -> dict | transforms.Compose:
+    def get(self, name: str | list[str] = None) -> dict | transforms.Compose:
         
-        assert name is None or name in self.keys, f"Can get all or one transform into {self.keys}, found {name} instead"
+        assert name is None or name in self.keys or all(name) in self.keys, f"Can get all or one transform into {self.keys}, found {name} instead"
                 
-        return self.transforms[name] if name is not None else self.transforms
+        if isinstance(name, list):
+            return {k: self.transforms[k] for k in name}
+        elif name is not None:
+            return self.transforms[name]
+        else:
+            return self.transforms
     
     def set_norm(self, mean: list[float], std: list[float]):
         self.mean = mean
-        self.std = std  
-        
-        self.transforms.get("aug")["train"].transforms[-1] = Transforms.normalizer(self.mean, self.std)
-        self.transforms.get("aug")["val"].transforms[-1] = Transforms.normalizer(self.mean, self.std)
+        self.std = std
         
     def __repr__(self):
         return f"Transforms(type={self.type}, keys={self.keys}, mean={self.mean}, std={self.std}, transforms={self.transforms})"
             
     def to_dict(self) -> dict:
         transforms_dict = {
-            k: list(str(t) for t in v.transforms) for k, v in self.transforms.items() if isinstance(v, transforms.Compose)
+            k: list(str(t) for t in v.transforms) for k, v in self.transforms.items()
         }
-        
-        update_dict = {"aug": {t: list(str(tr) for tr in val.transforms) for t, val in self.transforms.get("aug").items()}}
-        transforms_dict.update(update_dict)
         
         return {
             "type": self.type,

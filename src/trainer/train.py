@@ -66,10 +66,6 @@ class Trainer:
         self.gamma: float = None
         self.weight_decay: float = None
         
-        self.augment: bool = None
-        self.aug_train: Compose = None
-        self.norm_eval: transforms.Normalize = None
-        
         self.criterion: str = None
         self.optimizer: str = None
         self.scheduler: str = None
@@ -98,7 +94,6 @@ class Trainer:
         self.gamma = cfg.train.scheduler_gamma
         self.weight_decay = cfg.train.weight_decay
         self.top_k = cfg.train.top_k
-        self.augment = cfg.data.augment
         self.train_accuracy = cfg.train.train_accuracy
         self.best_model_path = cfg.path.best_model_path
         self.sanity_check = cfg.train.sanity_check
@@ -134,15 +129,6 @@ class Trainer:
             self.data_type = torch.float8_e5m2
         else:
             raise ValueError(f"Precision {precision} not supported")
-        
-    def add_aug_norm_transforms(self, transforms: dict):
-        
-        if not self.augment:
-            self.aug_train = transforms["val"]
-            self.norm_eval = transforms["val"]
-        else:
-            self.aug_train = transforms["train"]
-            self.norm_eval = transforms["val"]
             
     def _get_weights(self):
         
@@ -215,13 +201,8 @@ class Trainer:
 
         val_losses, val_accuracies = [], []
         train_losses, train_accuracies = [], []
-        best_accuracy = -1
+        best_accuracy = None
         best_num_epochs = None
-        
-        if self.norm_eval is None and self.aug_train is None:
-            logging.warning("Neither augmentation nor normalization transforms found")
-        elif self.aug_train == self.norm_eval:
-            logging.info("No augmentation found, only normalization will be applied")
         
         if self.sanity_check:    
             train_loss, train_accuracy = self.training_eval()
@@ -251,9 +232,6 @@ class Trainer:
             
             self.model.train()
             for (inputs, labels) in self.trainloader:
-                
-                if self.aug_train is not None:
-                    inputs = torch.stack([self.aug_train(input_img) for input_img in inputs])
 
                 inputs = inputs.type(self.data_type).to(self.device)
                 labels = labels.to(self.device)
@@ -288,10 +266,11 @@ class Trainer:
                 
             val_loss, val_accuracy = self.validate()
             
-            if val_accuracy > best_accuracy or val_accuracy == best_accuracy and val_loss < val_losses[best_num_epochs - 1]:
-                best_accuracy = val_accuracy
-                best_num_epochs = epoch + 1
-                self._save_checkpoint()
+            if best_accuracy is None or val_accuracy > best_accuracy or \
+                (val_accuracy == best_accuracy and val_loss < val_losses[best_num_epochs - 1]):
+                    best_accuracy = val_accuracy
+                    best_num_epochs = epoch + 1
+                    self._save_checkpoint()
 
             logging.info(f"End of Epoch {epoch+1}")
             
@@ -355,9 +334,6 @@ class Trainer:
         for inputs, labels in dataloader:
 
             data_len += inputs.size(0)
-            
-            if self.norm_eval is not None:
-                inputs = torch.stack([self.norm_eval(input_img) for input_img in inputs])
 
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)

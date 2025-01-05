@@ -42,31 +42,37 @@ def main():
         
     # Load datasets with base transformations (resize, crop, to tensor)
     transformations = Transforms(data_config=cfg.data)
-    trainset, validset, testset = ArtistDataset.create(
-        root, 
-        train_split_size=cfg.data.train_split_size, 
-        transforms=transformations.get(),
-        reduction_factor=cfg.data.reduce_factor,
-    )
-    
-    
     if not cfg.data.pretrained_stats:
         # Compute mean and standard deviation (only for training set) for normalization
+        trainset_stats = ArtistDataset(root, "train", transform=transformations.get("train_base"))
         trainloader_stats = create_dataloaders(
-            [trainset],
+            [trainset_stats],
             cfg.data.batch_size_stats,
             shuffle=False,
             drop_last=False,
             num_workers=cfg.env.num_workers
         )
         mean, std = map(
-            compute_stats(trainset, trainloader_stats, cfg.env.device, cfg.path.norm_stats_file).get, 
+            compute_stats(trainloader_stats, cfg.env.device, cfg.path.norm_stats_file).get, 
             ["mean", "std"]
         )
     else:
         mean, std = transformations.mean, transformations.std
     
     transformations.set_norm(mean, std)
+    
+    logging.info(f"Normalization stats: mean {transformations.mean}, std {transformations.std}")
+    
+    if not cfg.data.augment:
+        logging.info("No augmentation found, only normalization will be applied")
+    
+    trainset, validset, testset = ArtistDataset.create(
+        root, 
+        train_split_size=cfg.data.train_split_size, 
+        transforms=transformations.get(),
+        augment=cfg.data.augment,
+        reduction_factor=cfg.data.reduce_factor,
+    )
     
     # Create dataloaders for all the datasets: normalization applied during training
     trainloader, validloader, testloader = create_dataloaders(
@@ -89,7 +95,6 @@ def main():
     categories = testset.categories
     trainer = Trainer(model, trainloader, validloader, testloader, categories)
     trainer.build(cfg)
-    trainer.add_aug_norm_transforms(transformations.get("aug"))
     
     logging.info(transformations.to_dict())
     
