@@ -53,7 +53,7 @@ class Config:
                     augment=True
                 ),
                 train=TrainConfig(
-                    num_epochs=3,
+                    num_epochs=1,
                     train_log_frequency=2,
                     val_log_frequency=1,
                     num_classes=3,
@@ -65,8 +65,8 @@ class Config:
                 ),
                 model=ModelConfig(
                     precision=32,
-                    use_handcrafted=True,
-                    backbone_type=BackboneType.RESNET18
+                    use_handcrafted=False,
+                    backbone_type=None
                 )
             )
             

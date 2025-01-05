@@ -19,7 +19,7 @@ class ArtistDataset(VisionDataset):
     ):
         super(ArtistDataset, self).__init__(root, transform=transform, target_transform=target_transform)
         
-        assert split is None or split in ["train", "test"], "Split must be either training or test, or include all the dataset"
+        assert split is None or split in ["train", "val", "test"], "Split must be either training, validation or test, or include all the dataset"
                 
         self.split = split
         self.categories = os.listdir(self.root)
@@ -29,6 +29,7 @@ class ArtistDataset(VisionDataset):
         
         if split is None:
             images_paths_train, labels_train = self.__get_data_split(split_file("train"))
+            images_paths_val, labels_val = self.__get_data_split(split_file("val"))
             images_paths_test, labels_test = self.__get_data_split(split_file("test"))
             images_paths, labels = images_paths_train + images_paths_test, labels_train + labels_test
         else:
@@ -77,15 +78,13 @@ class ArtistDataset(VisionDataset):
         train_split_size: float = None,
         merge_datasets: bool = False,
         transforms: dict | Compose = None,
-        validation: bool = True,
         reduction_factor: float = None
     ) -> Union[tuple[Union[Subset, "ArtistDataset"], ...], Subset, "ArtistDataset"]:
         
-        assert not merge_datasets and not validation and (train_split_size is None) or \
-            not merge_datasets and validation and not (train_split_size is None) or \
-            merge_datasets and validation and (train_split_size is None), \
+        assert not merge_datasets and not (train_split_size is None) or \
+            merge_datasets and (train_split_size is None), \
             f"Something went wrong in parameter definition " + \
-            f"(merge_datasets:{merge_datasets}, validation_enabled:{validation}), train_split_size: {train_split_size:.2f}"
+            f"(merge_datasets:{merge_datasets}, train_split_size: {train_split_size:.2f}"
             
         assert train_split_size is None or 0 <= train_split_size <= 1, "Train split size must be a fraction"
         assert reduction_factor is None or 0 < reduction_factor <= 1, "Reduce factor must be a fraction"
@@ -99,18 +98,15 @@ class ArtistDataset(VisionDataset):
                 train_transforms, eval_transforms = None, None
             
             trainset = ArtistDataset(root, "train", transform=train_transforms)
+            validset = ArtistDataset(root, "val", transform=eval_transforms)
             testset = ArtistDataset(root, "test", transform=eval_transforms)
     
             if reduction_factor is not None and reduction_factor < 1:
                 trainset = ArtistDataset._reduce(trainset, reduction_factor)
+                validset = ArtistDataset._reduce(validset, reduction_factor)
                 testset = ArtistDataset._reduce(testset, reduction_factor)
                 
-            # A validation split is generated out of the train set
-            if validation:
-                trainset, validset = ArtistDataset._split(trainset, train_split_size)
-                return trainset, validset, testset
-            
-            return trainset, testset
+            return trainset, validset, testset
         
         # Load all the dataset in one single object: useful for statistics
         # Applied only basic evaluation transformations
@@ -130,12 +126,13 @@ class ArtistDataset(VisionDataset):
     ) -> tuple[Subset, Subset]:
 
         indexes = range(0, len(dataset))
+        stratify = dataset.get_labels() if isinstance(dataset, ArtistDataset) else None
         train_indexes, val_indexes = train_test_split(
             indexes,
             train_size=train_size,
             random_state=random_state, 
             shuffle=shuffle,
-            stratify=dataset.get_labels() if not isinstance(dataset, Subset) else None
+            stratify=stratify
         )
 
         trainset = Subset(dataset, train_indexes)

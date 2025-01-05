@@ -170,13 +170,19 @@ class Trainer:
             raise ValueError(f"Criterion {criterion} not supported")
         
         if optimizer == "adam":
-            self.optimizer = optim.Adam(
+            self.optimizer: optim.Adam = optim.Adam(
+                self.model.parameters(), 
+                lr=self.lr, 
+                weight_decay=self.weight_decay
+            )
+        elif optimizer == "adamw":
+            self.optimizer: optim.AdamW = optim.AdamW(
                 self.model.parameters(), 
                 lr=self.lr, 
                 weight_decay=self.weight_decay
             )
         elif optimizer == "sgd":
-            self.optimizer = optim.SGD(
+            self.optimizer: optim.SGD = optim.SGD(
                 self.model.parameters(), 
                 lr=self.lr, 
                 momentum=self.momentum, 
@@ -191,6 +197,15 @@ class Trainer:
             self.scheduler = None
         else:
             raise ValueError(f"Scheduler {scheduler} not supported")
+        
+    def _save_checkpoint(self, epoch: int = None):
+        checkpoint = {
+            "epoch": epoch,
+            "model_state_dict": self.model.state_dict(),
+            "optimizer_state_dict": self.optimizer.state_dict()
+        }
+        epoch_info = f"_{epoch}" if epoch is not None else ""
+        torch.save(checkpoint, f"{self.best_model_path}{epoch_info}.pth")
     
     @execution_time
     def train(self):
@@ -269,14 +284,14 @@ class Trainer:
                 train_accuracy = None
                 
             if self.save_models:
-                torch.save(self.model.state_dict(), f"{self.best_model_path}_{epoch+1}.pth")
+                self._save_checkpoint(epoch + 1)
                 
             val_loss, val_accuracy = self.validate()
             
             if val_accuracy > best_accuracy or val_accuracy == best_accuracy and val_loss < val_losses[best_num_epochs - 1]:
                 best_accuracy = val_accuracy
                 best_num_epochs = epoch + 1
-                torch.save(self.model.state_dict(), f"{self.best_model_path}.pth")
+                self._save_checkpoint()
 
             logging.info(f"End of Epoch {epoch+1}")
             
@@ -314,10 +329,10 @@ class Trainer:
     @execution_time
     def test(self, model_path: str = None, testloader: DataLoader = None, save_path: str = None):
         
-        if model_path is not None:
-            self.model.load_state_dict(torch.load(model_path, weights_only=True))
-        else:
-            self.model.load_state_dict(torch.load(f"{self.best_model_path}.pth", weights_only=True))
+        model_path = model_path if model_path is not None else f"{self.best_model_path}.pth"
+        checkpoint = torch.load(model_path, weights_only=True)
+        self.model.load_state_dict(checkpoint["model_state_dict"])
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         
         if save_path is not None:
             
@@ -358,6 +373,7 @@ class Trainer:
                              f"Loss: {mean(losses[current_step + 1 - self.val_log_frequency : current_step + 1]):.5f}")
             elif current_step == 0:
                 logging.info(f"Validation iteration {current_step + 1}, Loss: {loss.item():.5f}")
+        
             
             # Calculate accuracy
             self.metrics.update(outputs, labels)
