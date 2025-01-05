@@ -1,4 +1,5 @@
 from enum import Enum
+import json
 import time
 from functools import wraps
 import torch
@@ -35,3 +36,9 @@ def execution_time(func):
         return result
         
     return wrapper
+
+def load_stats(filename: str) -> tuple:
+    
+    stats = json.load(open(filename, "r"))
+    
+    return stats["mean"], stats["std"]

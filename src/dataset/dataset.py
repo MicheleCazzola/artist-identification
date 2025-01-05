@@ -79,19 +79,12 @@ class ArtistDataset(VisionDataset):
     @staticmethod
     def create(
         root: str,
-        train_split_size: float = None,
         merge_datasets: bool = False,
         augment: bool = False,
         transforms: dict | Compose = None,
         reduction_factor: float = None
     ) -> Union[tuple[Union[Subset, "ArtistDataset"], ...], Subset, "ArtistDataset"]:
         
-        assert not merge_datasets and not (train_split_size is None) or \
-            merge_datasets and (train_split_size is None), \
-            f"Something went wrong in parameter definition " + \
-            f"(merge_datasets:{merge_datasets}, train_split_size: {train_split_size:.2f}"
-            
-        assert train_split_size is None or 0 <= train_split_size <= 1, "Train split size must be a fraction"
         assert reduction_factor is None or 0 < reduction_factor <= 1, "Reduce factor must be a fraction"
         
         # Dataset is loaded into training and test set

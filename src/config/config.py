@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 
-from src.utils.utils import BackboneType
 from .components import PathConfig, EnvConfig, DataConfig, TrainConfig, ModelConfig, HOGConfig
 
 @dataclass
@@ -45,12 +44,12 @@ class Config:
                     num_workers=0
                 ),
                 data=DataConfig(
-                    pretrained_stats=True,
+                    pretrained_stats=False,
                     batch_size_model=2,
                     batch_size_stats=2,
                     train_split_size=0.66,
                     reduce_factor=1,
-                    augment=True
+                    augment=False
                 ),
                 train=TrainConfig(
                     num_epochs=1,

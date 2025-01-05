@@ -8,7 +8,7 @@ class PathConfig:
     default_root: str = "./data/artist_dataset"
     test_root: str = "./data/kaggle_testset"
     stats_file: str = "./scripts/stats/stats.json"
-    norm_stats_file: str = "./temp/norm_stats.json"
+    norm_stats_file: str = "./data/norm_stats.json"
     best_model_path: str = "./temp/best_model"
     results_root: str = "."
     trained_model_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/temp/best_model_10.pth"   # Change in case of custom inference-only model

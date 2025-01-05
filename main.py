@@ -4,10 +4,10 @@ import os
 from src.config.config import Config
 from src.dataset.dataset import ArtistDataset, UnlabeledArtistDataset
 from src.dataset.dataloader import create_dataloaders
-from src.utils.stats import compute_stats
 from src.transformations.transformations import Transforms
 from src.trainer.train import Trainer
 from src.model.network import MultiBranchArtistNetwork
+from src.utils.utils import load_stats
 import sys
 
 
@@ -39,23 +39,11 @@ def main():
         root = cfg.path.default_root
     
     logging.info(cfg.__dict__)
-        
-    # Load datasets with base transformations (resize, crop, to tensor)
+    
     transformations = Transforms(data_config=cfg.data)
+        
     if not cfg.data.pretrained_stats:
-        # Compute mean and standard deviation (only for training set) for normalization
-        trainset_stats = ArtistDataset(root, "train", transform=transformations.get("train_base"))
-        trainloader_stats = create_dataloaders(
-            [trainset_stats],
-            cfg.data.batch_size_stats,
-            shuffle=False,
-            drop_last=False,
-            num_workers=cfg.env.num_workers
-        )
-        mean, std = map(
-            compute_stats(trainloader_stats, cfg.env.device, cfg.path.norm_stats_file).get, 
-            ["mean", "std"]
-        )
+        mean, std = load_stats(cfg.path.norm_stats_file)
     else:
         mean, std = transformations.mean, transformations.std
     
@@ -68,7 +56,6 @@ def main():
     
     trainset, validset, testset = ArtistDataset.create(
         root, 
-        train_split_size=cfg.data.train_split_size, 
         transforms=transformations.get(),
         augment=cfg.data.augment,
         reduction_factor=cfg.data.reduce_factor,
@@ -144,9 +131,6 @@ def main():
         cfg.train.train_only,
         cfg.train.inference_only
     )
-    
-    if os.path.exists(cfg.path.norm_stats_file):
-        os.remove(cfg.path.norm_stats_file)
     
     logging.info(f"Done!")
 

@@ -26,16 +26,16 @@ class Transforms:
             self.keys = ["train_base", "train_norm", "train_aug", "eval"]
             self.normalizer = lambda m, s: Transforms.normalizer(m, s)
             
-            preprocessing = [
+            self.preprocessing = [
                 Transforms.resizer(data_config.resize_dim),
                 Transforms.cropper(data_config.crop_dim)
             ]
-            augmentations = Augmentations(data_config.aug_probs, data_config.aug_mask)
+            self.augmentations = Augmentations(data_config.aug_probs, data_config.aug_mask)
             
-            train_transforms_base = transforms.Compose([*preprocessing, Transforms.to_tensor()])
-            train_transforms_norm = transforms.Compose([*preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
-            train_transforms_aug = transforms.Compose([*preprocessing, augmentations, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
-            eval_transforms = transforms.Compose([*preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
+            train_transforms_base = transforms.Compose([*self.preprocessing, Transforms.to_tensor()])
+            train_transforms_norm = transforms.Compose([*self.preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
+            train_transforms_aug = transforms.Compose([*self.preprocessing, self.augmentations, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
+            eval_transforms = transforms.Compose([*self.preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
             
             self.transforms = dict(zip(self.keys, [train_transforms_base, train_transforms_norm, train_transforms_aug, eval_transforms]))
         else:
@@ -66,6 +66,10 @@ class Transforms:
     def set_norm(self, mean: list[float], std: list[float]):
         self.mean = mean
         self.std = std
+        
+        self.transforms["train_aug"].transforms[-1] = self.normalizer(self.mean, self.std)
+        self.transforms["train_norm"].transforms[-1] = self.normalizer(self.mean, self.std)
+        self.transforms["eval"].transforms[-1] = self.normalizer(self.mean, self.std)
         
     def __repr__(self):
         return f"Transforms(type={self.type}, keys={self.keys}, mean={self.mean}, std={self.std}, transforms={self.transforms})"
