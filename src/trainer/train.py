@@ -192,12 +192,17 @@ class Trainer:
         }
         epoch_info = f"_{epoch}" if epoch is not None else ""
         torch.save(checkpoint, f"{self.best_model_path}{epoch_info}.pth")
+        
+    def _load_checkpoint(self, model_path: str):
+        checkpoint = torch.load(model_path, weights_only=True)
+        self.model.load_state_dict(checkpoint["model_state_dict"])
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     
     @execution_time
     def train(self):
         
         if self.resume_training:
-            self.model.load_state_dict(torch.load(self.trained_model_path, weights_only=True))
+            self._load_checkpoint(self.trained_model_path)
 
         val_losses, val_accuracies = [], []
         train_losses, train_accuracies = [], []
@@ -309,9 +314,7 @@ class Trainer:
     def test(self, model_path: str = None, testloader: DataLoader = None, save_path: str = None):
         
         model_path = model_path if model_path is not None else f"{self.best_model_path}.pth"
-        checkpoint = torch.load(model_path, weights_only=True)
-        self.model.load_state_dict(checkpoint["model_state_dict"])
-        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self._load_checkpoint(model_path)
         
         if save_path is not None:
             
