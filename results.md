@@ -118,3 +118,6 @@
 | ResNet18 | 81 | 16 | CE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 6 | 1 | 3.489 | 21.35 | 6 | 3.51 | 24.3 | 46.2 | 14.9 | 21.65 | 114 |[20250106_011712](/out/official/20250106_011712/) | Strange validation trend, proceed some epochs **without HOG** with the same setting |
 | ResNet18 | 81 | 16 | CE | AdamW | 1e-4 | - | - | 1e-5 | - | - | - | - | 6 | 1 | 3.284 | 24.69 | 6 | 3.29 | 25.22 | 49.64 | 16.26 | 24.3 | 109 |[20250106_011325](/out/official/20250106_011325/) | Good trend for now, proceed as much as possible **without HOG** with the same setting |
 | ResNet18 | 81 | 16 | WCE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 6 | 1 | 3.324 | 19.25 | 6 | 3.36 | 22.05 | 44.67 | 12.1 | 19.1 | 114 |[20250106_013932](/out/official/20250106_013932/) | Suspend for now, use CE loss |
+| ResNet18 | No | 16 | CE | AdamW | 1e-4 | - | - | 1e-5 | - | - | - | - | 6 | 1 | |  | 6 | |25.47 | 49.51 | 15.73 | 23.19 | ~95 |[20250106_193020](/out/official/20250106_193020/) |  |
+| ResNet18 | No | 16 | CE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 6 | 1 | || 6 |  | 26.42 | 49.29 | 16.38 | 23.91 | ~93 |[20250106_193051](/out/official/20250106_193051/) |  |
+| ResNet18 | No | 16 | CE | AdamW | 1e-3 | - | - | 1e-5 | - | - | - | - | 6 | 1 | || 6 |  | 3.23| 12.85  | 1.13 | 2.45 | ~90 |[20250106_195019](/out/official/20250106_195019/) |  |
