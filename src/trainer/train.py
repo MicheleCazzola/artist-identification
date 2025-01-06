@@ -10,8 +10,6 @@ import torch.nn as nn
 import torch.optim as optim
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Subset
-from torchvision import transforms
-from torchvision.transforms import Compose
 
 from src.transformations.transformations import Transforms
 
