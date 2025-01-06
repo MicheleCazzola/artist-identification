@@ -36,7 +36,9 @@
 - metrics are computed on a test set by default, otherwise look for (*)
 - HOG features are extracted from a 224x224 center-cropped image, obtained from a 256x256 downsampled image (original is 512x512)
 
-| Backbone Model | HOG | Batch size | Loss | Optimizer |Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Best validation loss| Best validation WT5-MCA | Best epochs | Test loss | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Training time (mins) (***) | Output folder |
+### Dataset 60-20-20
+
+| Backbone Model | HOG | Batch size | Loss | Optimizer |Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Best validation loss| Best validation WT5-MCA  (%) | Best epochs | Test loss | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Training time (mins) (***) | Output folder |
 |:--------------:|:---:|:--:|:----------:|:-----------:|:--:|:-------------:|:------------:|:--:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | Random crop | No | 32 |  | Adam |  |  |  |  | | | | | |  | |  |  |  |  | | | | |[link]() |
 | Random crop | No | 32 | CE | Adam | 1e-3 | - | - | 1e-6 | - | - | - | - | 2 | 1 | 4.3 | 5.1 | 2 | 4.3 | 10.4 | 26.6 | 2.7 | 5.3 | ~20 |[20241229_184457](./out/official/20241229_184457/) |
@@ -82,9 +84,9 @@
 | ResNet18 | No | 16 | WCE |  Adam |1e-4 | -|- |1e-4 | -|-| -|- | 6 | 1| 3.34 | 19.5 | 6 | 3.35 | 20.35 | 42.76 | 13.13 | 19.77 | ~90 |[20250103_023554](/out/official/20250103_023554/) |
 | ResNet18 | 81 | 16 | CE | | Adam | 1e-4  |- |1e-4 | -|-| -|- | 6 | 1| 9.05 | 16.52 | 4 | 6.46 | 21.08 | 44.39 | 11.16 | 17.81 | ~100 |[20250103_024746](/out/official/20250103_024746/) |
 | ResNet18 | 81 | 16 | WCE |  Adam | 1e-4 |-|- |1e-4 | -|-| -|- | 6 | 1| 3.51 | 18.9 | 6 | 3.50 | 18.75 | 39.91 | 11.89 | 18.37 | ~95 |[20250103_024403](/out/official/20250103_024403/) |
-| nResNet18 | 81 | 16 | CE | Adam | 5e-5 | -|- |1e-4 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[20250104_202647](/out/official/20250104_202647/) |
-| nResNet18 | 81 | 16 | CE | Adam |  5e-5 | -|- |1e-5 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[20250104_202934](/out/official/20250104_202934/) |
-| nResNet18 | No | 16 | CE | Adam | 5e-5 |  -|- |1e-5 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[20250104_204007](/out/official/20250104_204007/) |
+| ResNet18 | 81 | 16 | CE | Adam | 5e-5 | -|- |1e-4 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[20250104_202647](/out/official/20250104_202647/) |
+| ResNet18 | 81 | 16 | CE | Adam |  5e-5 | -|- |1e-5 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[20250104_202934](/out/official/20250104_202934/) |
+| ResNet18 | No | 16 | CE | Adam | 5e-5 |  -|- |1e-5 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[20250104_204007](/out/official/20250104_204007/) |
 | nResNet18 | 81 | 16 | CE | Adamw | 1e-4 | -|- |1e-4 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[link](/out/official/20250106_011712/) |
 | nResNet18 | 81 | 16 | CE | Adamw | 1e-4 | -|- |1e-5 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[link](/out/official/20250106_011325/) |
 | nResNet18 | 81 | 16 | WCE | AdamW | 1e-4 | -|- |1e-4 | -|-| -|- | 6 | 1|  |  |  |  |  |  |  |  |  |[link](/out/official/20250106_013932/) |
@@ -102,3 +104,17 @@
 (\*) Value computed on training set  
 (*\*) In the form "probability - (param1, param2, ...)"  
 (\***) Global training time
+
+## Dataset 70-15-15
+
+| Backbone Model | HOG | Batch size | Loss | Optimizer |Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Best validation loss| Best validation WT5-MCA (%) | Best epochs | Test loss | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Training time (mins) (***) | Output folder | Notes |
+|:--------------:|:---:|:--:|:----------:|:-----------:|:--:|:-------------:|:------------:|:--:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Random crop | No | 32 | CE | AdamW | 1e-4 | - | - | 1e-6 | - | - | - | - | 5 | 1 | 3.30 | 21.86 | 5 | 3.36 | 24.5 | 48.2 | 13.9 | 21.2 | 52 |[20250105_200736](/out/official/20250105_200736/) | Good trend but accuracy is low, proceed for 5-10 epochs more |
+| Random crop | No | 32 | CE | AdamW | 1e-3 | - | - | 1e-5 | - | - | - | - | 5 | 1 | 3.86 | 12.46 | 5 | 3.88 | 16.4 | 35.6 | 7.24 | 12.4 | 53 |[20250105_214543](/out/official/20250105_214543/) | LR too high (?), accuracy is too low |
+| Random crop | No | 32 | CE | AdamW | 1e-4 | - | - | 1e-5 | - | - | - | - | 5 | 1 | 3.33 | 23.5 | 5 | 3.38 | 24.5 | 48.1 | 15.1 | 22.5 | 52 |[20250105_214716](/out/official/20250105_214716/) | Next line has the 5 next epochs | 
+| Random crop | No | 32 | CE | AdamW | 1e-4 | - | - | 1e-5 | - | - | - | - | 10 | 1 | 2.935 | 31.2 | 10 | 2.98 | 31.6 | 56.3 | 20.7 | 29.7 | 104 |[20250105_234725](/out/official/20250105_234725/) | Discrete trend, proceed up to 20 |
+| Random crop | No | 32 | CE | AdamW | 1e-2 | - | - | 1e-5 | - | - | - | - | 5 | 1 | 3.5 | 21.49 | 5 | 3.52 | 23.59 | 45.37 | 14.2 | 21.03 | 52 |[20250106_115128](/out/official/20250106_115128/) | LR too high, accuracy has bad trend from 3-4 |
+| Random crop | No | 32 | CE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 10 | 1 | 2.93 | 30.7 | 10 | 2.967 | 32.3 | 57.7 | 22.25 | 31.3 | 101 |[20250106_115446](/out/official/20250106_115446/) | Good trend, proceed up to 20 |
+| ResNet18 | 81 | 16 | CE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 6 | 1 | 3.489 | 21.35 | 6 | 3.51 | 24.3 | 46.2 | 14.9 | 21.65 | 114 |[20250106_011712](/out/official/20250106_011712/) | Strange validation trend, proceed some epochs **without HOG** with the same setting |
+| ResNet18 | 81 | 16 | CE | AdamW | 1e-4 | - | - | 1e-5 | - | - | - | - | 6 | 1 | 3.284 | 24.69 | 6 | 3.29 | 25.22 | 49.64 | 16.26 | 24.3 | 109 |[20250106_011325](/out/official/20250106_011325/) | Good trend for now, proceed as much as possible **without HOG** with the same setting |
+| ResNet18 | 81 | 16 | WCE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 6 | 1 | 3.324 | 19.25 | 6 | 3.36 | 22.05 | 44.67 | 12.1 | 19.1 | 114 |[20250106_013932](/out/official/20250106_013932/) | Suspend for now, use CE loss |

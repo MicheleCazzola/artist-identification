@@ -17452,7 +17452,7 @@ INFO:root:Done!
 """
 
 PATH = "out/official/"
-CONF = "20250104_205418/"           # configuration name here
+CONF = "20250106_115128/"           # configuration name here
 with open(PATH + CONF + "log.txt", "r") as f:
     string = f.read()
 
@@ -17486,7 +17486,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-plt.plot(train_loss[::], label="Train")
+#plt.plot(train_loss[::], label="Train")
 plt.plot(np.clip(val_loss[::], 0, 6), label="Validation")
 #plt.ylim(0, max(max(train_loss), max(val_loss)) + 0.5)
 plt.grid(which='both')
