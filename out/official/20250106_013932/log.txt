@@ -1,0 +1,357 @@
+INFO:root:{'path': PathConfig(default_root='./data/artist_dataset', test_root='./data/kaggle_testset', stats_file='./scripts/stats/stats.json', norm_stats_file='./data/norm_stats.json', best_model_path='./temp/best_model', results_root='.', trained_model_path='/content/drive/MyDrive/mlvm_shared/20241230_225438/temp/best_model_10.pth', predictions_path='/content/drive/MyDrive/mlvm_shared/20241230_225438/predictions.csv'), 'env': EnvConfig(device='cuda', num_workers=2), 'data': DataConfig(pretrained_stats=False, resize_dim=512, crop_dim=512, aug_probs=(0.2, 0.2, 0.2, 0.5), aug_mask=(True, True, True, True), augment=False, reduce_factor=1.0, batch_size_model=16, batch_size_stats=128, train_split_size=0.75), 'train': TrainConfig(num_epochs=6, train_log_frequency=30, val_log_frequency=10, train_accuracy=False, num_classes=161, lr=0.0001, momentum=0.9, weight_decay=0.0001, scheduler_step_size=10, scheduler_gamma=0.1, criterion='weighted_cross_entropy', optimizer='adamw', scheduler='step_lr', top_k=5, sanity_check=False, save_models=True, train_only=False, inference_only=False, save_predictions=False, resume_training=False), 'model': ModelConfig(backbone_type=<BackboneType.RESNET18: 'resnet18'>, use_handcrafted=True, precision=32), 'hog': HOGConfig(downsample_size=256, crop_size=224, channel_coefficients=(0.2989, 0.587, 0.114), orientations=9, pixels_per_cell=74, cells_per_block=1, transform_sqrt=False, feature_vector=True, normalization='L2-Hys')}
+INFO:root:Normalization stats: mean [0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std [0.2794029116630554, 0.27445685863494873, 0.264132022857666]
+INFO:root:No augmentation found, only normalization will be applied
+Downloading: "https://download.pytorch.org/models/resnet18-f37072fd.pth" to /root/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth
+100% 44.7M/44.7M [00:00<00:00, 125MB/s]
+INFO:root:Training setup...
+INFO:root:{'type': 'model', 'keys': ['train_base', 'train_norm', 'train_aug', 'eval'], 'mean': [0.47527796030044556, 0.42012834548950195, 0.3588443994522095], 'std': [0.2794029116630554, 0.27445685863494873, 0.264132022857666], 'transforms': {'train_base': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()'], 'train_norm': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()', 'Normalize(mean=[0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std=[0.2794029116630554, 0.27445685863494873, 0.264132022857666])'], 'train_aug': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'Augmentations(probabilities=[0.2, 0.2, 0.2, 0.5], transformations=[ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1), saturation=(0.9, 1.1), hue=None), LightingNoise(alpha=0.1, dim=3), GaussianBlur(kernel_size=(5, 5), sigma=(0.5, 1.5)), RandomResizedCrop(size=(512, 512), scale=(0.85, 1.0), ratio=(0.8, 1.25), interpolation=bilinear, antialias=True)])', 'ToTensor()', 'Normalize(mean=[0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std=[0.2794029116630554, 0.27445685863494873, 0.264132022857666])'], 'eval': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()', 'Normalize(mean=[0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std=[0.2794029116630554, 0.27445685863494873, 0.264132022857666])']}}
+INFO:root:Training...
+INFO:root:Training epoch 1, Iteration 1, Loss: 5.12708
+INFO:root:Training epoch 1, Iteration 30, Loss: 5.01217
+INFO:root:Training epoch 1, Iteration 60, Loss: 4.86853
+INFO:root:Training epoch 1, Iteration 90, Loss: 4.64936
+INFO:root:Training epoch 1, Iteration 120, Loss: 4.60436
+INFO:root:Training epoch 1, Iteration 150, Loss: 4.61432
+INFO:root:Training epoch 1, Iteration 180, Loss: 4.55016
+INFO:root:Training epoch 1, Iteration 210, Loss: 4.53243
+INFO:root:Training epoch 1, Iteration 240, Loss: 4.41743
+INFO:root:Training epoch 1, Iteration 270, Loss: 4.52553
+INFO:root:Training epoch 1, Iteration 300, Loss: 4.44172
+INFO:root:Training epoch 1, Iteration 330, Loss: 4.53564
+INFO:root:Training epoch 1, Iteration 360, Loss: 4.40796
+INFO:root:Training epoch 1, Iteration 390, Loss: 4.18185
+INFO:root:Training epoch 1, Iteration 420, Loss: 4.38197
+INFO:root:Training epoch 1, Iteration 450, Loss: 4.19090
+INFO:root:Training epoch 1, Iteration 480, Loss: 4.30055
+INFO:root:Training epoch 1, Iteration 510, Loss: 4.27054
+INFO:root:Training epoch 1, Iteration 540, Loss: 4.28702
+INFO:root:Training epoch 1, Iteration 570, Loss: 4.24305
+INFO:root:Training epoch 1, Iteration 600, Loss: 4.29720
+INFO:root:Training epoch 1, Iteration 630, Loss: 4.10572
+INFO:root:Training epoch 1, Iteration 660, Loss: 4.10402
+INFO:root:Training epoch 1, Iteration 690, Loss: 4.20881
+INFO:root:Training epoch 1, Iteration 720, Loss: 4.01824
+INFO:root:Training epoch 1, Iteration 750, Loss: 4.10123
+INFO:root:Training epoch 1, Iteration 780, Loss: 4.14150
+INFO:root:Training epoch 1, Iteration 810, Loss: 3.98384
+INFO:root:Training epoch 1, Iteration 840, Loss: 4.03633
+INFO:root:Training epoch 1, Iteration 870, Loss: 4.07601
+INFO:root:Training epoch 1, Iteration 900, Loss: 4.05071
+INFO:root:Validation iteration 1, Loss: 4.28134
+INFO:root:Validation iteration 10, Loss: 3.94316
+INFO:root:Validation iteration 20, Loss: 4.29118
+INFO:root:Validation iteration 30, Loss: 3.75607
+INFO:root:Validation iteration 40, Loss: 4.14315
+INFO:root:Validation iteration 50, Loss: 4.18906
+INFO:root:Validation iteration 60, Loss: 4.16396
+INFO:root:Validation iteration 70, Loss: 3.80619
+INFO:root:Validation iteration 80, Loss: 4.12528
+INFO:root:Validation iteration 90, Loss: 4.04963
+INFO:root:Validation iteration 100, Loss: 4.02808
+INFO:root:Validation iteration 110, Loss: 3.82328
+INFO:root:Validation iteration 120, Loss: 4.18060
+INFO:root:Validation iteration 130, Loss: 4.07085
+INFO:root:Validation iteration 140, Loss: 4.01361
+INFO:root:Validation iteration 150, Loss: 4.02074
+INFO:root:Validation iteration 160, Loss: 3.73108
+INFO:root:Validation iteration 170, Loss: 3.87511
+INFO:root:Validation iteration 180, Loss: 4.17233
+INFO:root:Validation iteration 190, Loss: 3.73631
+INFO:root:End of Epoch 1
+INFO:root:Training loss: 4.326
+INFO:root:Validation accuracy: 0.069, Validation loss: 4.00294
+INFO:root:Training epoch 2, Iteration 1, Loss: 3.71280
+INFO:root:Training epoch 2, Iteration 30, Loss: 3.98632
+INFO:root:Training epoch 2, Iteration 60, Loss: 4.00392
+INFO:root:Training epoch 2, Iteration 90, Loss: 3.91645
+INFO:root:Training epoch 2, Iteration 120, Loss: 3.96864
+INFO:root:Training epoch 2, Iteration 150, Loss: 3.85681
+INFO:root:Training epoch 2, Iteration 180, Loss: 3.88541
+INFO:root:Training epoch 2, Iteration 210, Loss: 3.98390
+INFO:root:Training epoch 2, Iteration 240, Loss: 3.90238
+INFO:root:Training epoch 2, Iteration 270, Loss: 3.86331
+INFO:root:Training epoch 2, Iteration 300, Loss: 3.96258
+INFO:root:Training epoch 2, Iteration 330, Loss: 3.90089
+INFO:root:Training epoch 2, Iteration 360, Loss: 3.97260
+INFO:root:Training epoch 2, Iteration 390, Loss: 3.98712
+INFO:root:Training epoch 2, Iteration 420, Loss: 3.75280
+INFO:root:Training epoch 2, Iteration 450, Loss: 3.90781
+INFO:root:Training epoch 2, Iteration 480, Loss: 3.98846
+INFO:root:Training epoch 2, Iteration 510, Loss: 3.93187
+INFO:root:Training epoch 2, Iteration 540, Loss: 3.99037
+INFO:root:Training epoch 2, Iteration 570, Loss: 3.95100
+INFO:root:Training epoch 2, Iteration 600, Loss: 3.86269
+INFO:root:Training epoch 2, Iteration 630, Loss: 3.83117
+INFO:root:Training epoch 2, Iteration 660, Loss: 3.82713
+INFO:root:Training epoch 2, Iteration 690, Loss: 3.86996
+INFO:root:Training epoch 2, Iteration 720, Loss: 3.80798
+INFO:root:Training epoch 2, Iteration 750, Loss: 3.80368
+INFO:root:Training epoch 2, Iteration 780, Loss: 3.85223
+INFO:root:Training epoch 2, Iteration 810, Loss: 3.73149
+INFO:root:Training epoch 2, Iteration 840, Loss: 3.91807
+INFO:root:Training epoch 2, Iteration 870, Loss: 3.95444
+INFO:root:Training epoch 2, Iteration 900, Loss: 3.77127
+INFO:root:Validation iteration 1, Loss: 3.90886
+INFO:root:Validation iteration 10, Loss: 3.66659
+INFO:root:Validation iteration 20, Loss: 4.07618
+INFO:root:Validation iteration 30, Loss: 3.53240
+INFO:root:Validation iteration 40, Loss: 3.90264
+INFO:root:Validation iteration 50, Loss: 3.97837
+INFO:root:Validation iteration 60, Loss: 3.93226
+INFO:root:Validation iteration 70, Loss: 3.50018
+INFO:root:Validation iteration 80, Loss: 3.96862
+INFO:root:Validation iteration 90, Loss: 3.69310
+INFO:root:Validation iteration 100, Loss: 3.74927
+INFO:root:Validation iteration 110, Loss: 3.75261
+INFO:root:Validation iteration 120, Loss: 3.97919
+INFO:root:Validation iteration 130, Loss: 3.73647
+INFO:root:Validation iteration 140, Loss: 3.78266
+INFO:root:Validation iteration 150, Loss: 3.67522
+INFO:root:Validation iteration 160, Loss: 3.50435
+INFO:root:Validation iteration 170, Loss: 3.62951
+INFO:root:Validation iteration 180, Loss: 3.99415
+INFO:root:Validation iteration 190, Loss: 3.61879
+INFO:root:End of Epoch 2
+INFO:root:Training loss: 3.898
+INFO:root:Validation accuracy: 0.105, Validation loss: 3.77135
+INFO:root:Training epoch 3, Iteration 1, Loss: 3.63197
+INFO:root:Training epoch 3, Iteration 30, Loss: 3.79033
+INFO:root:Training epoch 3, Iteration 60, Loss: 3.74247
+INFO:root:Training epoch 3, Iteration 90, Loss: 3.65363
+INFO:root:Training epoch 3, Iteration 120, Loss: 3.75600
+INFO:root:Training epoch 3, Iteration 150, Loss: 3.68063
+INFO:root:Training epoch 3, Iteration 180, Loss: 3.63069
+INFO:root:Training epoch 3, Iteration 210, Loss: 3.66540
+INFO:root:Training epoch 3, Iteration 240, Loss: 3.65261
+INFO:root:Training epoch 3, Iteration 270, Loss: 3.71472
+INFO:root:Training epoch 3, Iteration 300, Loss: 3.81216
+INFO:root:Training epoch 3, Iteration 330, Loss: 3.71741
+INFO:root:Training epoch 3, Iteration 360, Loss: 3.79736
+INFO:root:Training epoch 3, Iteration 390, Loss: 3.64245
+INFO:root:Training epoch 3, Iteration 420, Loss: 3.65720
+INFO:root:Training epoch 3, Iteration 450, Loss: 3.60211
+INFO:root:Training epoch 3, Iteration 480, Loss: 3.61077
+INFO:root:Training epoch 3, Iteration 510, Loss: 3.67648
+INFO:root:Training epoch 3, Iteration 540, Loss: 3.65939
+INFO:root:Training epoch 3, Iteration 570, Loss: 3.83224
+INFO:root:Training epoch 3, Iteration 600, Loss: 3.48656
+INFO:root:Training epoch 3, Iteration 630, Loss: 3.70959
+INFO:root:Training epoch 3, Iteration 660, Loss: 3.74042
+INFO:root:Training epoch 3, Iteration 690, Loss: 3.58244
+INFO:root:Training epoch 3, Iteration 720, Loss: 3.61894
+INFO:root:Training epoch 3, Iteration 750, Loss: 3.72936
+INFO:root:Training epoch 3, Iteration 780, Loss: 3.50326
+INFO:root:Training epoch 3, Iteration 810, Loss: 3.74794
+INFO:root:Training epoch 3, Iteration 840, Loss: 3.64663
+INFO:root:Training epoch 3, Iteration 870, Loss: 3.63933
+INFO:root:Training epoch 3, Iteration 900, Loss: 3.54479
+INFO:root:Validation iteration 1, Loss: 3.92004
+INFO:root:Validation iteration 10, Loss: 3.62191
+INFO:root:Validation iteration 20, Loss: 3.92453
+INFO:root:Validation iteration 30, Loss: 3.42407
+INFO:root:Validation iteration 40, Loss: 3.53051
+INFO:root:Validation iteration 50, Loss: 3.70311
+INFO:root:Validation iteration 60, Loss: 3.97298
+INFO:root:Validation iteration 70, Loss: 3.35808
+INFO:root:Validation iteration 80, Loss: 3.63761
+INFO:root:Validation iteration 90, Loss: 3.50046
+INFO:root:Validation iteration 100, Loss: 3.39566
+INFO:root:Validation iteration 110, Loss: 3.42946
+INFO:root:Validation iteration 120, Loss: 3.79381
+INFO:root:Validation iteration 130, Loss: 3.72536
+INFO:root:Validation iteration 140, Loss: 3.59430
+INFO:root:Validation iteration 150, Loss: 3.46201
+INFO:root:Validation iteration 160, Loss: 3.49602
+INFO:root:Validation iteration 170, Loss: 3.45870
+INFO:root:Validation iteration 180, Loss: 3.79426
+INFO:root:Validation iteration 190, Loss: 3.47992
+INFO:root:End of Epoch 3
+INFO:root:Training loss: 3.672
+INFO:root:Validation accuracy: 0.145, Validation loss: 3.59131
+INFO:root:Training epoch 4, Iteration 1, Loss: 3.61636
+INFO:root:Training epoch 4, Iteration 30, Loss: 3.51212
+INFO:root:Training epoch 4, Iteration 60, Loss: 3.45489
+INFO:root:Training epoch 4, Iteration 90, Loss: 3.41997
+INFO:root:Training epoch 4, Iteration 120, Loss: 3.49232
+INFO:root:Training epoch 4, Iteration 150, Loss: 3.55756
+INFO:root:Training epoch 4, Iteration 180, Loss: 3.48863
+INFO:root:Training epoch 4, Iteration 210, Loss: 3.56295
+INFO:root:Training epoch 4, Iteration 240, Loss: 3.61946
+INFO:root:Training epoch 4, Iteration 270, Loss: 3.53166
+INFO:root:Training epoch 4, Iteration 300, Loss: 3.42009
+INFO:root:Training epoch 4, Iteration 330, Loss: 3.59940
+INFO:root:Training epoch 4, Iteration 360, Loss: 3.54602
+INFO:root:Training epoch 4, Iteration 390, Loss: 3.46480
+INFO:root:Training epoch 4, Iteration 420, Loss: 3.56449
+INFO:root:Training epoch 4, Iteration 450, Loss: 3.51471
+INFO:root:Training epoch 4, Iteration 480, Loss: 3.54405
+INFO:root:Training epoch 4, Iteration 510, Loss: 3.54157
+INFO:root:Training epoch 4, Iteration 540, Loss: 3.57704
+INFO:root:Training epoch 4, Iteration 570, Loss: 3.64592
+INFO:root:Training epoch 4, Iteration 600, Loss: 3.51261
+INFO:root:Training epoch 4, Iteration 630, Loss: 3.54443
+INFO:root:Training epoch 4, Iteration 660, Loss: 3.49455
+INFO:root:Training epoch 4, Iteration 690, Loss: 3.50505
+INFO:root:Training epoch 4, Iteration 720, Loss: 3.51056
+INFO:root:Training epoch 4, Iteration 750, Loss: 3.42714
+INFO:root:Training epoch 4, Iteration 780, Loss: 3.55084
+INFO:root:Training epoch 4, Iteration 810, Loss: 3.52925
+INFO:root:Training epoch 4, Iteration 840, Loss: 3.49957
+INFO:root:Training epoch 4, Iteration 870, Loss: 3.56243
+INFO:root:Training epoch 4, Iteration 900, Loss: 3.53706
+INFO:root:Validation iteration 1, Loss: 3.55033
+INFO:root:Validation iteration 10, Loss: 3.46370
+INFO:root:Validation iteration 20, Loss: 3.69025
+INFO:root:Validation iteration 30, Loss: 3.27730
+INFO:root:Validation iteration 40, Loss: 3.53706
+INFO:root:Validation iteration 50, Loss: 3.58859
+INFO:root:Validation iteration 60, Loss: 3.59380
+INFO:root:Validation iteration 70, Loss: 3.21947
+INFO:root:Validation iteration 80, Loss: 3.53380
+INFO:root:Validation iteration 90, Loss: 3.39989
+INFO:root:Validation iteration 100, Loss: 3.32198
+INFO:root:Validation iteration 110, Loss: 3.33676
+INFO:root:Validation iteration 120, Loss: 3.61491
+INFO:root:Validation iteration 130, Loss: 3.54681
+INFO:root:Validation iteration 140, Loss: 3.39315
+INFO:root:Validation iteration 150, Loss: 3.30320
+INFO:root:Validation iteration 160, Loss: 3.30482
+INFO:root:Validation iteration 170, Loss: 3.42994
+INFO:root:Validation iteration 180, Loss: 3.48886
+INFO:root:Validation iteration 190, Loss: 3.25380
+INFO:root:End of Epoch 4
+INFO:root:Training loss: 3.528
+INFO:root:Validation accuracy: 0.176, Validation loss: 3.43806
+INFO:root:Training epoch 5, Iteration 1, Loss: 2.67465
+INFO:root:Training epoch 5, Iteration 30, Loss: 3.38674
+INFO:root:Training epoch 5, Iteration 60, Loss: 3.23084
+INFO:root:Training epoch 5, Iteration 90, Loss: 3.36426
+INFO:root:Training epoch 5, Iteration 120, Loss: 3.43714
+INFO:root:Training epoch 5, Iteration 150, Loss: 3.44109
+INFO:root:Training epoch 5, Iteration 180, Loss: 3.40374
+INFO:root:Training epoch 5, Iteration 210, Loss: 3.36084
+INFO:root:Training epoch 5, Iteration 240, Loss: 3.39271
+INFO:root:Training epoch 5, Iteration 270, Loss: 3.44231
+INFO:root:Training epoch 5, Iteration 300, Loss: 3.26179
+INFO:root:Training epoch 5, Iteration 330, Loss: 3.36715
+INFO:root:Training epoch 5, Iteration 360, Loss: 3.46790
+INFO:root:Training epoch 5, Iteration 390, Loss: 3.43573
+INFO:root:Training epoch 5, Iteration 420, Loss: 3.46466
+INFO:root:Training epoch 5, Iteration 450, Loss: 3.30689
+INFO:root:Training epoch 5, Iteration 480, Loss: 3.47375
+INFO:root:Training epoch 5, Iteration 510, Loss: 3.39256
+INFO:root:Training epoch 5, Iteration 540, Loss: 3.42333
+INFO:root:Training epoch 5, Iteration 570, Loss: 3.23332
+INFO:root:Training epoch 5, Iteration 600, Loss: 3.48875
+INFO:root:Training epoch 5, Iteration 630, Loss: 3.33885
+INFO:root:Training epoch 5, Iteration 660, Loss: 3.28850
+INFO:root:Training epoch 5, Iteration 690, Loss: 3.38061
+INFO:root:Training epoch 5, Iteration 720, Loss: 3.39218
+INFO:root:Training epoch 5, Iteration 750, Loss: 3.56884
+INFO:root:Training epoch 5, Iteration 780, Loss: 3.29747
+INFO:root:Training epoch 5, Iteration 810, Loss: 3.37652
+INFO:root:Training epoch 5, Iteration 840, Loss: 3.33547
+INFO:root:Training epoch 5, Iteration 870, Loss: 3.21566
+INFO:root:Training epoch 5, Iteration 900, Loss: 3.43932
+INFO:root:Validation iteration 1, Loss: 3.71572
+INFO:root:Validation iteration 10, Loss: 3.39524
+INFO:root:Validation iteration 20, Loss: 3.51096
+INFO:root:Validation iteration 30, Loss: 3.29425
+INFO:root:Validation iteration 40, Loss: 3.47880
+INFO:root:Validation iteration 50, Loss: 3.54193
+INFO:root:Validation iteration 60, Loss: 3.64731
+INFO:root:Validation iteration 70, Loss: 2.96153
+INFO:root:Validation iteration 80, Loss: 3.42933
+INFO:root:Validation iteration 90, Loss: 3.28907
+INFO:root:Validation iteration 100, Loss: 3.21945
+INFO:root:Validation iteration 110, Loss: 3.22012
+INFO:root:Validation iteration 120, Loss: 3.44577
+INFO:root:Validation iteration 130, Loss: 3.32866
+INFO:root:Validation iteration 140, Loss: 3.45277
+INFO:root:Validation iteration 150, Loss: 3.34767
+INFO:root:Validation iteration 160, Loss: 3.04412
+INFO:root:Validation iteration 170, Loss: 3.21023
+INFO:root:Validation iteration 180, Loss: 3.55995
+INFO:root:Validation iteration 190, Loss: 3.17388
+INFO:root:End of Epoch 5
+INFO:root:Training loss: 3.378
+INFO:root:Validation accuracy: 0.190, Validation loss: 3.34422
+INFO:root:Training epoch 6, Iteration 1, Loss: 2.69835
+INFO:root:Training epoch 6, Iteration 30, Loss: 3.12421
+INFO:root:Training epoch 6, Iteration 60, Loss: 3.28478
+INFO:root:Training epoch 6, Iteration 90, Loss: 3.30587
+INFO:root:Training epoch 6, Iteration 120, Loss: 3.19383
+INFO:root:Training epoch 6, Iteration 150, Loss: 3.22930
+INFO:root:Training epoch 6, Iteration 180, Loss: 3.20602
+INFO:root:Training epoch 6, Iteration 210, Loss: 3.29507
+INFO:root:Training epoch 6, Iteration 240, Loss: 3.27821
+INFO:root:Training epoch 6, Iteration 270, Loss: 3.16758
+INFO:root:Training epoch 6, Iteration 300, Loss: 3.31611
+INFO:root:Training epoch 6, Iteration 330, Loss: 3.29191
+INFO:root:Training epoch 6, Iteration 360, Loss: 3.29568
+INFO:root:Training epoch 6, Iteration 390, Loss: 3.35579
+INFO:root:Training epoch 6, Iteration 420, Loss: 3.26619
+INFO:root:Training epoch 6, Iteration 450, Loss: 3.23537
+INFO:root:Training epoch 6, Iteration 480, Loss: 3.13641
+INFO:root:Training epoch 6, Iteration 510, Loss: 3.32990
+INFO:root:Training epoch 6, Iteration 540, Loss: 3.20312
+INFO:root:Training epoch 6, Iteration 570, Loss: 3.25607
+INFO:root:Training epoch 6, Iteration 600, Loss: 3.32228
+INFO:root:Training epoch 6, Iteration 630, Loss: 3.18383
+INFO:root:Training epoch 6, Iteration 660, Loss: 3.21312
+INFO:root:Training epoch 6, Iteration 690, Loss: 3.13637
+INFO:root:Training epoch 6, Iteration 720, Loss: 3.24394
+INFO:root:Training epoch 6, Iteration 750, Loss: 3.12166
+INFO:root:Training epoch 6, Iteration 780, Loss: 3.25228
+INFO:root:Training epoch 6, Iteration 810, Loss: 3.34963
+INFO:root:Training epoch 6, Iteration 840, Loss: 3.35162
+INFO:root:Training epoch 6, Iteration 870, Loss: 3.22168
+INFO:root:Training epoch 6, Iteration 900, Loss: 3.21848
+INFO:root:Validation iteration 1, Loss: 3.29283
+INFO:root:Validation iteration 10, Loss: 3.36489
+INFO:root:Validation iteration 20, Loss: 3.65239
+INFO:root:Validation iteration 30, Loss: 3.19498
+INFO:root:Validation iteration 40, Loss: 3.35631
+INFO:root:Validation iteration 50, Loss: 3.46728
+INFO:root:Validation iteration 60, Loss: 3.49344
+INFO:root:Validation iteration 70, Loss: 3.07723
+INFO:root:Validation iteration 80, Loss: 3.41985
+INFO:root:Validation iteration 90, Loss: 3.15141
+INFO:root:Validation iteration 100, Loss: 3.37707
+INFO:root:Validation iteration 110, Loss: 3.23140
+INFO:root:Validation iteration 120, Loss: 3.49719
+INFO:root:Validation iteration 130, Loss: 3.30953
+INFO:root:Validation iteration 140, Loss: 3.38568
+INFO:root:Validation iteration 150, Loss: 3.08106
+INFO:root:Validation iteration 160, Loss: 3.05423
+INFO:root:Validation iteration 170, Loss: 3.27126
+INFO:root:Validation iteration 180, Loss: 3.51042
+INFO:root:Validation iteration 190, Loss: 3.15872
+INFO:root:End of Epoch 6
+INFO:root:Training loss: 3.244
+INFO:root:Validation accuracy: 0.192, Validation loss: 3.32415
+INFO:root:Best validation accuracy: 0.192 at epoch 6
+INFO:root:Inference...
+INFO:root:Validation iteration 1, Loss: 3.38258
+INFO:root:Validation iteration 10, Loss: 3.46807
+INFO:root:Validation iteration 20, Loss: 3.46518
+INFO:root:Validation iteration 30, Loss: 3.12327
+INFO:root:Validation iteration 40, Loss: 3.18846
+INFO:root:Validation iteration 50, Loss: 3.26864
+INFO:root:Validation iteration 60, Loss: 3.37374
+INFO:root:Validation iteration 70, Loss: 3.13906
+INFO:root:Validation iteration 80, Loss: 3.22823
+INFO:root:Validation iteration 90, Loss: 3.22419
+INFO:root:Validation iteration 100, Loss: 3.13407
+INFO:root:Validation iteration 110, Loss: 3.57589
+INFO:root:Validation iteration 120, Loss: 3.67040
+INFO:root:Validation iteration 130, Loss: 3.46639
+INFO:root:Validation iteration 140, Loss: 3.40845
+INFO:root:Validation iteration 150, Loss: 3.25322
+INFO:root:Validation iteration 160, Loss: 3.20646
+INFO:root:Validation iteration 170, Loss: 3.62927
+INFO:root:Validation iteration 180, Loss: 3.32118
+INFO:root:Validation iteration 190, Loss: 3.52110
+Test accuracy: 0.191, Test loss: 3.36067
+INFO:root:Saving results...
+INFO:root:Done!
