@@ -440,7 +440,7 @@ class Trainer:
         plt.legend()
         plt.xlim(-0.05, self.num_epochs - 0.8)
         
-        plt.ylim(-0.05, max(values[0] + values[1]) + 1)
+        #plt.ylim(-0.05, max(values[0] + values[1]) + 1)
             
         f.savefig(f"{save_path}/{name.lower()}.png", dpi=300)
     

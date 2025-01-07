@@ -52,7 +52,7 @@ class Config:
                     augment=False
                 ),
                 train=TrainConfig(
-                    num_epochs=1,
+                    num_epochs=5,
                     train_log_frequency=2,
                     val_log_frequency=1,
                     num_classes=3,
@@ -60,7 +60,8 @@ class Config:
                     inference_only=False,
                     save_predictions=False,
                     criterion="cross_entropy",
-                    resume_training=False
+                    resume_training=False,
+                    save_models=False
                 ),
                 model=ModelConfig(
                     precision=32,
