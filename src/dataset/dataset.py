@@ -23,12 +23,11 @@ class ArtistDataset(VisionDataset):
         assert split is None or split in ["train", "val", "test"], "Split must be either training, validation or test, or include all the dataset"
                 
         self.split = split
-        # categories = os.listdir(self.root)
-        # self.categories = dict(zip(categories, range(0, len(categories))))
 
         images_paths, labels = [], []
         split_file = lambda s: f"{root}/../{s}.txt"
         
+        split = "train" if split is None else split
         self.categories = self.__build_labels(split_file(split))
         
         if split is None:
@@ -51,9 +50,6 @@ class ArtistDataset(VisionDataset):
     def __getitem__(self, index) -> tuple[torch.Tensor, int]:
         img_path = self.data["image_path"].iloc[index]
         img, label = ArtistDataset.pil_loader(img_path), self.data["label"].iloc[index]
-        
-        if index < 20:
-            logging.info(f"{img_path} -> {label}")
         
         if self.transform is not None:
             img = self.transform(img)

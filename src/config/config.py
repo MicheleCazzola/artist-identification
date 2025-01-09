@@ -37,7 +37,7 @@ class Config:
                     test_root="./scripts/stats/images/kaggle_test",
                     stats_file="./scripts/stats/stats.json",
                     results_root="./out",
-                    trained_model_path="./temp/best_model.pth",
+                    trained_model_path="./temp/best_model.pth.tar",
                 ),
                 env=EnvConfig(
                     device="cpu",
@@ -60,7 +60,7 @@ class Config:
                     inference_only=False,
                     save_predictions=False,
                     criterion="cross_entropy",
-                    resume_training=False,
+                    resume_training=True,
                     save_models=False
                 ),
                 model=ModelConfig(

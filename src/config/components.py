@@ -24,7 +24,7 @@ class DataConfig:
     pretrained_stats: bool = False
     resize_dim: int = 512
     crop_dim: int = 512
-    aug_probs: tuple[float] = (0.2, 0.2, 0.2, 0.5)
+    aug_probs: tuple[float] = (0.5, 0.5, 0.5, 0.5)
     aug_mask: tuple[bool] = (True, True, True, True)
     augment: bool = False
     reduce_factor: float = 1.0
@@ -42,7 +42,7 @@ class TrainConfig:
     lr: float = 3e-4
     momentum: float = 0.9
     weight_decay: float = 1e-5
-    scheduler_step_size: int = 10
+    scheduler_milestones: list[int] = (10,)
     scheduler_gamma: float = 0.1
     criterion: str = "cross_entropy"
     optimizer: str = "adam"
