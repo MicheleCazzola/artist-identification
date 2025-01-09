@@ -29,6 +29,7 @@ class ArtistDataset(VisionDataset):
         images_paths, labels = [], []
         split_file = lambda s: f"{root}/../{s}.txt"
         
+        split = "train" if split is None else split
         self.categories = self.__build_labels(split_file(split))
         
         if split is None:

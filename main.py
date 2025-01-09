@@ -81,7 +81,7 @@ def main():
     
     if cfg.data.reduce_factor is None or cfg.data.reduce_factor == 1:
         assert trainset.categories == validset.categories == testset.categories, "Categories mismatch"
-        assert len(trainset.categories) == 161, "Invalid number of categories"
+        assert len(trainset.categories) == cfg.train.num_classes, "Invalid number of categories"
     
     categories = testset.categories if isinstance(testset, ArtistDataset) else testset.dataset.categories
     trainer = Trainer(model, trainloader, validloader, testloader, categories)

@@ -27,7 +27,7 @@ class TrainingResult:
     best_num_epochs: int = None
     
     def __iter__(self):
-        return iter((self.train_losses, self.train_accuracies, self.val_losses, self.val_accuracies))
+        return iter((self.train_losses, self.train_accuracies, self.val_losses, self.val_accuracies, self.best_num_epochs))
     
     
 @dataclass
@@ -60,7 +60,7 @@ class Trainer:
         self.num_epochs: int = None
         self.lr: float = None
         self.momentum: float = None
-        self.step_size: int = None
+        self.milestones: list[int] = None
         self.gamma: float = None
         self.weight_decay: float = None
         
@@ -88,7 +88,7 @@ class Trainer:
         self.num_epochs = cfg.train.num_epochs
         self.lr = cfg.train.lr
         self.momentum = cfg.train.momentum
-        self.step_size = cfg.train.scheduler_step_size
+        self.milestones = list(cfg.train.scheduler_milestones)
         self.gamma = cfg.train.scheduler_gamma
         self.weight_decay = cfg.train.weight_decay
         self.top_k = cfg.train.top_k
@@ -98,6 +98,7 @@ class Trainer:
         self.save_models = cfg.train.save_models
         self.resume_training = cfg.train.resume_training
         self.trained_model_path = cfg.path.trained_model_path
+        self.start_epoch = 0
         
         self._set_precision(cfg.model.precision)
         self._prepare_training(cfg.train.criterion, cfg.train.optimizer, cfg.train.scheduler)
@@ -176,7 +177,7 @@ class Trainer:
             raise ValueError(f"Optimizer {optimizer} not supported")
         
         if scheduler == "step_lr":
-            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, self.step_size, self.gamma)
+            self.scheduler: optim.lr_scheduler.MultiStepLR = optim.lr_scheduler.MultiStepLR(self.optimizer, self.milestones, self.gamma)
         elif scheduler == "constant" or scheduler is None:
             self.scheduler = None
         else:
@@ -184,40 +185,64 @@ class Trainer:
         
     def _save_checkpoint(self, epoch: int = None):
         checkpoint = {
-            "epoch": epoch,
+            "epoch": self.num_epochs if epoch is None else epoch,
             "model_state_dict": self.model.state_dict(),
-            "optimizer_state_dict": self.optimizer.state_dict()
+            "optimizer_state_dict": self.optimizer.state_dict(),
+            "scheduler_state_dict": self.scheduler.state_dict() if self.scheduler is not None else None,
+            "training_results": self.training_results
         }
         epoch_info = f"_{epoch}" if epoch is not None else ""
         torch.save(checkpoint, f"{self.best_model_path}{epoch_info}.pth.tar")
         
+        logging.info(f"Checkpoint saved at {self.best_model_path}{epoch_info}.pth.tar")
+        
     def _load_checkpoint(self, model_path: str):
         checkpoint = torch.load(model_path, weights_only=True)
+        
+        self.start_epoch = checkpoint["epoch"]
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.training_results = checkpoint["training_results"]
+        
+        if self.scheduler is not None:
+            prev_state_dict = checkpoint["scheduler_state_dict"]
+            if prev_state_dict is not None:
+                self.scheduler.load_state_dict(prev_state_dict)
+        
+        logging.info(f"Checkpoint loaded from {model_path}")
+        
+    def _load_pretrained(self, model_path: str):
+        checkpoint = torch.load(model_path, weights_only=True)
+        self.model.load_state_dict(checkpoint["model_state_dict"])
+        
+        logging.info(f"Pretrained model loaded from {model_path}")
     
     @execution_time
     def train(self):
         
-        if self.resume_training:
-            self._load_checkpoint(self.trained_model_path)
-
         val_losses, val_accuracies = [], []
         train_losses, train_accuracies = [], []
         best_accuracy = None
         best_num_epochs = None
         
+        if self.resume_training:
+            self._load_checkpoint(self.trained_model_path)
+            train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs = self.training_results
+            
+            print(len(train_losses), len(train_accuracies), len(val_losses), len(val_accuracies))
+        
         if self.sanity_check:    
             train_loss, train_accuracy = self.training_eval()
             val_loss, val_accuracy = self.validate()
             
-            train_losses.append(train_loss)
-            
-            if self.train_accuracy:
-                train_accuracies.append(train_accuracy)
-            
-            val_losses.append(val_loss)
-            val_accuracies.append(val_accuracy)
+            if not self.resume_training:
+                train_losses.append(train_loss)
+                
+                if self.train_accuracy:
+                    train_accuracies.append(train_accuracy)
+                
+                val_losses.append(val_loss)
+                val_accuracies.append(val_accuracy)
             
             logging.info(f"Sanity check - Before training")
                 
@@ -227,8 +252,23 @@ class Trainer:
                 logging.info(f"Training loss: {train_loss:.3f}")
                 
             logging.info(f"Validation accuracy: {val_accuracy:.3f}, Validation loss: {val_loss:.5f}")
+            
+        logging.info(f"Starting training, from epoch {self.start_epoch + 1} to {self.num_epochs}")
         
-        for epoch in range(self.num_epochs):
+        if train_losses and val_losses and val_accuracies:
+            logging.info(f"Last training loss: {train_losses[-1]:.5f}")
+            logging.info(f"Last validation loss: {val_losses[-1]:.5f}")
+            logging.info(f"Last validation accuracy: {val_accuracies[-1]:.3f}")
+        if train_accuracies:
+            logging.info(f"Last training accuracy: {train_accuracies[-1]:.3f}")
+            
+        if val_accuracies:
+            logging.info(f"Best validation accuracy: {val_accuracies[best_num_epochs - 1]:.3f} at epoch {best_num_epochs}")
+        
+        for epoch in range(self.start_epoch, self.num_epochs):
+            
+            current_lr = self.optimizer.param_groups[0]["lr"]
+            logging.info(f"Start of Epoch {epoch+1}, LR: {current_lr}, WD: {self.weight_decay}")
             
             current_step = 0
             epoch_losses = []
@@ -264,16 +304,7 @@ class Trainer:
                 train_loss = mean(epoch_losses)
                 train_accuracy = None
                 
-            if self.save_models:
-                self._save_checkpoint(epoch + 1)
-                
             val_loss, val_accuracy = self.validate()
-            
-            if best_accuracy is None or val_accuracy > best_accuracy or \
-                (val_accuracy == best_accuracy and val_loss < val_losses[best_num_epochs - 1]):
-                    best_accuracy = val_accuracy
-                    best_num_epochs = epoch + 1
-                    self._save_checkpoint()
 
             logging.info(f"End of Epoch {epoch+1}")
             
@@ -290,6 +321,17 @@ class Trainer:
             
             if self.train_accuracy:
                 train_accuracies.append(train_accuracy)
+                
+            self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
+            
+            if self.save_models:
+                self._save_checkpoint(epoch + 1)
+                
+            if best_num_epochs is None or val_accuracies[best_num_epochs - 1] < val_accuracy \
+                or (val_accuracies[best_num_epochs - 1] == val_accuracy and val_losses[best_num_epochs - 1] > val_loss):
+                    best_accuracy = val_accuracy
+                    best_num_epochs = epoch + 1
+                    self._save_checkpoint()
 
             # Scheduler is None if learning rate is constant
             if self.scheduler is not None:
@@ -312,7 +354,7 @@ class Trainer:
     def test(self, model_path: str = None, testloader: DataLoader = None, save_path: str = None):
         
         model_path = model_path if model_path is not None else f"{self.best_model_path}.pth.tar"
-        self._load_checkpoint(model_path)
+        self._load_pretrained(model_path)
         
         if save_path is not None:
             
@@ -351,7 +393,6 @@ class Trainer:
             elif current_step == 0:
                 logging.info(f"Validation iteration {current_step + 1}, Loss: {loss.item():.5f}")
         
-            
             # Calculate accuracy
             self.metrics.update(outputs, labels)
             
@@ -439,8 +480,6 @@ class Trainer:
         plt.grid(which="both")
         plt.legend()
         plt.xlim(-0.05, self.num_epochs - 0.8)
-        
-        #plt.ylim(-0.05, max(values[0] + values[1]) + 1)
             
         f.savefig(f"{save_path}/{name.lower()}.png", dpi=300)
     
