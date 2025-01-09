@@ -189,7 +189,7 @@ class Trainer:
             "optimizer_state_dict": self.optimizer.state_dict()
         }
         epoch_info = f"_{epoch}" if epoch is not None else ""
-        torch.save(checkpoint, f"{self.best_model_path}{epoch_info}.pth")
+        torch.save(checkpoint, f"{self.best_model_path}{epoch_info}.pth.tar")
         
     def _load_checkpoint(self, model_path: str):
         checkpoint = torch.load(model_path, weights_only=True)
