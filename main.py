@@ -79,9 +79,15 @@ def main():
     
     logging.info(f"Training setup...")
     
+    if cfg.data.reduce_factor is None or cfg.data.reduce_factor == 1:
+        assert trainset.categories == validset.categories == testset.categories, "Categories mismatch"
+        assert len(trainset.categories) == 161, "Invalid number of categories"
+    
     categories = testset.categories if isinstance(testset, ArtistDataset) else testset.dataset.categories
     trainer = Trainer(model, trainloader, validloader, testloader, categories)
     trainer.build(cfg)
+    
+    logging.info(categories)
     
     logging.info(transformations.to_dict())
     

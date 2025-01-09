@@ -311,7 +311,7 @@ class Trainer:
     @execution_time
     def test(self, model_path: str = None, testloader: DataLoader = None, save_path: str = None):
         
-        model_path = model_path if model_path is not None else f"{self.best_model_path}.pth"
+        model_path = model_path if model_path is not None else f"{self.best_model_path}.pth.tar"
         self._load_checkpoint(model_path)
         
         if save_path is not None:

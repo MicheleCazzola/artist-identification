@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Union
 import pandas as pd
@@ -50,6 +51,9 @@ class ArtistDataset(VisionDataset):
     def __getitem__(self, index) -> tuple[torch.Tensor, int]:
         img_path = self.data["image_path"].iloc[index]
         img, label = ArtistDataset.pil_loader(img_path), self.data["label"].iloc[index]
+        
+        if index < 20:
+            logging.info(f"{img_path} -> {label}")
         
         if self.transform is not None:
             img = self.transform(img)
