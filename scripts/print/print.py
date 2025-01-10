@@ -17452,7 +17452,7 @@ INFO:root:Done!
 """
 
 PATH = "out/official/"
-CONF = "20250110_102848/"           # configuration name here
+CONF = "20250110_170354/"           # configuration name here
 with open(PATH + CONF + "log.txt", "r") as f:
     string = f.read()
 

@@ -182,15 +182,14 @@ class Trainer:
         else:
             raise ValueError(f"Scheduler {scheduler} not supported")
         
-    def _save_checkpoint(self, epoch: int = None):
+    def _save_checkpoint(self, epoch: int, marker: bool = True):
         checkpoint = {
-            "epoch": self.num_epochs if epoch is None else epoch,
+            "epoch": epoch,
             "model_state_dict": self.model.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
-            "scheduler_state_dict": self.scheduler.state_dict() if self.scheduler is not None else None,
             "training_results": self.training_results
         }
-        epoch_info = f"_{epoch}" if epoch is not None else ""
+        epoch_info = f"_{epoch}" if marker else ""
         torch.save(checkpoint, f"{self.best_model_path}{epoch_info}.pth.tar")
         
         logging.info(f"Checkpoint saved at {self.best_model_path}{epoch_info}.pth.tar")
@@ -202,11 +201,6 @@ class Trainer:
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         self.training_results = checkpoint["training_results"]
-        
-        if self.scheduler is not None:
-            prev_state_dict = checkpoint["scheduler_state_dict"]
-            if prev_state_dict is not None:
-                self.scheduler.load_state_dict(prev_state_dict)
         
         logging.info(f"Checkpoint loaded from {model_path}")
         
@@ -330,7 +324,7 @@ class Trainer:
                 or (val_accuracies[best_num_epochs - 1] == val_accuracy and val_losses[best_num_epochs - 1] > val_loss):
                     best_accuracy = val_accuracy
                     best_num_epochs = epoch + 1
-                    self._save_checkpoint()
+                    self._save_checkpoint(best_num_epochs, marker=False)
 
             # Scheduler is None if learning rate is constant
             if self.scheduler is not None:
