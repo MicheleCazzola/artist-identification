@@ -130,3 +130,11 @@
 | ResNet18 | No | 16 | CE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 6 | 1 | 3.31 | 23.82 | 6 | 3.32 | 26.42 | 49.29 | 16.38 | 23.91 | ~93 |[20250106_193051](/out/official/20250106_193051/) | Strange step but good, other 5-10 epochs  |
 | ResNet18 | No | 16 | CE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 6->11 | 1 | 3.11 | 30.7 | 10  | 3.09 |  29.81 |  55.41| 21.03 | 30.29 | ~75  |[20250107_130610](/out/official/20250107_130610/) | anche qui val losses ha fatto qualche picco: bent num_epocs è 4 che corrisponde alla 10 e non alla 11 |
 | ResNet18 | No | 16 | CE | AdamW | 1e-3 | - | - | 1e-5 | - | - | - | - | 6 | 1 | 2.4 | 6.17 | 1 | 6.16  | 3.23| 12.85  | 1.13 | 2.45 | ~90 |[20250106_195019](/out/official/20250106_195019/) | Discard, LR too high  |
+
+
+## Dataset 70-15-15 and new labeling making
+
+| Backbone Model | HOG | Batch size | Loss | Optimizer |Learning rate | Scheduler step | Scheduler factor | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Best validation loss| Best validation WT5-MCA (%) | Best epochs | Test loss | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Training time (mins) (***) | Output folder | Notes |
+|:--------------:|:---:|:--:|:----------:|:-----------:|:--:|:-------------:|:------------:|:--:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Random crop | No | 32 | CE | AdamW | 1e-4 | - | - | 1e-4 | - | - | - | - | 14 | 1 | 2.76 | 35.57 | 13 | 2.79 | 35.63 | 61.42 | 25.21 | 34.93 | 160 |[20250110_102624](/out/official/20250110_102624/) | good, go up to 30 |
+| Random crop | No | 32 | CE | AdamW | 1e-4 | - | - | 1e-5 | - | - | - | - | 14 | 1 | 2.76 | 36.95 | 14 | 2.81 | 35.69 | 61.48 | 26.91 | 36.45 | 163 |[20250110_102848](/out/official/20250110_102848/) | good, go up to 30 |

@@ -28,8 +28,6 @@ class TrainingResult:
     
     def __iter__(self):
         return iter((self.train_losses, self.train_accuracies, self.val_losses, self.val_accuracies, self.best_num_epochs))
-        return iter((self.train_losses, self.train_accuracies, self.val_losses, self.val_accuracies, self.best_num_epochs))
-    
     
 @dataclass
 class EvaluationResult:
