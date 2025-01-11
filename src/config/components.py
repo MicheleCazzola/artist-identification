@@ -9,7 +9,8 @@ class PathConfig:
     test_root: str = "./data/kaggle_testset"
     stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./data/norm_stats.json"
-    best_model_path: str = "./temp/best_model"
+    saved_model_path: str = "./temp/model"
+    saved_best_model_path: str = "./temp/best_model"
     results_root: str = "."
     trained_model_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/temp/best_model_10.pth"   # Change in case of custom inference-only model
     predictions_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/predictions.csv"    # Change according to trained model used
@@ -50,6 +51,7 @@ class TrainConfig:
     top_k: int = 5
     sanity_check: bool = False
     save_models: bool = True
+    save_models_step: int = 2
     train_only: bool = False
     inference_only: bool = False
     save_predictions: bool = False

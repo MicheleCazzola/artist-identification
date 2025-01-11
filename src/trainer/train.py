@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 import json
 import logging
+import math
 import os
 import time
 from statistics import mean
@@ -73,7 +74,7 @@ class Trainer:
         self.data_type: torch.dtype = torch.float32
         
         self.best_num_epochs: int = None
-        self.best_model_path: str = None
+        self.saved_model_path: str = None
         self.save_models: bool = None
         
         self.training_results: TrainingResult = None
@@ -92,9 +93,11 @@ class Trainer:
         self.weight_decay = cfg.train.weight_decay
         self.top_k = cfg.train.top_k
         self.train_accuracy = cfg.train.train_accuracy
-        self.best_model_path = cfg.path.best_model_path
+        self.saved_model_path = cfg.path.saved_model_path
+        self.saved_best_model_path = cfg.path.saved_best_model_path
         self.sanity_check = cfg.train.sanity_check
         self.save_models = cfg.train.save_models
+        self.save_models_step = cfg.train.save_models_step
         self.resume_training = cfg.train.resume_training
         self.trained_model_path = cfg.path.trained_model_path
         self.start_epoch = 0
@@ -182,17 +185,26 @@ class Trainer:
         else:
             raise ValueError(f"Scheduler {scheduler} not supported")
         
-    def _save_checkpoint(self, epoch: int, marker: bool = True):
+    def _save_checkpoint(self, epoch: int, model_path: str):
         checkpoint = {
             "epoch": epoch,
             "model_state_dict": self.model.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "training_results": self.training_results
         }
-        epoch_info = f"_{epoch}" if marker else ""
-        torch.save(checkpoint, f"{self.best_model_path}{epoch_info}.pth.tar")
+        save_path = f"{model_path}_{epoch}.pth.tar"
+        torch.save(checkpoint, save_path)
         
-        logging.info(f"Checkpoint saved at {self.best_model_path}{epoch_info}.pth.tar")
+        logging.info(f"Checkpoint saved at {save_path}")
+        
+    def _remove_checkpoint(self, epoch: int, model_path: str):
+        saved_path = f"{model_path}_{epoch}.pth.tar"
+        if os.path.exists(saved_path):
+            os.remove(saved_path)
+            
+            logging.info(f"Checkpoint removed at {saved_path}")
+        else:
+            logging.error(f"Checkpoint {saved_path} not found")
         
     def _load_checkpoint(self, model_path: str):
         checkpoint = torch.load(model_path, weights_only=True)
@@ -317,14 +329,18 @@ class Trainer:
                 
             self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
             
-            if self.save_models:
-                self._save_checkpoint(epoch + 1)
+            if self.save_models and ((epoch + 1) % self.save_models_step == 0 or (epoch + 1) == self.num_epochs):
+                self._save_checkpoint(epoch + 1, self.saved_model_path)
                 
-            if best_num_epochs is None or val_accuracies[best_num_epochs - 1] < val_accuracy \
-                or (val_accuracies[best_num_epochs - 1] == val_accuracy and val_losses[best_num_epochs - 1] > val_loss):
+            if best_num_epochs is None or val_accuracy > val_accuracies[best_num_epochs - 1] \
+                or (math.isclose(val_accuracies[best_num_epochs - 1], val_accuracy, abs_tol=1e-6) and val_loss < val_losses[best_num_epochs - 1]):
+                    
+                    if best_num_epochs is not None:
+                        self._remove_checkpoint(best_num_epochs, self.saved_best_model_path)
+                    
                     best_accuracy = val_accuracy
                     best_num_epochs = epoch + 1
-                    self._save_checkpoint(best_num_epochs, marker=False)
+                    self._save_checkpoint(best_num_epochs, self.saved_best_model_path)
 
             # Scheduler is None if learning rate is constant
             if self.scheduler is not None:
@@ -336,17 +352,17 @@ class Trainer:
         self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
     
     def training_eval(self) -> EvaluationResult:
-        losses, top_1_acc, _, _, top_k_weighted_mca, _ = self.evaluate(self.trainloader)
+        losses, _, _, _, top_k_weighted_mca, _ = self.evaluate(self.trainloader)
         return losses, top_k_weighted_mca
     
     def validate(self) -> EvaluationResult:
-        losses, top_1_acc, _, _, top_k_weighted_mca, _ = self.evaluate(self.validloader)
+        losses, _, _, _, top_k_weighted_mca, _ = self.evaluate(self.validloader)
         return losses, top_k_weighted_mca
     
     @execution_time
     def test(self, model_path: str = None, testloader: DataLoader = None, save_path: str = None):
         
-        model_path = model_path if model_path is not None else f"{self.best_model_path}.pth.tar"
+        model_path = model_path if model_path is not None else f"{self.saved_best_model_path}_{self.best_num_epochs}.pth.tar"
         self._load_pretrained(model_path)
         
         if save_path is not None:

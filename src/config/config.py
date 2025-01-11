@@ -60,8 +60,9 @@ class Config:
                     inference_only=False,
                     save_predictions=False,
                     criterion="cross_entropy",
-                    resume_training=True,
-                    save_models=False
+                    resume_training=False,
+                    save_models=True,
+                    save_models_step=2
                 ),
                 model=ModelConfig(
                     precision=32,
