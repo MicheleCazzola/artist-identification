@@ -75,6 +75,7 @@ class Trainer:
         
         self.best_num_epochs: int = None
         self.saved_model_path: str = None
+        self.saved_model_path: str = None
         self.save_models: bool = None
         
         self.training_results: TrainingResult = None
