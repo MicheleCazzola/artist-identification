@@ -213,6 +213,7 @@ class Trainer:
         self.start_epoch = checkpoint["epoch"]
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.optimizer.param_groups[0]["lr"] = self.lr
         self.training_results = checkpoint["training_results"]
         
         logging.info(f"Checkpoint loaded from {model_path}")
