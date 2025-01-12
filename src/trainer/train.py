@@ -328,19 +328,21 @@ class Trainer:
             if self.train_accuracy:
                 train_accuracies.append(train_accuracy)
                 
-            self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
             
+            self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
             if self.save_models and ((epoch + 1) % self.save_models_step == 0 or (epoch + 1) == self.num_epochs):
+                
                 self._save_checkpoint(epoch + 1, self.saved_model_path)
                 
             if best_num_epochs is None or val_accuracy > val_accuracies[best_num_epochs - 1] \
                 or (math.isclose(val_accuracies[best_num_epochs - 1], val_accuracy, abs_tol=1e-6) and val_loss < val_losses[best_num_epochs - 1]):
                     
-                    if best_num_epochs is not None:
+                    if best_num_epochs is not None or best_num_epochs >= self.start_epoch:
                         self._remove_checkpoint(best_num_epochs, self.saved_best_model_path)
                     
                     best_accuracy = val_accuracy
                     best_num_epochs = epoch + 1
+                    self.training_results.best_num_epochs = best_num_epochs
                     self._save_checkpoint(best_num_epochs, self.saved_best_model_path)
 
             # Scheduler is None if learning rate is constant
