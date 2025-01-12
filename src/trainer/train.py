@@ -337,7 +337,7 @@ class Trainer:
             if best_num_epochs is None or val_accuracy > val_accuracies[best_num_epochs - 1] \
                 or (math.isclose(val_accuracies[best_num_epochs - 1], val_accuracy, abs_tol=1e-6) and val_loss < val_losses[best_num_epochs - 1]):
                     
-                    if best_num_epochs is not None or best_num_epochs >= self.start_epoch:
+                    if best_num_epochs is not None:
                         self._remove_checkpoint(best_num_epochs, self.saved_best_model_path)
                     
                     best_accuracy = val_accuracy

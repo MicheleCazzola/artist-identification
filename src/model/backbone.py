@@ -40,22 +40,33 @@ class SpatialTransformerNetwork(nn.Module):
                 model = mobilenet_v3_small(weights="IMAGENET1K_V1")
                 last_in_features = model.classifier[3].in_features
                 model.classifier[3] = nn.Linear(last_in_features, 6)
+                # Initialize the weights of the classifier to learn the identity transformation
+                model.classifier[3].weight.data.zero_()
+                model.classifier[3].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
             case self.backbone_type.EFFICIENTNET_B0:
                 model = efficientnet_b0(weights="IMAGENET1K_V1")
                 last_in_features = model.classifier[1].in_features
                 model.classifier[1] = nn.Linear(last_in_features, 6)
+                model.classifier[1].weight.data.zero_()
+                model.classifier[1].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
             case self.backbone_type.REGNET_X_400MF:
                 model = regnet_x_400mf(weights="IMAGENET1K_V1")
                 last_in_features = model.fc.in_features
                 model.fc = nn.Linear(last_in_features, 6)
+                model.fc.weight.data.zero_()
+                model.fc.bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
             case self.backbone_type.SHUFFLENET_V2_X0_5:
                 model = shufflenet_v2_x0_5(weights="IMAGENET1K_V1")
                 last_in_features = model.fc.in_features
                 model.fc = nn.Linear(last_in_features, 6)
+                model.fc.weight.data.zero_()
+                model.fc.bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
             case self.backbone_type.MNASNET0_5:
                 model = mnasnet0_5(weights="IMAGENET1K_V1")
                 last_in_features = model.classifier[1].in_features
                 model.classifier[1] = nn.Linear(last_in_features, 6)
+                model.classifier[1].weight.data.zero_()
+                model.classifier[1].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
             case _:
                 raise ValueError(f"Unknown backbone type: {self.backbone_type}")
         return model
