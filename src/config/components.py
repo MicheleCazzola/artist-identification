@@ -19,6 +19,7 @@ class PathConfig:
 class EnvConfig:
     device: str = "cuda"
     num_workers: int = 2
+    seed: int = 42
 
 @dataclass
 class DataConfig:

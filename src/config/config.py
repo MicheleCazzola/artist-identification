@@ -61,7 +61,7 @@ class Config:
                     save_predictions=False,
                     criterion="cross_entropy",
                     resume_training=False,
-                    save_models=True,
+                    save_models=False,
                     save_models_step=2
                 ),
                 model=ModelConfig(

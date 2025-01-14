@@ -7,7 +7,7 @@ from src.dataset.dataloader import create_dataloaders
 from src.transformations.transformations import Transforms
 from src.trainer.train import Trainer
 from src.model.network import MultiBranchArtistNetwork
-from src.utils.utils import load_stats
+from src.utils.utils import load_stats, init_seed
 import sys
 
 
@@ -40,6 +40,8 @@ def main():
     
     logging.info(cfg.__dict__)
     
+    dataloader_worker_init_fun, dataloader_generator = init_seed(cfg.env.seed)
+    
     transformations = Transforms(data_config=cfg.data)
         
     if not cfg.data.pretrained_stats:
@@ -65,7 +67,9 @@ def main():
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
         cfg.data.batch_size_model,
-        num_workers=cfg.env.num_workers
+        num_workers=cfg.env.num_workers,
+        worker_init_fn=dataloader_worker_init_fun,
+        generator=dataloader_generator
     )
     
     # Model definition

@@ -3,6 +3,8 @@ import json
 import time
 from functools import wraps
 import torch
+import random
+import numpy as np
 
 class BackboneType(str, Enum):
     RESNET18 = "resnet18"
@@ -42,3 +44,22 @@ def load_stats(filename: str) -> tuple:
     stats = json.load(open(filename, "r"))
     
     return stats["mean"], stats["std"]
+
+def init_seed(seed: int) -> tuple[callable, torch.Generator]:
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    def seed_worker(_):
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
+
+    g = torch.Generator()
+    g.manual_seed(seed)
+    
+    return seed_worker, g
