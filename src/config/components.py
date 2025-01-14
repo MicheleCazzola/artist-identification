@@ -12,7 +12,7 @@ class PathConfig:
     saved_model_path: str = "./temp/model"
     saved_best_model_path: str = "./temp/best_model"
     results_root: str = "."
-    trained_model_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/temp/best_model_10.pth"   # Change in case of custom inference-only model
+    trained_model_path: str = "/content/drive/MyDrive/mlvm_shared/20250114_185257/temp/model_20.pth.tar"   # Change in case of custom inference-only model
     predictions_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/predictions.csv"    # Change according to trained model used
 
 @dataclass
@@ -28,39 +28,39 @@ class DataConfig:
     crop_dim: int = 512
     aug_probs: tuple[float] = (0.5, 0.5, 0.5, 0.5)
     aug_mask: tuple[bool] = (True, True, True, True)
-    augment: bool = False
+    augment: bool = True
     reduce_factor: float = 1.0
-    batch_size_model: int = 32
+    batch_size_model: int = 16
     batch_size_stats: int = 128
     train_split_size: float = 0.75
 
 @dataclass
 class TrainConfig:
-    num_epochs: int = 2
+    num_epochs: int = 10
     train_log_frequency: int = 30
     val_log_frequency: int = 10
     train_accuracy: bool = False
     num_classes: int = 161
-    lr: float = 3e-4
+    lr: float = 5e-5
     momentum: float = 0.9
-    weight_decay: float = 1e-5
+    weight_decay: float = 1e-4
     scheduler_milestones: tuple[int] = (10,)
     scheduler_gamma: float = 0.1
     criterion: str = "cross_entropy"
-    optimizer: str = "adam"
-    scheduler: str = "step_lr"
+    optimizer: str = "adamw"
+    scheduler: str = None
     top_k: int = 5
     sanity_check: bool = False
     save_models: bool = True
-    save_models_step: int = 2
+    save_models_step: int = 5
     train_only: bool = False
     inference_only: bool = False
     save_predictions: bool = False
-    resume_training: bool = False
+    resume_training: bool = True
 
 @dataclass
 class ModelConfig:
-    backbone_type: BackboneType = None
+    backbone_type: BackboneType = BackboneType.REGNET_X_400MF
     use_handcrafted: bool = False
     precision: int = 32
 
