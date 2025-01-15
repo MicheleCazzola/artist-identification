@@ -47,6 +47,15 @@ class MultiBranchArtistNetwork(nn.Module):
             self.handcrafted = None
             self.classifier = nn.Linear(2048, num_classes, dtype=self.dtype)
             
+        # Using same initialization as ResNet
+        for m in self.modules():
+            if m not in self.roi_extractor.modules():
+                if isinstance(m, nn.Conv2d):
+                    nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+                elif isinstance(m, nn.BatchNorm2d):
+                    nn.init.constant_(m.weight, 1)
+                    nn.init.constant_(m.bias, 0)
+                
     def _get_dtype(self, precision: int) -> torch.dtype:
         if precision == 16:
             return torch.float16
