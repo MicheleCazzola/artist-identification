@@ -46,7 +46,8 @@ model_variants = [
         num_classes=NUM_CLASSES,
         stn=backbone,
         use_handcrafted=handcrafted,
-        hog_params=hog_config
+        hog_params=hog_config,
+        use_default_init=True
     ).to(DEVICE)
     for backbone in BACKBONES
     for handcrafted in HANDCRAFTED_FLAGS

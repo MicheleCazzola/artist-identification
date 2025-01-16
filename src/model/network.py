@@ -14,6 +14,7 @@ class MultiBranchArtistNetwork(nn.Module):
         stn: BackboneType = None,
         use_handcrafted: bool = True,
         hog_params: HOGConfig = None, 
+        use_default_init: bool = False,
         precision: int = 32
     ):
         super(MultiBranchArtistNetwork, self).__init__()
@@ -47,7 +48,11 @@ class MultiBranchArtistNetwork(nn.Module):
             self.handcrafted = None
             self.classifier = nn.Linear(2048, num_classes, dtype=self.dtype)
             
-        # Using same initialization as ResNet
+        if not use_default_init:
+            self._init_weights()
+                        
+    def _init_weights(self):
+        # Same initialization as ResNet
         for m in self.modules():
             if m not in self.roi_extractor.modules():
                 if isinstance(m, nn.Conv2d):

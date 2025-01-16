@@ -65,6 +65,7 @@ class Config:
                     save_models_step=2
                 ),
                 model=ModelConfig(
+                    use_default_init=True,
                     precision=32,
                     use_handcrafted=False,
                     backbone_type=None

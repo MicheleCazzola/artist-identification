@@ -36,12 +36,12 @@ class DataConfig:
 
 @dataclass
 class TrainConfig:
-    num_epochs: int = 10
+    num_epochs: int = 30
     train_log_frequency: int = 30
     val_log_frequency: int = 10
     train_accuracy: bool = False
     num_classes: int = 161
-    lr: float = 5e-5
+    lr: float = 1e-4
     momentum: float = 0.9
     weight_decay: float = 1e-4
     scheduler_milestones: tuple[int] = (10,)
@@ -51,16 +51,17 @@ class TrainConfig:
     scheduler: str = None
     top_k: int = 5
     sanity_check: bool = False
-    save_models: bool = True
+    save_models: bool = False
     save_models_step: int = 5
     train_only: bool = False
     inference_only: bool = False
     save_predictions: bool = False
-    resume_training: bool = True
+    resume_training: bool = False
 
 @dataclass
 class ModelConfig:
-    backbone_type: BackboneType = BackboneType.REGNET_X_400MF
+    use_default_init: bool = True
+    backbone_type: BackboneType = None
     use_handcrafted: bool = False
     precision: int = 32
 

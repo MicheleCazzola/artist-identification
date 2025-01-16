@@ -78,6 +78,7 @@ def main():
         stn=cfg.model.backbone_type,
         use_handcrafted=cfg.model.use_handcrafted,
         hog_params=cfg.hog,
+        use_default_init=cfg.model.use_default_init,
         precision=cfg.model.precision
     )
     
