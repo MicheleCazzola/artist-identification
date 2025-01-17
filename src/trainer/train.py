@@ -375,7 +375,8 @@ class Trainer:
             
             self.predict(testloader, save_path)
         else:
-            test_result = self.evaluate(self.testloader)
+            testloader = self.testloader if testloader is None else testloader
+            test_result = self.evaluate(testloader)
             
             self.test_results = test_result
 
