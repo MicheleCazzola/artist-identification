@@ -12,6 +12,7 @@ import torch.optim as optim
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Subset
 
+from src.trainer.scheduler import CustomMultiStepLR
 from src.transformations.transformations import Transforms
 
 from ..config.config import Config
@@ -90,7 +91,7 @@ class Trainer:
         self.lr = cfg.train.lr
         self.momentum = cfg.train.momentum
         self.milestones = list(cfg.train.scheduler_milestones)
-        self.gamma = cfg.train.scheduler_gamma
+        self.gammas = cfg.train.scheduler_gammas
         self.weight_decay = cfg.train.weight_decay
         self.top_k = cfg.train.top_k
         self.train_accuracy = cfg.train.train_accuracy
@@ -180,7 +181,18 @@ class Trainer:
             raise ValueError(f"Optimizer {optimizer} not supported")
         
         if scheduler == "step_lr":
-            self.scheduler: optim.lr_scheduler.MultiStepLR = optim.lr_scheduler.MultiStepLR(self.optimizer, self.milestones, self.gamma)
+            assert len(self.gammas) == 1, "Only one gamma value is allowed for MultiStepLR"
+            self.scheduler: optim.lr_scheduler.MultiStepLR = optim.lr_scheduler.MultiStepLR(
+                self.optimizer, 
+                self.milestones, 
+                self.gammas[0]
+            )
+        elif scheduler == "custom_step_lr":
+            self.scheduler: CustomMultiStepLR = CustomMultiStepLR(
+                self.optimizer, 
+                self.milestones, 
+                self.gammas
+            )
         elif scheduler == "constant" or scheduler is None:
             self.scheduler = None
         else:
