@@ -56,6 +56,8 @@ class Config:
                     train_log_frequency=2,
                     val_log_frequency=1,
                     num_classes=3,
+                    scheduler_milestones=(2,4),
+                    scheduler_gammas=(0.1, 0.5),
                     train_only=False,
                     inference_only=False,
                     train_acc_only=False,
@@ -63,7 +65,8 @@ class Config:
                     criterion="cross_entropy",
                     resume_training=False,
                     save_models=False,
-                    save_models_step=2
+                    save_models_step=2,
+                    scheduler="custom_step_lr"
                 ),
                 model=ModelConfig(
                     use_default_init=True,

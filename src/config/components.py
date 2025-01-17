@@ -45,7 +45,7 @@ class TrainConfig:
     momentum: float = 0.9
     weight_decay: float = 1e-4
     scheduler_milestones: tuple[int] = (10,)
-    scheduler_gamma: float = 0.1
+    scheduler_gammas: tuple[float] = (0.1,)
     criterion: str = "cross_entropy"
     optimizer: str = "adamw"
     scheduler: str = None
