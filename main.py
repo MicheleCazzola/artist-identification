@@ -98,7 +98,7 @@ def main():
     
     training_time = test_time = None
     
-    if not cfg.train.inference_only:
+    if not (cfg.train.inference_only or cfg.train.train_acc_only):
         logging.info(f"Training...")
         
         trainer.train()
@@ -123,6 +123,8 @@ def main():
                 trainer.test(cfg.path.trained_model_path, testloader, cfg.path.predictions_path)
             else:
                 trainer.test(cfg.path.trained_model_path)
+        elif cfg.train.train_acc_only:
+            trainer.test(cfg.path.trained_model_path, trainloader)        
         else:
             trainer.test()
             

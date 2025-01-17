@@ -55,6 +55,7 @@ class TrainConfig:
     save_models_step: int = 5
     train_only: bool = False
     inference_only: bool = False
+    train_acc_only: bool = False
     save_predictions: bool = False
     resume_training: bool = False
 
