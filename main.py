@@ -124,7 +124,20 @@ def main():
             else:
                 trainer.test(cfg.path.trained_model_path)
         elif cfg.train.train_acc_only:
-            trainer.test(cfg.path.trained_model_path, trainloader)        
+            trainset_eval = ArtistDataset.create(
+                root,
+                transforms=transformations.get(),
+                augment=False,
+                reduction_factor=cfg.data.reduce_factor,
+            )
+            trainloader_eval = create_dataloaders(
+                [trainset_eval],
+                cfg.data.batch_size_model,
+                shuffle=False,
+                drop_last=False,
+                num_workers=cfg.env.num_workers
+            )
+            trainer.test(cfg.path.trained_model_path, trainloader_eval)        
         else:
             trainer.test()
             
@@ -142,7 +155,7 @@ def main():
         training_time,
         test_time,
         cfg.train.train_only,
-        cfg.train.inference_only
+        cfg.train.inference_only or cfg.train.train_acc_only
     )
     
     logging.info(f"Done!")
