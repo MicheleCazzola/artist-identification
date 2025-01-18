@@ -242,7 +242,7 @@ print(f"Datasets created, with sizes {len(trainset)}, {len(validset)}, {len(test
 
 trainloader, validloader, testloader = create_dataloaders(
     [trainset, validset, testset],
-    cfg.data.batch_size,
+    cfg.data.batch_size_model,
     num_workers=cfg.env.num_workers   
 )
 
