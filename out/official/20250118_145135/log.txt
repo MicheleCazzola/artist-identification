@@ -1,0 +1,61 @@
+INFO:root:{'path': PathConfig(default_root='./data/artist_dataset', test_root='./data/kaggle_testset', stats_file='./scripts/stats/stats.json', norm_stats_file='./data/norm_stats.json', saved_model_path='./temp/model', saved_best_model_path='./temp/best_model', results_root='.', trained_model_path='/content/drive/MyDrive/mlvm_shared/20250117_145942/temp/best_model_27.pth.tar', predictions_path='/content/drive/MyDrive/mlvm_shared/20250117_145942/predictions.csv'), 'env': EnvConfig(device='cuda', num_workers=2, seed=42), 'data': DataConfig(pretrained_stats=False, resize_dim=512, crop_dim=512, aug_probs=(0.5, 0.5, 0.5, 0.5), aug_mask=(True, True, True, True), augment=True, reduce_factor=1.0, batch_size_model=32, batch_size_stats=128, train_split_size=0.75), 'train': TrainConfig(num_epochs=30, train_log_frequency=30, val_log_frequency=10, train_accuracy=False, num_classes=161, lr=0.0001, momentum=0.9, weight_decay=0.0001, scheduler_milestones=(10,), scheduler_gammas=(0.1,), criterion='cross_entropy', optimizer='adamw', scheduler=None, top_k=5, sanity_check=False, save_models=False, save_models_step=5, train_only=False, inference_only=False, train_acc_only=True, save_predictions=False, resume_training=False), 'model': ModelConfig(use_default_init=True, backbone_type=<BackboneType.RESNET18: 'resnet18'>, use_handcrafted=True, precision=32), 'hog': HOGConfig(downsample_size=256, crop_size=224, channel_coefficients=(0.2989, 0.587, 0.114), orientations=9, pixels_per_cell=74, cells_per_block=1, transform_sqrt=False, feature_vector=True, normalization='L2-Hys')}
+INFO:root:Normalization stats: mean [0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std [0.2794029116630554, 0.27445685863494873, 0.264132022857666]
+Downloading: "https://download.pytorch.org/models/resnet18-f37072fd.pth" to /root/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth
+100% 44.7M/44.7M [00:00<00:00, 102MB/s]
+INFO:root:Training setup...
+INFO:root:['adriaen-van-ostade', 'agnolo-bronzino', 'albrecht-altdorfer', 'albrecht-durer', 'aleksey-savrasov', 'alexey-venetsianov', 'alfred-stevens', 'anders-zorn', 'andrea-del-sarto', 'andrea-mantegna', 'andrei-ryabushkin', 'anthony-van-dyck', 'antoine-pesne', 'antoine-watteau', 'arkhip-kuindzhi', 'bartolome-esteban-murillo', 'benjamin-west', 'benozzo-gozzoli', 'bernardo-bellotto', 'boris-kustodiev', 'camille-corot', 'camille-pissarro', 'canaletto', 'caravaggio', 'carlo-crivelli', 'caspar-david-friedrich', 'charles-francois-daubigny', 'cornelis-springer', 'correggio', 'dante-gabriel-rossetti', 'david-teniers-the-younger', 'diego-velazquez', 'dmitry-levitzky', 'domenico-ghirlandaio', 'edouard-manet', 'edward-burne-jones', 'edward-hopper', 'edwin-henry-landseer', 'el-greco', 'esaias-van-de-velde', 'eugene-boudin', 'eugene-delacroix', 'filippo-lippi', 'fra-angelico', 'francesco-guardi', 'francisco-de-zurbaran', 'francisco-goya', 'frans-hals', 'frans-snyders', 'fyodor-bronnikov', 'fyodor-vasilyev', 'george-morland', 'george-stubbs', 'gerard-david', 'gerrit-dou', 'gian-lorenzo-bernini', 'giorgio-vasari', 'giovanni-battista-tiepolo', 'giovanni-bellini', 'giovanni-boldini', 'giovanni-domenico-tiepolo', 'guido-reni', 'gustave-courbet', 'gustave-dore', 'hans-holbein-the-younger', 'hans-memling', 'henri-fantin-latour', 'henry-raeburn', 'hieronymus-bosch', 'ilya-repin', 'isaac-levitan', 'ivan-aivazovsky', 'ivan-kramskoy', 'ivan-shishkin', 'ivan-vladimirov', 'jacob-jordaens', 'jacopo-pontormo', 'james-mcneill-whistler', 'james-tissot', 'jan-matejko', 'jan-steen', 'jan-van-eyck', 'jean-baptiste-simeon-chardin', 'jean-fouquet', 'jean-francois-millet', 'jean-honore-fragonard', 'johan-hendrik-weissenbruch', 'john-atkinson-grimshaw', 'john-constable', 'john-crome', 'john-everett-millais', 'john-french-sloan', 'john-hoppner', 'john-singer-sargent', 'john-william-waterhouse', 'joseph-wright', 'joshua-reynolds', 'julius-leblanc-stewart', 'karl-bodmer', 'karl-bryullov', 'konstantin-makovsky', 'leonardo-da-vinci', 'lev-lagorio', 'lorenzo-lotto', 'louise-elisabeth-vigee-le-brun', 'luca-signorelli', 'mabuse', 'maerten-van-heemskerck', 'martin-schongauer', 'martiros-saryan', 'maurice-quentin-de-la-tour', 'michelangelo', 'n.c.-wyeth', 'nicholas-roerich', 'nikolai-ge', 'nikolay-bogdanov-belsky', 'odilon-redon', 'orest-kiprensky', 'paolo-uccello', 'paolo-veronese', 'paul-cezanne', 'pavel-svinyin', 'peter-paul-rubens', 'piero-della-francesca', 'pieter-bruegel-the-elder', 'pieter-de-hooch', 'pietro-longhi', 'pietro-perugino', 'pyotr-konchalovsky', 'raphael', 'rembrandt', 'rogier-van-der-weyden', 'rudolf-von-alt', 'salvador-dali', 'sandro-botticelli', 'sir-lawrence-alma-tadema', 'taras-shevchenko', 'theodore-gericault', 'theodore-rousseau', 'thomas-cole', 'thomas-eakins', 'thomas-gainsborough', 'tintoretto', 'titian', 'valentin-serov', 'vasily-perov', 'vasily-polenov', 'vasily-surikov', 'vasily-tropinin', 'vasily-vereshchagin', 'viktor-vasnetsov', 'vincent-van-gogh', 'vittore-carpaccio', 'vladimir-borovikovsky', 'vladimir-makovsky', 'volodymyr-orlovsky', 'william-adolphe-bouguereau', 'william-hogarth', 'william-shayer', 'william-turner', 'winslow-homer']
+INFO:root:{'type': 'model', 'keys': ['train_base', 'train_norm', 'train_aug', 'eval'], 'mean': [0.47527796030044556, 0.42012834548950195, 0.3588443994522095], 'std': [0.2794029116630554, 0.27445685863494873, 0.264132022857666], 'transforms': {'train_base': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()'], 'train_norm': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()', 'Normalize(mean=[0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std=[0.2794029116630554, 0.27445685863494873, 0.264132022857666])'], 'train_aug': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'Augmentations(probabilities=[0.5, 0.5, 0.5, 0.5], transformations=[ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1), saturation=(0.9, 1.1), hue=None), LightingNoise(alpha=0.1, dim=3), GaussianBlur(kernel_size=(5, 5), sigma=(0.5, 1.5)), RandomResizedCrop(size=(512, 512), scale=(0.85, 1.0), ratio=(0.8, 1.25), interpolation=bilinear, antialias=True)])', 'ToTensor()', 'Normalize(mean=[0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std=[0.2794029116630554, 0.27445685863494873, 0.264132022857666])'], 'eval': ['Resize(size=512, interpolation=bilinear, max_size=None, antialias=True)', 'CenterCrop(size=(512, 512))', 'ToTensor()', 'Normalize(mean=[0.47527796030044556, 0.42012834548950195, 0.3588443994522095], std=[0.2794029116630554, 0.27445685863494873, 0.264132022857666])']}}
+INFO:root:Inference...
+INFO:root:Pretrained model loaded from /content/drive/MyDrive/mlvm_shared/20250117_145942/temp/best_model_27.pth.tar
+/usr/local/lib/python3.11/dist-packages/torch/nn/functional.py:5012: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:208.)
+  return torch.affine_grid_generator(theta, size, align_corners)
+INFO:root:Validation iteration 1, Loss: 0.80655
+INFO:root:Validation iteration 10, Loss: 0.81961
+INFO:root:Validation iteration 20, Loss: 0.83421
+INFO:root:Validation iteration 30, Loss: 0.76233
+INFO:root:Validation iteration 40, Loss: 0.85584
+INFO:root:Validation iteration 50, Loss: 0.79168
+INFO:root:Validation iteration 60, Loss: 0.73973
+INFO:root:Validation iteration 70, Loss: 0.76450
+INFO:root:Validation iteration 80, Loss: 0.71443
+INFO:root:Validation iteration 90, Loss: 0.74603
+INFO:root:Validation iteration 100, Loss: 0.89041
+INFO:root:Validation iteration 110, Loss: 0.74084
+INFO:root:Validation iteration 120, Loss: 0.75045
+INFO:root:Validation iteration 130, Loss: 0.79168
+INFO:root:Validation iteration 140, Loss: 0.78877
+INFO:root:Validation iteration 150, Loss: 0.81099
+INFO:root:Validation iteration 160, Loss: 0.83467
+INFO:root:Validation iteration 170, Loss: 0.83874
+INFO:root:Validation iteration 180, Loss: 0.87948
+INFO:root:Validation iteration 190, Loss: 0.79324
+INFO:root:Validation iteration 200, Loss: 0.80839
+INFO:root:Validation iteration 210, Loss: 0.83393
+INFO:root:Validation iteration 220, Loss: 0.85169
+INFO:root:Validation iteration 230, Loss: 0.92211
+INFO:root:Validation iteration 240, Loss: 0.85193
+INFO:root:Validation iteration 250, Loss: 0.83180
+INFO:root:Validation iteration 260, Loss: 0.80646
+INFO:root:Validation iteration 270, Loss: 0.79917
+INFO:root:Validation iteration 280, Loss: 0.82445
+INFO:root:Validation iteration 290, Loss: 0.80646
+INFO:root:Validation iteration 300, Loss: 0.73952
+INFO:root:Validation iteration 310, Loss: 0.76973
+INFO:root:Validation iteration 320, Loss: 0.76908
+INFO:root:Validation iteration 330, Loss: 0.81278
+INFO:root:Validation iteration 340, Loss: 0.85807
+INFO:root:Validation iteration 350, Loss: 0.78133
+INFO:root:Validation iteration 360, Loss: 0.81795
+INFO:root:Validation iteration 370, Loss: 0.90004
+INFO:root:Validation iteration 380, Loss: 0.81465
+INFO:root:Validation iteration 390, Loss: 0.84614
+INFO:root:Validation iteration 400, Loss: 0.81927
+INFO:root:Validation iteration 410, Loss: 0.71967
+INFO:root:Validation iteration 420, Loss: 0.87231
+INFO:root:Validation iteration 430, Loss: 0.86989
+INFO:root:Validation iteration 440, Loss: 0.90234
+INFO:root:Validation iteration 450, Loss: 0.84694
+INFO:root:Validation iteration 460, Loss: 0.85139
+Test accuracy: 0.823, Test loss: 0.81393
+INFO:root:Saving results...
+INFO:root:Done!
