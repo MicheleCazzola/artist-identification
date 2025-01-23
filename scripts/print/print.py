@@ -18525,7 +18525,7 @@ INFO:root:Validation accuracy: 0.124, Validation loss: 5.69414
 """
 
 PATH = "out/official/"
-CONF = "20250118_143415/"           # configuration name here
+CONF = "20250122_214108/"           # configuration name here
 with open(PATH + CONF + "log.txt", "r") as f:
     string = f.read()
 
@@ -18565,7 +18565,7 @@ import numpy as np
 # plt.scatter(range(len(val_loss)), val_loss, color='red', s=10, label="Validation")
 
 plt.plot(train_loss[::], label="Train")
-plt.plot(np.clip(val_loss[::], 0, 10), label="Validation")
+#plt.plot(np.clip(val_loss[::], 0, 15), label="Validation")
 #plt.scatter(range(0, len(val_loss), 1), val_loss[::], color='red', s=10)
 #plt.ylim(0, max(max(train_loss), max(val_loss)) + 0.5)
 plt.grid(which='both')
