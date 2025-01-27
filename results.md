@@ -184,6 +184,15 @@
 | ResNet18 | 81 | 16 | CE | AdamW | 1e-4 | 10,20 | 0.5 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 2.64 | 42.6 | 28 | 2.73 | 40.1 | 65.5 |31.25 | 40.98 | - | 315 | L4,22 |[20250113_192428](/out/official/20250113_192428/) |  |
 
 
+# Partial results for final models - Reproducibility setting ON
+| Seed | Backbone Model | HOG | Batch size | Loss | Optimizer |Learning rate | Scheduler milestones | Scheduler gammas | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Best validation loss| Best validation WT5-MCA (%) | Best epochs | Test loss | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Kaggle score | Train T5-WMCA (%) | Variance | Training time (mins) (***) | GPU (type, GB) | Output folder | Train accuracy out folder | Notes |
+|:--:|:--------------:|:---:|:--:|:----------:|:-----------:|:--:|:-------------:|:------------:|:--:|:------------:|:------:|:----------------:|:--------------:|:--------------:|:---:|:-------------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 42 | MobileNetV3-S | 81 | 16 | CE | AdamW | 5e-5 | - | - | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 10 | 1 | 2.902 | 29.98 | 10 | 2.935 | 31.44 | 56.8 | 19.7 | 28.82 | | - | - | 203 | T4,15 |[mobilnetV3-S_1_10](/out/official/20250123_200642/) | | go up to 20 |
+| 42 | Random crop | 81 | 16 | CE | AdamW | 1e-4 | - | - | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 6 | 1 | 3.316 | 23.58 | 6 | 3.327 | 24.79 | 48.63 | 15.2 | 22.6 | - | - | - | 110 | T4,15 |[20250127_161040](/out/official/20250127_161040/) | | 6 epochs more |
+| 42 | Random crop | 81 | 16 | CE | AdamW | 1e-3 | - | - | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 6 | 1 | 4.083 | 7.71 | 6 | 4.085 | 12.28 | 31.1 | 4.08 | 7.9 | - | - | - | 110 | T4,15 |[20250127_182418](/out/official/20250127_182418/) | | stop |
+| 42 | Random crop | 81 | 16 | CE | AdamW | 1e-5 | - | - | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 6 | 1 | 3.88 | 10.79 | 6 | 3.93 | 16.05 | 35.56 | 5.8 | 10.09 | - | - | - | 115 | T4,15 |[20250127_184140](/out/official/20250127_184140/) | | stop |
+| 42 | Random crop | 81 | 16 | CE | AdamW | 5e-5 | - | - | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 6 | 1 | 3.44 | 20.34 | 6 | 3.45 | 23.06 | 47 | 13.14 | 20.26 | - | - | - | 128 | T4,15 |[20250127_190634](/out/official/20250127_190634/) | | 6 epochs more |
+
 
 # Final results with reproducibility setting
 
@@ -196,7 +205,7 @@
 | 42 | ResNet18 | No | 16 | CE | AdamW | 1e-4 | 8,26 | 0.31622 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 2.61 | 42.03 | 29 | 2.67 | 41.25 | 65.69 | 31.66 | 41.35 | 0.380 | - | - | 293 | L4,22 |[resnet](/out/official/20250116_231408/) | | first 25 epochs done at [20250116_221909](/out/official/20250116_221909/) |
 | 42 | ResNet18 | 81 | 16 | CE | AdamW | 1e-4 | 10,20 | 0.5 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 2.64 | 42.89 | 27 | 2.67 | 41.66 | 66.16 | 32.83 | 42.31 | 0.400 | - | - | 330 | L4,22 |[resnet_HOG](/out/official/20250117_145942/) | [val_resnet_HOG](./out/official/20250118_145135/) | |
 | 42 | MobileNetV3-S | No | 16 | CE | AdamW | 1e-4 | 20 | 0.5 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 2.37 | 48.15 | 30 | 2.44 | 45.39 | 70.9 | 36.99 | 46.97 | 0.436 | - | - | 241 | L4,22 |[mobilenet](/out/official/20250118_143415/) | | |
-| 42 | MobileNetV3-S | 81 | 16 | CE | AdamW | 1e-4 | 15 | 0.5 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 2.73 | 42.1 | 29 | 2.76 | 40 | 65.88 | 30.87 | 41.07 | 0.436 | - | - | 257 | L4,22 |[mobilenet_HOG](/out/official/20250122_214808/) | | will be discarded |
+| 42 | MobileNetV3-S | 81 | 16 | CE | AdamW | 1e-4 | 15 | 0.5 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 2.73 | 42.1 | 29 | 2.76 | 40 | 65.88 | 30.87 | 41.07 | - | - | - | 257 | L4,22 |[mobilenet_HOG](/out/official/20250122_214108/) | | will be discarded |
 | 42 | RegNetX-400MF | No | 16 | CE | AdamW | 1e-4 | 10,25 | 0.5,0.25 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 4.81 | 44.37 | 25 | 2.4 | 43.5 | 69 | 33.46 | 43.75 | 0.417 | - | - | 276 | L4,22 |[regnet](/out/official/20250117_202044/) | | first 24 epochs no log, all by hand |
 | 42 | RegNetX-400MF | 81 | 16 | CE | AdamW | 1e-4 | 10,20,25 | 0.5,0.5,0.25 | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 2.47 | 45.42 | 29 | 2.52 | 42.69 | 68.2 | 33.69 | 43.84 | 0.417 | - | - | 324 | L4,22 |[regnet_HOG](/out/official/20250122_171346/) | | |
 
