@@ -91,7 +91,7 @@ class Trainer:
         self.lr = cfg.train.lr
         self.momentum = cfg.train.momentum
         self.milestones = list(cfg.train.scheduler_milestones)
-        self.gammas = cfg.train.scheduler_gammas
+        self.gammas = cfg.train.scheduler_factors
         self.weight_decay = cfg.train.weight_decay
         self.top_k = cfg.train.top_k
         self.train_accuracy = cfg.train.train_accuracy
@@ -107,14 +107,14 @@ class Trainer:
         self._set_precision(cfg.model.precision)
         self._prepare_training(cfg.train.criterion, cfg.train.optimizer, cfg.train.scheduler)
         
-        self.metrics = Metrics(num_classes=cfg.train.num_classes, top_k=cfg.train.top_k)
+        self.metrics = Metrics(num_classes=self.model.num_classes, top_k=cfg.train.top_k)
         
         self.training_results: TrainingResult = TrainingResult()
         self.test_results: EvaluationResult = EvaluationResult(
             [], 
             dict(zip(
                 ["top-1_accuracy", "top-5_accuracy", "mca", "weighted_top-5_mca", "confusion_matrix"],
-                [0,0,0,0, [[0] * cfg.train.num_classes] * cfg.train.num_classes]
+                [0,0,0,0, [[0] * self.model.num_classes] * self.model.num_classes]
             ))
         )
         

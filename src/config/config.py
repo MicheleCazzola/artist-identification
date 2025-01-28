@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from .components import PathConfig, EnvConfig, DataConfig, TrainConfig, ModelConfig, HOGConfig
+from src.config.components import PathConfig, EnvConfig, DataConfig, TrainConfig, ModelConfig, HOGConfig
 
 @dataclass
 class Config:
@@ -11,9 +11,6 @@ class Config:
     train: TrainConfig = field(default_factory=TrainConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     hog: HOGConfig = field(default_factory=HOGConfig)
-
-    def __post_init__(self):
-        self.train.top_k = min(5, self.train.num_classes)
         
     def to_dict(self) -> dict:
         return {
@@ -33,7 +30,7 @@ class Config:
         if target == "local":
             return Config(
                 path=PathConfig(
-                    default_root="./scripts/stats/images/artist_dataset",
+                    root="./scripts/stats/images/artist_dataset",
                     test_root="./scripts/stats/images/kaggle_test",
                     stats_file="./scripts/stats/stats.json",
                     results_root="./out",
@@ -47,7 +44,6 @@ class Config:
                     pretrained_stats=False,
                     batch_size_model=2,
                     batch_size_stats=2,
-                    train_split_size=0.66,
                     reduce_factor=1,
                     augment=False
                 ),
@@ -55,9 +51,8 @@ class Config:
                     num_epochs=5,
                     train_log_frequency=2,
                     val_log_frequency=1,
-                    num_classes=3,
                     scheduler_milestones=(2,4),
-                    scheduler_gammas=(0.1, 0.5),
+                    scheduler_factors=(0.1, 0.5),
                     train_only=False,
                     inference_only=False,
                     train_acc_only=False,

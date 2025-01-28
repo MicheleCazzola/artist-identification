@@ -8,6 +8,7 @@ from src.transformations.transformations import Transforms
 from src.trainer.train import Trainer
 from src.model.network import MultiBranchArtistNetwork
 from src.utils.utils import load_stats, init_seed
+from src.utils.parser import get_config
 import sys
 
 
@@ -31,12 +32,10 @@ def main():
     
     logging.basicConfig(level=logging.INFO)
     
-    if len(sys.argv) > 1:
-        cfg = Config.create("colab")
-        root = sys.argv[1]
-    else:
-        cfg = Config.create("local")
-        root = cfg.path.default_root
+    LOCAL = True
+    default_cfg = Config.create("local" if LOCAL else "colab")
+    
+    cfg = get_config(default_cfg)
     
     logging.info(cfg.__dict__)
     
@@ -55,13 +54,25 @@ def main():
     
     if not cfg.data.augment:
         logging.info("No augmentation found, only normalization will be applied")
+        
+    logging.info(transformations.to_dict())
     
     trainset, validset, testset = ArtistDataset.create(
-        root, 
+        cfg.path.root, 
         transforms=transformations.get(),
         augment=cfg.data.augment,
         reduction_factor=cfg.data.reduce_factor,
     )
+    
+    if cfg.data.reduce_factor is None or cfg.data.reduce_factor == 1:
+        assert trainset.categories == validset.categories == testset.categories, "Categories mismatch"
+    else:
+        assert trainset.dataset.categories == validset.dataset.categories == testset.dataset.categories, "Categories mismatch"
+    
+    categories = testset.categories if isinstance(testset, ArtistDataset) else testset.dataset.categories
+    num_classes = len(categories)
+    
+    logging.info(categories)
     
     # Create dataloaders for all the datasets: normalization applied during training
     trainloader, validloader, testloader = create_dataloaders(
@@ -74,7 +85,7 @@ def main():
     
     # Model definition
     model = MultiBranchArtistNetwork(
-        num_classes=cfg.train.num_classes,
+        num_classes=num_classes,
         stn=cfg.model.backbone_type,
         use_handcrafted=cfg.model.use_handcrafted,
         hog_params=cfg.hog,
@@ -84,17 +95,8 @@ def main():
     
     logging.info(f"Training setup...")
     
-    if cfg.data.reduce_factor is None or cfg.data.reduce_factor == 1:
-        assert trainset.categories == validset.categories == testset.categories, "Categories mismatch"
-        assert len(trainset.categories) == cfg.train.num_classes, "Invalid number of categories"
-    
-    categories = testset.categories if isinstance(testset, ArtistDataset) else testset.dataset.categories
     trainer = Trainer(model, trainloader, validloader, testloader, categories)
     trainer.build(cfg)
-    
-    logging.info(categories)
-    
-    logging.info(transformations.to_dict())
     
     training_time = test_time = None
     
@@ -125,7 +127,7 @@ def main():
                 trainer.test(cfg.path.trained_model_path)
         elif cfg.train.train_acc_only:
             trainset_eval = ArtistDataset.create(
-                root,
+                cfg.path.root,
                 transforms=transformations.get(),
                 augment=False,
                 reduction_factor=cfg.data.reduce_factor,

@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-from ..utils.utils import BackboneType
+from src.utils.utils import BackboneType
 
 
 @dataclass
 class PathConfig:
-    default_root: str = "./data/artist_dataset"
+    root: str = "./data/artist_dataset"
     test_root: str = "./data/kaggle_testset"
     stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./data/norm_stats.json"
@@ -32,7 +32,6 @@ class DataConfig:
     reduce_factor: float = 1.0
     batch_size_model: int = 16
     batch_size_stats: int = 128
-    train_split_size: float = 0.75
 
 @dataclass
 class TrainConfig:
@@ -40,12 +39,11 @@ class TrainConfig:
     train_log_frequency: int = 30
     val_log_frequency: int = 10
     train_accuracy: bool = False
-    num_classes: int = 161
     lr: float = 1e-4
     momentum: float = 0.9
     weight_decay: float = 1e-4
     scheduler_milestones: tuple[int] = (10,)
-    scheduler_gammas: tuple[float] = (0.1,)
+    scheduler_factors: tuple[float] = (0.1,)
     criterion: str = "cross_entropy"
     optimizer: str = "adamw"
     scheduler: str = None
