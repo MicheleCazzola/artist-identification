@@ -1,5 +1,4 @@
 import logging
-import os
 
 from src.config.config import Config
 from src.dataset.dataset import ArtistDataset, UnlabeledArtistDataset
@@ -7,33 +6,19 @@ from src.dataset.dataloader import create_dataloaders
 from src.transformations.transformations import Transforms
 from src.trainer.train import Trainer
 from src.model.network import MultiBranchArtistNetwork
-from src.utils.utils import load_stats, init_seed
+from src.utils.utils import load_stats, init_seed, Env
 from src.utils.parser import get_config
-import sys
 
 
-# def check(*dataloaders):
-#     for dataloader in dataloaders:
-        
-#         print(dataloader)
-#         tot_len = len(dataloader)
-#         for (step, (inputs, labels)) in enumerate(dataloader):
-#             print(f"Step {step+1}/{tot_len}")
-#             images = [torchvision.transforms.ToPILImage()(input) for input in inputs]
-#             for img, label in zip(images, labels):
-#                 plt.figure()
-#                 plt.imshow(img)
-#                 plt.title(f"Label {label}")
-#         print()
-#     plt.show()
+# !!! Change to CPU ONLY in case of local debugging !!!
+ENVIRONMENT = Env.CUDA
 
 
-def main():
+def main(env: Env):
     
     logging.basicConfig(level=logging.INFO)
     
-    LOCAL = True
-    default_cfg = Config.create("local" if LOCAL else "colab")
+    default_cfg = Config.create("local" if env == env.CPU else "colab")
     
     cfg = get_config(default_cfg)
     
@@ -162,4 +147,5 @@ def main():
     
     logging.info(f"Done!")
 
-main()
+
+main(ENVIRONMENT)

@@ -1,5 +1,6 @@
 import argparse
 from src.config.config import Config, PathConfig, EnvConfig, DataConfig, TrainConfig, ModelConfig, HOGConfig
+from src.utils.utils import BackboneType
 
 def parse_args(cfg: Config):
     parser = argparse.ArgumentParser()
@@ -98,7 +99,7 @@ def encapsulate_args(args):
             aug_mask=tuple(args.aug_mask),
             augment=args.augment,
             reduce_factor=args.reduce_factor,
-            batch_size_model=args.batch_size_model
+            batch_size_model=args.batch_size
         ),
         train=TrainConfig(
             num_epochs=args.num_epochs,
@@ -125,7 +126,7 @@ def encapsulate_args(args):
         ),
         model=ModelConfig(
             use_default_init=args.use_default_init,
-            backbone_type=args.backbone_type,
+            backbone_type=BackboneType[args.backbone_type.upper()] if args.backbone_type else None,
             use_handcrafted=args.use_handcrafted,
             precision=args.precision,
         ),

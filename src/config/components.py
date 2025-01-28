@@ -28,7 +28,7 @@ class DataConfig:
     crop_dim: int = 512
     aug_probs: tuple[float] = (0.5, 0.5, 0.5, 0.5)
     aug_mask: tuple[bool] = (True, True, True, True)
-    augment: bool = True
+    augment: bool = False
     reduce_factor: float = 1.0
     batch_size_model: int = 16
     batch_size_stats: int = 128

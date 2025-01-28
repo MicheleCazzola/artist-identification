@@ -15,6 +15,11 @@ class BackboneType(str, Enum):
     MNASNET0_5 = "mnasnet0_5"
     
 
+class Env(str, Enum):
+    CUDA = "cuda"
+    CPU = "cpu"
+    
+
 def execution_time(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

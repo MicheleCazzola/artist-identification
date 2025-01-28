@@ -53,6 +53,7 @@ class Config:
                     val_log_frequency=1,
                     scheduler_milestones=(2,4),
                     scheduler_factors=(0.1, 0.5),
+                    top_k=3,
                     train_only=False,
                     inference_only=False,
                     train_acc_only=False,
