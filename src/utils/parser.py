@@ -27,7 +27,7 @@ def parse_args(cfg: Config):
     parser.add_argument('--aug-mask', type=bool, nargs=4, default=cfg.data.aug_mask, help="Augmentation mask (color jitter, lighting noise, blur, random resized crop)")
     parser.add_argument('--augment', action='store_true', default=cfg.data.augment, help="Enable augmentation")
     parser.add_argument('--reduce-factor', type=float, default=cfg.data.reduce_factor, help="Reduction factor for dataset")
-    parser.add_argument('--batch-size-model', type=int, default=cfg.data.batch_size_model, help="Batch size for model")
+    parser.add_argument('--batch-size', type=int, default=cfg.data.batch_size_model, help="Batch size for model")
 
     # cfg.train arguments
     parser.add_argument('--num-epochs', type=int, default=cfg.train.num_epochs, help="Number of epochs (resume included, if present)")
