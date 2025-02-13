@@ -5,12 +5,16 @@
 *artist_dataset*
 
 # Output files
-out/*
-!out/official/
-!out/official/**
+out/local/
 
 # Temporary files
 temp/
+
+# Sample images
+sample_images/
+
+# Playground notebook
+playground.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
