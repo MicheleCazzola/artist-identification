@@ -6,6 +6,9 @@ from PIL import Image
 
 
 class LightingNoise:
+    """
+    Add PCA-based lighting noise to the image.
+    """
     
     def __init__(self, alpha: float = 0.1, dim: int = 3):
         self.alpha = alpha
