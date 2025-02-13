@@ -48,7 +48,7 @@ logging.basicConfig(level=logging.INFO)
 
 cfg = Config.create("colab")
 transformations = Transforms("model", data_config=cfg.data).get("train_base")
-trainset_stats = ArtistDataset(cfg.path.default_root, "train", transform=transformations)
+trainset_stats = ArtistDataset(cfg.path.root, "train", transform=transformations)
 trainloader_stats = create_dataloaders(
     [trainset_stats],
     cfg.data.batch_size_stats,

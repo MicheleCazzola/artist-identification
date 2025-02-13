@@ -211,7 +211,7 @@ class HOGLayer(nn.Module):
             else:
                 return pooled
 
-# Example usage
+
 if __name__ == '__main__':
     import cv2
     
@@ -234,33 +234,3 @@ if __name__ == '__main__':
     y = hog(x)
 
     print(y.shape)
-
-# if __name__ == '__main__':
-#     import cv2
-#     cuda = False
-
-#     path = './scripts/hog_gpu/adriaen-van-ostade_a-fight-1.jpg'
-#     open(path)
-#     im = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-
-#     x = torch.from_numpy(im)[None, None]
-#     if cuda:
-#         x = x.cuda().float()
-#     else:
-#         x = x.float()
-
-#     hog = HOGLayer(nbins=12, pool=2)
-#     if cuda:
-#         hog = hog.cuda()
-
-#     y = hog(x)
-
-#     y2 = y.cpu().numpy()
-#     bin = 0
-#     while bin < hog.nbins:
-#         im = y2[0, bin]
-#         im = (im-im.min())/(im.max()-im.min())
-#         print('bin: ', bin, ' ang: ', float(bin)/hog.nbins * 180.0)
-#         cv2.imshow('bin', im)
-#         cv2.waitKey()
-#         bin += 1

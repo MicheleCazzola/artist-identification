@@ -32,6 +32,8 @@ def load_data():
     dataset = ArtistDataset.create(root, merge_datasets=True, transforms=transformations.get("tensor"))
     dataloader = create_dataloaders([dataset], batch_size=1, shuffle=False, drop_last=False, num_workers=NUM_WORKERS)
     
+    print(len(dataloader))
+
     return dataset, dataloader
 
 @torch.no_grad()
@@ -44,10 +46,7 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
              "min_height", "max_height", "min_width", "max_width"]
     
     num_authors = len(dataset.categories)
-    
-    ivd = {v: k for k, v in dataset.categories.items()}
-    category = lambda l: ivd[l]
-        
+
     labels_counts = {}
     dimensions = {}
     avg = torch.zeros((1,3)).to(DEVICE)
@@ -73,11 +72,12 @@ def compute_stats(dataset: ArtistDataset, dataloader: DataLoader):
         w_min, w_max = min(w_min, w), max(w_max, w)
         dimensions[f"{int(h*w / 100_000)}00k"] = dimensions.get(f"{int(h*w / 100_000)}00k", 0) + 1
         
-        print(f"Processing batch {step+1}/{tot_batches}")
+        if (step + 1) % 100 == 0:
+            print(f"Processing batch {step+1}/{tot_batches}")
         
         # Count number of elements for each class
         for label in labels:
-            labels_counts[category(label.item())] = labels_counts.get(category(label.item()), 0) + 1
+            labels_counts[dataset.categories[label.item()]] = labels_counts.get(dataset.categories[label.item()], 0) + 1
         
         b, _, h, w = img_inputs.shape
         
