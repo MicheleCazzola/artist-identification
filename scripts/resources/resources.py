@@ -17,7 +17,7 @@ def compute_latency(model: torch.nn.Module, dataset, device, log_frequency):
     model.eval()
     for step, x in enumerate(dataset):
         x = x.to(device)
-        out = call_model(x)
+        _ = call_model(x)
         latency.append(call_model.time)
         
         if (step + 1) % log_frequency == 0:
@@ -25,8 +25,8 @@ def compute_latency(model: torch.nn.Module, dataset, device, log_frequency):
         
     return mean(latency) * 1000     # latency in ms
 
-OUTFILE = "./scripts/resources/resources_prova.json"
-OUTFILE_PLOT = "./scripts/resources/accuracy_vs_latency_prova.png"
+OUTFILE = "./scripts/resources/resources.json"
+OUTFILE_PLOT = "./scripts/resources/accuracy_vs_latency.png"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DATASET_SIZE = 1000
 NUM_CLASSES = 161
@@ -47,7 +47,7 @@ model_variants = [
         stn=backbone,
         use_handcrafted=handcrafted,
         hog_params=hog_config,
-        use_default_init=True
+        use_default_init=False
     ).to(DEVICE)
     for backbone in BACKBONES
     for handcrafted in HANDCRAFTED_FLAGS
@@ -91,10 +91,10 @@ with open(OUTFILE, "w") as f:
     json.dump(model_stats, f, indent=4)
     
 fig = plt.figure(figsize=(16,8))
-plt.subplots_adjust(left=0.05, right=0.75)  # Adjust the subplot to remove left margin and make space for legend
+plt.subplots_adjust(left=0.05, right=0.75)
 
 names, acc, lat = zip(*[(name, stats["accuracy"], float(stats["latency"].split()[0])) for (name, stats) in model_stats.items()])
-colors = plt.cm.tab20.colors  # Use a colormap with enough distinct colors
+colors = plt.cm.tab20.colors 
 color_map = {name: colors[i % len(colors)] for i, name in enumerate(names)}
 
 for name, latency, accuracy in zip(names, lat, acc):
