@@ -16,18 +16,21 @@ ENVIRONMENT = Env.CUDA
 
 def main(env: Env):
     
+    # Set up environment
     logging.basicConfig(level=logging.INFO)
     
     default_cfg = Config.create("local" if env == env.CPU else "colab")
-    
     cfg = get_config(default_cfg)
     
     logging.info(cfg.__dict__)
     
+    # Set up random seed and dataloader generator for reproducibility
     dataloader_worker_init_fun, dataloader_generator = init_seed(cfg.env.seed)
     
+    # Data transformations
     transformations = Transforms(data_config=cfg.data)
         
+    # Load normalization stats and update input normalization
     if not cfg.data.pretrained_stats:
         mean, std = load_stats(cfg.path.norm_stats_file)
     else:
@@ -42,6 +45,7 @@ def main(env: Env):
         
     logging.info(transformations.to_dict())
     
+    # Create datasets
     trainset, validset, testset = ArtistDataset.create(
         cfg.path.root, 
         transforms=transformations.get(),
@@ -59,7 +63,7 @@ def main(env: Env):
     
     logging.info(categories)
     
-    # Create dataloaders for all the datasets: normalization applied during training
+    # Create dataloaders for the datasets
     trainloader, validloader, testloader = create_dataloaders(
         [trainset, validset, testset],
         cfg.data.batch_size_model,
@@ -80,22 +84,28 @@ def main(env: Env):
     
     logging.info(f"Training setup...")
     
+    # Trainer setup
     trainer = Trainer(model, trainloader, validloader, testloader, categories)
     trainer.build(cfg)
     
     training_time = test_time = None
     
+    # Training process
     if not (cfg.train.inference_only or cfg.train.train_acc_only):
         logging.info(f"Training...")
         
         trainer.train()
         training_time = trainer.train.time
         
+    # Inference process
     if not cfg.train.train_only:
         logging.info(f"Inference...")
         
+        # If inference only, load the pretrained model
         if cfg.train.inference_only:
             trainer.test(cfg.path.trained_model_path)
+            
+        # If train accuracy only, evaluate a pretrained model on the training set
         elif cfg.train.train_acc_only:
             trainset_eval = ArtistDataset.create(
                 cfg.path.root,
@@ -110,7 +120,9 @@ def main(env: Env):
                 drop_last=False,
                 num_workers=cfg.env.num_workers
             )
-            trainer.test(cfg.path.trained_model_path, trainloader_eval)        
+            trainer.test(cfg.path.trained_model_path, trainloader_eval)   
+        
+        # Otherwise, evaluate the current best model on the test set     
         else:
             trainer.test()
             
@@ -123,6 +135,7 @@ def main(env: Env):
     
     logging.info(f"Saving results...")
     
+    # Save training/evaluation results
     trainer.save_results(
         cfg, 
         cfg.path.results_root, 

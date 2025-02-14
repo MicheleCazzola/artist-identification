@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader, Subset
-from .dataset import ArtistDataset
+from src.dataset.dataset import ArtistDataset
 
 def create_dataloaders(
     datasets: list[ArtistDataset | Subset],
@@ -11,6 +11,29 @@ def create_dataloaders(
     worker_init_fn: callable = None,
     generator: torch.Generator = None
 ) -> tuple[DataLoader, DataLoader, DataLoader] | tuple[DataLoader, DataLoader] | DataLoader:
+    
+    """
+    Create dataloaders for the given datasets
+    
+    datasets: list[ArtistDataset | Subset]
+        List of datasets to create the dataloaders from
+    batch_size: int
+        Batch size for the dataloaders
+    shuffle: bool
+        Whether to shuffle the data
+    drop_last: bool
+        Whether to drop the last incomplete batch
+    num_workers: int
+        Number of workers for the dataloaders
+    worker_init_fn: callable
+        Worker initialization function
+    generator: torch.Generator
+        Random generator for the dataloaders
+        
+    Returns:
+        - A single DataLoader if a single dataset is passed
+        - A tuple of DataLoaders if multiple datasets are passed
+    """
     
     assert batch_size > 0, f"Batch size must be strictly positive, found {batch_size}"
     

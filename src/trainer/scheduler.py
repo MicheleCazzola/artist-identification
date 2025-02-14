@@ -1,15 +1,30 @@
 from torch.optim.lr_scheduler import _LRScheduler
+from torch.optim import Optimizer
 
 class CustomMultiStepLR(_LRScheduler):
-    def __init__(self, optimizer, milestones, factors, last_epoch=-1):
+    """
+    Custom scheduler that adjusts the learning rate at specified milestones with different gamma values for each step.
+    It is a generalization of the built-in MultiStepLR scheduler, which uses the same gamma value for all steps.
+    
+    Attributes:
+    -----------
+    milestones: list[int]
+        List of epoch indices at which to adjust the learning rate.
+    gammas: list[float] 
+        List of gamma values for each milestone.
+    """
+    def __init__(self, optimizer: Optimizer, milestones: list[int], factors: list[float], last_epoch: int = -1):
         """
         Custom multi-step LR scheduler with different gamma values for each step.
 
-        Args:
-            optimizer (Optimizer): Wrapped optimizer.
-            milestones (list): List of epoch indices at which to adjust the learning rate.
-            factors (list): List of gamma values for each milestone. Must be the same length as milestones.
-            last_epoch (int): The index of the last epoch. Defaults to -1 (starts from epoch 0).
+        optimizer: Optimizer
+            Optimizer to adjust the learning rate for
+        milestones: list[int]
+            List of epoch indices at which to adjust the learning rate.
+        factors: list[float]
+            List of gamma values for each milestone: gamma is multiplied by the learning rate at each milestone.
+        last_epoch: int
+            The index of the last epoch. Default: -1.
         """
         assert len(milestones) == len(factors), "Milestones and gammas must have the same length."
         self.milestones = milestones
@@ -24,7 +39,8 @@ class CustomMultiStepLR(_LRScheduler):
                 factor *= gamma
         return [base_lr * factor for base_lr in self.base_lrs]
     
-    
+
+# Local test
 if __name__ == '__main__':
     import torch
     import torch.optim as optim
