@@ -1,6 +1,6 @@
-from ..config.components import DataConfig
+from src.config.components import DataConfig
 from torchvision.transforms import transforms
-from .augmentations import Augmentations
+from src.transformations.augmentations import Augmentations
 
 
 class Transforms:
@@ -19,6 +19,7 @@ class Transforms:
         self.type = type
         
         # Default values for normalization (ImageNet)
+        # Not used in reality, we compute ours
         self.mean = [0.485, 0.456, 0.406]
         self.std = [0.229, 0.224, 0.225]
         

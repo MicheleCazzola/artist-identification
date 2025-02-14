@@ -1,7 +1,7 @@
 import logging
 
 from src.config.config import Config
-from src.dataset.dataset import ArtistDataset, UnlabeledArtistDataset
+from src.dataset.dataset import ArtistDataset
 from src.dataset.dataloader import create_dataloaders
 from src.transformations.transformations import Transforms
 from src.trainer.train import Trainer
@@ -95,21 +95,7 @@ def main(env: Env):
         logging.info(f"Inference...")
         
         if cfg.train.inference_only:
-            if cfg.train.save_predictions:
-                testset = UnlabeledArtistDataset(
-                    cfg.path.test_root, 
-                    transform=transformations.get("eval")
-                )
-                testloader = create_dataloaders(
-                    [testset],
-                    cfg.data.batch_size_model,
-                    shuffle=False,
-                    drop_last=False,
-                    num_workers=cfg.env.num_workers
-                )
-                trainer.test(cfg.path.trained_model_path, testloader, cfg.path.predictions_path)
-            else:
-                trainer.test(cfg.path.trained_model_path)
+            trainer.test(cfg.path.trained_model_path)
         elif cfg.train.train_acc_only:
             trainset_eval = ArtistDataset.create(
                 cfg.path.root,
@@ -130,9 +116,11 @@ def main(env: Env):
             
         test_time = trainer.test.time
         
-        if not cfg.train.save_predictions:
+        if not cfg.train.train_acc_only:
             print(f"Test accuracy: {trainer.test_results.metrics.get(f'weighted_top-{cfg.train.top_k}_mca'):.3f}, Test loss: {trainer.test_results.loss:.5f}")
-        
+        else:
+            print(f"Train accuracy: {trainer.test_results.metrics.get(f'weighted_top-{cfg.train.top_k}_mca'):.3f}, Train loss: {trainer.test_results.loss:.5f}")
+    
     logging.info(f"Saving results...")
     
     trainer.save_results(

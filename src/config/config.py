@@ -27,6 +27,7 @@ class Config:
 
         assert target in ["local", "colab"], f"Target must be either 'local' or 'colab', found {target}"
 
+        # Manual configuration for local debugging
         if target == "local":
             return Config(
                 path=PathConfig(

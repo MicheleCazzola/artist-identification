@@ -6,15 +6,12 @@ from src.utils.utils import BackboneType
 @dataclass
 class PathConfig:
     root: str = "./data/artist_dataset"
-    test_root: str = "./data/kaggle_testset"
-    stats_file: str = "./scripts/stats/stats.json"
     norm_stats_file: str = "./data/norm_stats.json"
     saved_model_path: str = "./temp/model"
     saved_best_model_path: str = "./temp/best_model"
     results_root: str = "."
-    trained_model_path: str = "/content/drive/MyDrive/mlvm_shared/20250114_185257/temp/model_20.pth.tar"   # Change in case of custom inference-only model
-    predictions_path: str = "/content/drive/MyDrive/mlvm_shared/20241230_225438/predictions.csv"    # Change according to trained model used
-
+    trained_model_path: str = "/content/drive/MyDrive/mlvm_shared/20250114_185257/temp/model_20.pth.tar"   # Change in case of custom inference-only model of training resume
+    
 @dataclass
 class EnvConfig:
     device: str = "cuda"
@@ -54,7 +51,6 @@ class TrainConfig:
     train_only: bool = False
     inference_only: bool = False
     train_acc_only: bool = False
-    save_predictions: bool = False
     resume_training: bool = False
 
 @dataclass

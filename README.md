@@ -21,7 +21,7 @@ This folder contains the scripts used to generate the stats.
 │   └── official
 |       ├── official experiments with results presented in the report
 ├── scripts
-│   ├── general code used to perform various tests and calculate statistics
+│   ├── general code used to perform unofficial tests and calculate statistics
 ├── src
 │   ├── code used to train the models
 ├── README.md

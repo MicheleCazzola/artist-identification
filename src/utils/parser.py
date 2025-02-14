@@ -7,15 +7,12 @@ def parse_args(cfg: Config):
     
     # cfg.env arguments
     parser.add_argument('--root', type=str, default=cfg.path.root, help="Root directory")
-    parser.add_argument('--test-root', type=str, default=cfg.path.test_root, help="Test root directory (only for submission on Kaggle)")
-    parser.add_argument('--stats-file', type=str, default=cfg.path.stats_file, help="Stats file path")
     parser.add_argument('--norm-stats-file', type=str, default=cfg.path.norm_stats_file, help="Normalization stats file path")
     parser.add_argument('--saved-model-path', type=str, default=cfg.path.saved_model_path, help="Path to save model or checkpoint")
     parser.add_argument('--saved-best-model-path', type=str, default=cfg.path.saved_best_model_path, help="Path to save best model or checkpoint")
     parser.add_argument('--results-root', type=str, default=cfg.path.results_root, help="Results directory")
     parser.add_argument('--trained-model-path', type=str, default=cfg.path.trained_model_path, help="Path to trained model or checkpoint")
-    parser.add_argument('--predictions-path', type=str, default=cfg.path.predictions_path, help="Path to save predictions (only for submission on Kaggle)")
-
+    
     parser.add_argument('--device', type=str, default=cfg.env.device, help="Device for computation (cpu or cuda)")
     parser.add_argument('--num-workers', type=int, default=cfg.env.num_workers, help="Number of workers for data loading (0 if working on cpu)")
     parser.add_argument('--seed', type=int, default=cfg.env.seed, help="Random seed")
@@ -50,7 +47,6 @@ def parse_args(cfg: Config):
     parser.add_argument('--train-only', action='store_true', default=cfg.train.train_only, help="Train only mode")
     parser.add_argument('--inference-only', action='store_true', default=cfg.train.inference_only, help="Inference only mode")
     parser.add_argument('--train-acc-only', action='store_true', default=cfg.train.train_acc_only, help="Compute only accuracy on training set")
-    parser.add_argument('--save-predictions', action='store_true', default=cfg.train.save_predictions, help="Save predictions (only for submission on Kaggle)")
     parser.add_argument('--resume-training', action='store_true', default=cfg.train.resume_training, help="Resume training from checkpoint")
 
     # cfg.model arguments
@@ -77,14 +73,11 @@ def encapsulate_args(args):
     return Config(
         path=PathConfig(
             root=args.root,
-            test_root=args.test_root,
-            stats_file=args.stats_file,
             norm_stats_file=args.norm_stats_file,
             saved_model_path=args.saved_model_path,
             saved_best_model_path=args.saved_best_model_path,
             results_root=args.results_root,
-            trained_model_path=args.trained_model_path,
-            predictions_path=args.predictions_path,
+            trained_model_path=args.trained_model_path
         ),
         env=EnvConfig(
             device=args.device,
@@ -121,7 +114,6 @@ def encapsulate_args(args):
             train_only=args.train_only,
             inference_only=args.inference_only,
             train_acc_only=args.train_acc_only,
-            save_predictions=args.save_predictions,
             resume_training=args.resume_training,
         ),
         model=ModelConfig(

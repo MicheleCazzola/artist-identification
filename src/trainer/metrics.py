@@ -1,6 +1,7 @@
 import logging
 import torch
 import torch.nn.functional as F
+
 from torchmetrics import Metric
 from torchmetrics.classification import MulticlassAccuracy, MulticlassConfusionMatrix
 
@@ -87,7 +88,7 @@ class Metrics(Metric):
 
 if __name__ == "__main__":
     
-    good = WeightedTopKMCA(5, 3)
+    wt5_mca = WeightedTopKMCA(5, 3)
     # mca = MulticlassAccuracy(5, average=None)
     # top2_mca = MulticlassAccuracy(5, top_k=2, average=None)
     # top3_mca = MulticlassAccuracy(5, top_k=3, average=None)
@@ -128,10 +129,10 @@ if __name__ == "__main__":
     print(per_class_third_predictions)
     print()
     
-    good.update(outputs1, labels1)
-    print(good.compute())
-    good.update(outputs2, labels2)
-    result_good = good.compute()
+    wt5_mca.update(outputs1, labels1)
+    print(wt5_mca.compute())
+    wt5_mca.update(outputs2, labels2)
+    result_good = wt5_mca.compute()
     
     #print(good.scores)
     

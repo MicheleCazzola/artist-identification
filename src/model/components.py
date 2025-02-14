@@ -5,7 +5,8 @@ import torchvision.transforms as transforms
 import numpy as np
 
 from skimage.feature import hog
-from ..config.config import HOGConfig
+
+from src.config.config import HOGConfig
 
 class BottleneckBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, stride: int = 1, dtype=torch.float32):
@@ -64,7 +65,6 @@ class HandCraftedFeatures(nn.Module):
         
         x_np = x.cpu().numpy().transpose(0, 2, 3, 1)
         
-        # gray = lambda img: 0.299 * img[:, :, 0] + 0.587 * img[:, :, 1] + 0.114 * img[:, :, 2]
         return torch.tensor(np.array([
             hog(
                 img @ self.channel_coefficients,
