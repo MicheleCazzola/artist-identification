@@ -4,12 +4,55 @@ from src.transformations.augmentations import Augmentations
 
 
 class Transforms:
+    """
+    Transforms class to handle the transformations for the input images.
+    
+    Class Attributes:
+    -----------
+    resizer: callable
+        Resize transformation
+    cropper: callable
+        Crop transformation
+    to_tensor: callable
+        Convert image to tensor transformation
+    to_image: callable
+        Convert tensor to image transformation
+        
+    Instance attributes:
+    --------------------
+    type: str
+        Type of the transformation (either 'model' or 'stats')
+    keys: list[str]
+        List of possible transformations
+    normalizer: callable
+        Normalization function
+    mean: list[float]
+        Mean values for normalization
+    std: list[float]
+        Standard deviation values for normalization
+    normalizer: callable
+        Normalize tensor transformation
+    preprocessing: list[callable]
+        Preprocessing transformations
+    augmentations: Augmentations
+        Augmentation transformations
+    transforms: dict
+        Dictionary of transformations applied on the image
+        
+    Methods:
+    --------
+    get(name: str | list[str] = None) -> dict | transforms.Compose
+        Get the transformation(s) by name
+    set_norm(mean: list[float], std: list[float])
+        Set the normalization values
+    to_dict() -> dict
+        Convert the transformations to a dictionary
+    """
     
     resizer = transforms.Resize
     cropper = transforms.CenterCrop
     to_tensor = transforms.ToTensor
     to_image = transforms.ToPILImage
-    normalizer = transforms.Normalize
     
     def __init__(self, type: str = "model", data_config: DataConfig = None):
         
@@ -23,9 +66,10 @@ class Transforms:
         self.mean = [0.485, 0.456, 0.406]
         self.std = [0.229, 0.224, 0.225]
         
+        # Preprocessing when using the model
         if type == "model":
             self.keys = ["train_base", "train_norm", "train_aug", "eval"]
-            self.normalizer = lambda m, s: Transforms.normalizer(m, s)
+            self.normalizer = lambda m, s: transforms.Normalize(m, s)
             
             self.preprocessing = [
                 Transforms.resizer(data_config.resize_dim),
@@ -33,17 +77,30 @@ class Transforms:
             ]
             self.augmentations = Augmentations(data_config.aug_probs, data_config.aug_mask)
             
+            # Downsample + center crop
             train_transforms_base = transforms.Compose([*self.preprocessing, Transforms.to_tensor()])
+            
+            # Downsample + center crop + normalize
             train_transforms_norm = transforms.Compose([*self.preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
+            
+            # Downsample + center crop + augmentation + normalize
             train_transforms_aug = transforms.Compose([*self.preprocessing, self.augmentations, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
+            
+            # Downsample + center crop + normalize (evaluation)
             eval_transforms = transforms.Compose([*self.preprocessing, Transforms.to_tensor(), self.normalizer(self.mean, self.std)])
             
             self.transforms = dict(zip(self.keys, [train_transforms_base, train_transforms_norm, train_transforms_aug, eval_transforms]))
+        
+        # Preprocessing when computing the stats
         else:
             self.keys = ["tensor", "adjust"]
+            
+            # Only conversion to tensor: used when computing shape stats
             to_tensor = transforms.Compose([
                 Transforms.to_tensor()
             ])
+            
+            # Conversion to tensor + resizing + center cropping: used when computing normalization stats
             to_adjusted = transforms.Compose([
                 Transforms.to_image(),
                 Transforms.resizer(data_config.resize_dim),
@@ -54,6 +111,7 @@ class Transforms:
             self.transforms = dict(zip(self.keys, [to_tensor, to_adjusted]))
 
     def get(self, name: str | list[str] = None) -> dict | transforms.Compose:
+        """Get the transformation(s) by name"""
         
         assert name is None or name in self.keys or all(name) in self.keys, f"Can get all or one transform into {self.keys}, found {name} instead"
                 
@@ -65,6 +123,7 @@ class Transforms:
             return self.transforms
     
     def set_norm(self, mean: list[float], std: list[float]):
+        """Set the normalization values. Necessary to modify the transformation pipelines"""
         self.mean = mean
         self.std = std
         

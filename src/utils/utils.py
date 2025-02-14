@@ -7,6 +7,7 @@ import random
 import numpy as np
 
 class BackboneType(str, Enum):
+    """Backbone types for the localization network"""
     RESNET18 = "resnet18"
     MOBILENET_V3_SMALL = "mobilenet_v3_small"
     EFFICIENTNET_B0 = "efficientnet_b0"
@@ -16,11 +17,13 @@ class BackboneType(str, Enum):
     
 
 class Env(str, Enum):
+    """Environment types"""
     CUDA = "cuda"
     CPU = "cpu"
     
 
 def execution_time(func):
+    """Decorator to measure the execution time of a function. Works with both CPU and GPU. The time is stored in the wrapped function object"""
     @wraps(func)
     def wrapper(*args, **kwargs):
         if torch.cuda.is_available():
@@ -46,12 +49,14 @@ def execution_time(func):
     return wrapper
 
 def load_stats(filename: str) -> tuple:
+    """Load the mean and standard deviation (of the training set) from a JSON file"""
     
     stats = json.load(open(filename, "r"))
     
     return stats["mean"], stats["std"]
 
 def init_seed(seed: int) -> tuple[callable, torch.Generator]:
+    """Initialize the seed for reproducibility, working with both CPU and GPU, both in single and multi-processing"""
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)

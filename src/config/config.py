@@ -4,6 +4,31 @@ from src.config.components import PathConfig, EnvConfig, DataConfig, TrainConfig
 
 @dataclass
 class Config:
+    """
+    Configuration class for the project
+    
+    Attributes:
+    -----------
+    path: PathConfig
+        Configuration for the paths
+    env: EnvConfig
+        Configuration for the environment
+    data: DataConfig
+        Configuration for data processing
+    train: TrainConfig
+        Configuration for training process
+    model: ModelConfig
+        Configuration for model architecture and weights
+    hog: HOGConfig
+        Configuration for HOG features
+
+    Methods:
+    --------
+    to_dict() -> dict
+        Convert the configuration to a dictionary
+    create(target: str = "colab") -> "Config"
+        Create a configuration based on the target environment (either "local" or "colab")
+    """
 
     path: PathConfig = field(default_factory=PathConfig)
     env: EnvConfig = field(default_factory=EnvConfig)
@@ -24,53 +49,60 @@ class Config:
     
     @staticmethod
     def create(target: str = "colab") -> "Config":
+        """
+        Create a configuration based on the target environment
+        
+        target: str
+            Target environment, either "local" or "colab"
+        """
 
         assert target in ["local", "colab"], f"Target must be either 'local' or 'colab', found {target}"
 
+        
+        if target == "colab":
+            return Config()
+        
         # Manual configuration for local debugging
-        if target == "local":
-            return Config(
-                path=PathConfig(
-                    root="./scripts/stats/images/artist_dataset",
-                    test_root="./scripts/stats/images/kaggle_test",
-                    stats_file="./scripts/stats/stats.json",
-                    results_root="./out",
-                    trained_model_path="./temp/best_model_29_rnd.pth.tar",
-                ),
-                env=EnvConfig(
-                    device="cpu",
-                    num_workers=0
-                ),
-                data=DataConfig(
-                    pretrained_stats=False,
-                    batch_size_model=2,
-                    batch_size_stats=2,
-                    reduce_factor=1,
-                    augment=False
-                ),
-                train=TrainConfig(
-                    num_epochs=5,
-                    train_log_frequency=2,
-                    val_log_frequency=1,
-                    scheduler_milestones=(2,4),
-                    scheduler_factors=(0.1, 0.5),
-                    top_k=3,
-                    train_only=False,
-                    inference_only=False,
-                    train_acc_only=False,
-                    save_predictions=False,
-                    criterion="cross_entropy",
-                    resume_training=False,
-                    save_models=False,
-                    save_models_step=2,
-                    scheduler="custom_step_lr"
-                ),
-                model=ModelConfig(
-                    use_default_init=True,
-                    precision=32,
-                    use_handcrafted=False,
-                    backbone_type=None
-                )
+        return Config(
+            path=PathConfig(
+                root="./scripts/stats/images/artist_dataset",
+                test_root="./scripts/stats/images/kaggle_test",
+                stats_file="./scripts/stats/stats.json",
+                results_root="./out",
+                trained_model_path="./temp/best_model_29_rnd.pth.tar",
+            ),
+            env=EnvConfig(
+                device="cpu",
+                num_workers=0
+            ),
+            data=DataConfig(
+                pretrained_stats=False,
+                batch_size_model=2,
+                batch_size_stats=2,
+                reduce_factor=1,
+                augment=False
+            ),
+            train=TrainConfig(
+                num_epochs=5,
+                train_log_frequency=2,
+                val_log_frequency=1,
+                scheduler_milestones=(2,4),
+                scheduler_factors=(0.1, 0.5),
+                top_k=3,
+                train_only=False,
+                inference_only=False,
+                train_acc_only=False,
+                save_predictions=False,
+                criterion="cross_entropy",
+                resume_training=False,
+                save_models=False,
+                save_models_step=2,
+                scheduler="custom_step_lr"
+            ),
+            model=ModelConfig(
+                use_default_init=True,
+                precision=32,
+                use_handcrafted=False,
+                backbone_type=None
             )
-            
-        return Config()
+        )

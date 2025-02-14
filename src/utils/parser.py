@@ -3,6 +3,9 @@ from src.config.config import Config, PathConfig, EnvConfig, DataConfig, TrainCo
 from src.utils.utils import BackboneType
 
 def parse_args(cfg: Config):
+    """
+    Parse arguments for the project configuration. Allows execution from command line.
+    """
     parser = argparse.ArgumentParser()
     
     # cfg.env arguments
@@ -70,6 +73,7 @@ def parse_args(cfg: Config):
 
 
 def encapsulate_args(args):
+    """Encapsulate parsed arguments into a Config object"""
     return Config(
         path=PathConfig(
             root=args.root,
@@ -136,6 +140,7 @@ def encapsulate_args(args):
     )
 
 def get_config(default_cfg: Config) -> Config:
+    """Get the configuration for the project workflow"""
     parser = parse_args(default_cfg)
     args = parser.parse_args()
     return encapsulate_args(args)
