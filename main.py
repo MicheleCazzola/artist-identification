@@ -1,7 +1,7 @@
 import logging
 
 from src.config.config import Config
-from src.dataset.dataset import ArtistDataset, UnlabeledArtistDataset
+from src.dataset.dataset import ArtistDataset
 from src.dataset.dataloader import create_dataloaders
 from src.transformations.transformations import Transforms
 from src.trainer.train import Trainer
