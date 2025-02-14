@@ -17,8 +17,8 @@ sample_images/
 playground.ipynb
 
 # Models
-*.pth
-*.pth.tar
+# *.pth
+# *.pth.tar
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
