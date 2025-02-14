@@ -16,6 +16,10 @@ sample_images/
 # Playground notebook
 playground.ipynb
 
+# Models
+*.pth
+*.pth.tar
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
