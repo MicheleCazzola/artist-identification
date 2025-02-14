@@ -201,7 +201,6 @@
 | 42 | Random crop | 81 | 16 | CE | AdamW | 1e-4 | - | - | 1e-4 | 0.5 | 0.5 | 0.5 | 0.5 | 30 | 1 | 3.45 | 40.65 | 30 | 3.62 | 36.0 | 60.79 | 28.8 | 38.0 | - | - | - | 110+113+108+108+125  | T4,15 |[20250204_213851](/out/colab/20250204_213851/) | |  |
 
 
-# Final results with reproducibility setting
 
 
 | Seed | Backbone Model | HOG | Batch size | Loss | Optimizer |Learning rate | Scheduler milestones | Scheduler gammas | Weight decay | Color jitter (**) | Lighting noise (**) | Gaussian blur (**) | Geometric transform (**) | Epochs | Reduction factor | Best validation loss| Best validation WT5-MCA (%) | Best epochs | Test loss | Top-1 accuracy (%) | Top-5 accuracy (%) | MCA (%) | Top-5 weighted MCA (%) | Kaggle score | Train T5-WMCA (%) | Variance | Training time (mins) (***) | GPU (type, GB) | Output folder | Train accuracy out folder | Notes |
