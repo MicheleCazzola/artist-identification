@@ -231,7 +231,18 @@ class Trainer:
         
     def _load_pretrained(self, model_path: str):
         checkpoint = torch.load(model_path, weights_only=True)
-        self.model.load_state_dict(checkpoint["model_state_dict"])
+        
+        if ["model_state_dict"] in checkpoint:
+            if not model_path.endswith(".tar"):
+                logging.warning(f"Checkpoint {model_path} not properly saved, please follow naming conventions")
+                
+            model_state_dict = checkpoint["model_state_dict"]
+        else:
+            if not model_path.endswith(".pth"):
+                logging.warning(f"Model {model_path} not properly saved, please follow naming conventions")
+            model_state_dict = checkpoint
+        
+        self.model.load_state_dict(model_state_dict)
         
         logging.info(f"Pretrained model loaded from {model_path}")
     
