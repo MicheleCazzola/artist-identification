@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 
-from ..utils.utils import BackboneType
-from ..config.config import HOGConfig
-from .backbone import ROIsProposal
-from .components import BottleneckBlock, JoinModule, HandCraftedFeatures
+from src.utils.utils import BackboneType
+from src.config.config import HOGConfig
+from src.model.backbone import ROIsProposal
+from src.model.components import BottleneckBlock, JoinModule, HandCraftedFeatures
 
 
 class MultiBranchArtistNetwork(nn.Module):
@@ -52,7 +52,7 @@ class MultiBranchArtistNetwork(nn.Module):
             self._init_weights()
                         
     def _init_weights(self):
-        # Same initialization as ResNet
+        # Same initialization as ResNet (Kaiming normal, constant for BatchNorm)
         for m in self.modules():
             if m not in self.roi_extractor.modules():
                 if isinstance(m, nn.Conv2d):

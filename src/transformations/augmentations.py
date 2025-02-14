@@ -44,11 +44,11 @@ class Augmentations:
         crop_scale: tuple[float] = (0.85, 1.0), 
         crop_ratio: tuple[float] = (0.8, 1.25)
     ):
-        # Not too much, palette is already colorful
+        # Change color brightness, contrast and saturation
         color_jitter = transforms.ColorJitter(brightness=jitter_brightness, contrast=jitter_contrast, saturation=jitter_saturation)
         # PCA-based lighting noise, AlexNet style
         lighting_noise = LightingNoise()
-        # 5x5 kernel since image is 512x512, wide sigma interval to have slight increasing blur
+        # Apply Gaussian kernel to blur the image
         gaussian_blur = transforms.GaussianBlur(kernel_size=blur_size, sigma=blur_sigma)
         # 512x512 to preserve image dimension, 0.85 to 1.0 to have slight zoom in, 0.8 to 1.25 to have slight change in proportions
         geometric_transform = transforms.RandomResizedCrop(size=(512, 512), scale=crop_scale, ratio=crop_ratio)
@@ -64,4 +64,3 @@ class Augmentations:
     
     def __repr__(self):
         return f"Augmentations(probabilities={self.probabilities}, transformations={self.transformations})"
-

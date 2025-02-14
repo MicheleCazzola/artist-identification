@@ -27,7 +27,7 @@ def create_dataloaders(
     )
     
     # A single dataset is passed, so single dataloader
-    # (here called trainloader, but it is a single dataloader for the whole dataset)
+    # (here called trainloader, but it is a single dataloader)
     if len(datasets) == 1:
         return trainloader
     

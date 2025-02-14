@@ -33,6 +33,7 @@ def execution_time(func):
             
             torch.cuda.synchronize()
             
+            # Time in ms
             wrapper.time = start_event.elapsed_time(end_event) / 1000
         else:
             start_time = time.time()

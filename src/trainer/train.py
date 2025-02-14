@@ -14,11 +14,10 @@ from torch.utils.data import DataLoader, Subset
 
 from src.trainer.scheduler import CustomMultiStepLR
 from src.transformations.transformations import Transforms
-
-from ..config.config import Config
-from ..model.network import MultiBranchArtistNetwork
-from ..utils.utils import execution_time
-from .metrics import Metrics
+from src.config.config import Config
+from src.model.network import MultiBranchArtistNetwork
+from src.utils.utils import execution_time
+from src.trainer.metrics import Metrics
 
 @dataclass
 class TrainingResult:
@@ -62,7 +61,7 @@ class Trainer:
         self.lr: float = None
         self.momentum: float = None
         self.milestones: list[int] = None
-        self.gamma: float = None
+        self.gammas: list[float] = None
         self.weight_decay: float = None
         
         self.criterion: str = None
@@ -217,7 +216,7 @@ class Trainer:
             
             logging.info(f"Checkpoint removed at {saved_path}")
         else:
-            logging.error(f"Checkpoint {saved_path} not found")
+            logging.warning(f"Checkpoint {saved_path} not found")
         
     def _load_checkpoint(self, model_path: str):
         checkpoint = torch.load(model_path, weights_only=True)
@@ -341,7 +340,6 @@ class Trainer:
             if self.train_accuracy:
                 train_accuracies.append(train_accuracy)
                 
-            
             self.training_results = TrainingResult(train_losses, train_accuracies, val_losses, val_accuracies, best_num_epochs)
             if self.save_models and ((epoch + 1) % self.save_models_step == 0 or (epoch + 1) == self.num_epochs):
                 
@@ -350,6 +348,8 @@ class Trainer:
             if best_num_epochs is None or val_accuracy > val_accuracies[best_num_epochs - 1] \
                 or (math.isclose(val_accuracies[best_num_epochs - 1], val_accuracy, abs_tol=1e-6) and val_loss < val_losses[best_num_epochs - 1]):
                     
+                    # Could cause a warning: "Checkpoint not found"
+                    # Completely unharmful, not found checkpoints are not removed with any program crash
                     if best_num_epochs is not None:
                         self._remove_checkpoint(best_num_epochs, self.saved_best_model_path)
                     
@@ -376,21 +376,15 @@ class Trainer:
         return losses, top_k_weighted_mca
     
     @execution_time
-    def test(self, model_path: str = None, testloader: DataLoader = None, save_path: str = None):
+    def test(self, model_path: str = None, testloader: DataLoader = None):
         
         model_path = model_path if model_path is not None else f"{self.saved_best_model_path}_{self.best_num_epochs}.pth.tar"
-        self._load_pretrained(model_path)
+        testloader = self.testloader if testloader is None else testloader
         
-        if save_path is not None:
-            
-            assert testloader is not None, "Missing dataloader for working set"
-            
-            self.predict(testloader, save_path)
-        else:
-            testloader = self.testloader if testloader is None else testloader
-            test_result = self.evaluate(testloader)
-            
-            self.test_results = test_result
+        self._load_pretrained(model_path)
+        test_result = self.evaluate(testloader)
+        
+        self.test_results = test_result
 
     @torch.no_grad()
     def evaluate(self, dataloader: DataLoader) -> EvaluationResult:
@@ -428,39 +422,7 @@ class Trainer:
         self.metrics.reset()
         
         return EvaluationResult(mean(losses), metrics)
-    
-    @torch.no_grad()
-    def predict(self, testloader: DataLoader, save_path: str) -> torch.Tensor:
-        self.model.eval()
-        
-        predictions = []
-        images = []
-        current_step = 0
-        for inputs, input_names in testloader:
-            inputs = inputs.to(self.device)
-            outputs = self.model(inputs)
-            
-            predicted = torch.topk(outputs, self.top_k, dim=1).indices.cpu().tolist()
-            predictions.extend(predicted)
-            
-            for input_name in input_names:
-                images.append(input_name.split("/")[-1])
-                
-            if (current_step + 1) % self.val_log_frequency == 0:
-                logging.info(f"Prediction iteration {current_step + 1}")
-                
-            current_step += 1
-
-        self._save_predictions(images, predictions, save_path)
-    
-    def _save_predictions(self, images: list, predictions: list[list[int]], save_path: str):
-        with open(save_path, "w") as f:
-            classes = ",".join([f"Class{i}" for i in range(1, self.top_k + 1)])
-            f.write(f"Image Name,{classes}\n")
-            for image, pred in zip(images, predictions):
-                f.write(f"{image},{','.join(self.categories[p].replace('_', '-') for p in pred)}\n")
-        
-        
+       
     def save_results(
         self,
         cfg: Config,
