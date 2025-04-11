@@ -1,5 +1,9 @@
 # Artist Identification
 
+## Authors:
+- [Michele Cazzola](https://github.com/MicheleCazzola)
+- [Giuseppe Arbore](https://github.com/GiuseppeArbore)
+
 ## General information
 **Course**: `Machine Learning for Vision and Multimedia` (`Polytechnic of Turin`)  
 **Academic Year**: 2024-25, developed from December 2024 to February 2025  
